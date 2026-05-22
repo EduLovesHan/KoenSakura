@@ -9,7 +9,7 @@ const escene = new THREE.Scene();
 escene.background = new THREE.Color(0x87CEEB);
 
 const camara = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camara.position.set(0, 0, 15);
+camara.position.set(0, 5, 15);
 
 const renderizador = new THREE.WebGLRenderer({ antialias: true });
 renderizador.setSize(window.innerWidth, window.innerHeight);
@@ -30,7 +30,7 @@ escene.add(directionalLight);
 // carga del modelo 3D  en formato glTF (glb) 
 const loader = new GLTFLoader();
 
-loader.load('assets/modelos/free_lowpoly_japanese_bridge.glb', 
+loader.load('assets/modelos/plazaPrincipal.glb', 
     (gltf) => {
         
         const model = gltf.scene;

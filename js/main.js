@@ -8,8 +8,11 @@ import { ControlesPrimeraPersona } from './controles.js';
 const escene = new THREE.Scene();
 escene.background = new THREE.Color(0x87CEEB);
 
+// Configuración de la cámara en perspectiva con un campo de visión de 75 grados, una relación de aspecto basada en el tamaño de la ventana, y planos de recorte cercanos y lejanos de 0.1 y 1000 unidades respectivamente
 const camara = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camara.position.set(0, 5, 15);
+
+// Ajustamos el segundo valor (Y) para bajar la altura de la vista
+camara.position.set(-14, 1.7, 28);
 
 const renderizador = new THREE.WebGLRenderer({ antialias: true });
 renderizador.setSize(window.innerWidth, window.innerHeight);
@@ -22,7 +25,9 @@ window.addEventListener('resize', () => {
     renderizador.setSize(window.innerWidth, window.innerHeight);
 });
 
-const Controles = new ControlesPrimeraPersona(camara, document.body);
+// Lista de objetos con los que la cámara puede colisionar
+const objetosColision = [];
+const Controles = new ControlesPrimeraPersona(camara, document.body, objetosColision);
 
 // Iluminación básica de prueba
 // luz ambiental
@@ -44,30 +49,44 @@ loader.load('assets/modelos/plazaPrincipal.glb',
         // model.scale.set(2, 2, 2); // Si el modelo sigue pareciendo pequeño, aumenta este valor
         model.position.y = -1; // Ajuste de la posición vertical del modelo
         escene.add(model);
+
+        // Agregamos el modelo completo al array de colisiones.
+        // Esto hará que el Raycaster detecte automáticamente las paredes y verjas.
+        objetosColision.push(model);
+
         console.log("Modelo cargado");
     }, 
     undefined, 
     (error) => {
-        // debug para errores de carga
         console.error("Error al cargarel modelo:", error);
     }
 );
 
-// Ejemplo de cómo podrías cargar otro objeto por separado si eliges el camino modular
-/*
-loader.load('assets/modelos/otro_objeto.glb', (gltf) => {
-    const item = gltf.scene;
-    item.position.set(5, 0, 5);
-    item.scale.set(0.5, 0.5, 0.5);
-    escene.add(item);
-});
-*/
+// Función para crear cajas de colisión invisibles y optimizadas
+function crearHitbox(x, y, z, ancho, alto, profundo) {
+    const geometry = new THREE.BoxGeometry(ancho, alto, profundo);
+    const material = new THREE.MeshBasicMaterial({ 
+        color: 0xff0000, 
+        wireframe: true, 
+        visible: false // Cambia a true para ver las cajas mientras las posicionas
+    });
+    const hitbox = new THREE.Mesh(geometry, material);
+    hitbox.position.set(x, y, z);
+    escene.add(hitbox);
+    objetosColision.push(hitbox);
+}
 
 function animar() {
     requestAnimationFrame(animar);
     
     //actualizar controles
     Controles.actualizar();
+
+    // Muestra la posición de la cámara en la consola solo cuando el puntero está bloqueado (dentro del juego)
+    if (Controles.isLocked) {
+        console.log(`Posición Cámara -> X: ${camara.position.x.toFixed(2)}, Y: ${camara.position.y.toFixed(2)}, Z: ${camara.position.z.toFixed(2)}`);
+    }
+
     renderizador.render(escene, camara);
 }
 

@@ -1,29 +1,35 @@
-import { Vector3, MathUtils } from 'three';
+import { Vector3, MathUtils, Raycaster } from 'three';
 
 //Clase para controlar la camara en primera persona
 
 class ControlesPrimeraPersona {
 
-    constructor(camara, domElement) {
+    constructor(camara, domElement, objetosColision = []) {
         this.camara = camara;
         this.domElement = domElement;
+        this.objetosColision = objetosColision;
 
         // Propiedades de la camara
         this.isLocked = false;
         this.velocidad = 0.15;
         this.sensibilidad = 0.002;
+        this.distanciaColision = 0.7; // Radio de "cuerpo" de la cámara
 
         // teclas para movimiento
         this.teclas = { w: false, a: false, s: false, d: false };
 
         // Ángulos de Euler para la cámara
-        this.yaw = 0;
+        this.yaw = Math.PI; // Inicia mirando 180 grados (hacia el otro lado)
         this.pitch = 0;
         this.camara.rotation.order = 'YXZ'; // FPS
+        this.camara.rotation.set(this.pitch, this.yaw, 0); // Aplicar rotación inicial
 
         this._vectorAdelante = new Vector3();
         this._vectorArriba = new Vector3(0, 1, 0);
         this._vectorDerecha = new Vector3();
+        this._raycaster = new Raycaster();
+        this._direccionAux = new Vector3();
+        this._origenRayo = new Vector3(); // Para no crear vectores nuevos cada frame
 
         this._onMouseMove = this.onMouseMove.bind(this);
         this._onKeyDown = this.onKeyDown.bind(this);
@@ -85,6 +91,24 @@ class ControlesPrimeraPersona {
         }
     }
 
+    // Método para verificar si el camino está despejado
+    puedeMoverse(direccion) {
+        if (this.objetosColision.length === 0) return true;
+
+        // Bajamos el origen del rayo 1.2 unidades desde la cámara
+        // Si la cámara está en 1.7, el rayo se lanza desde 0.5 (altura de las rodillas)
+        this._origenRayo.copy(this.camara.position);
+        this._origenRayo.y -= 1.2; 
+
+        this._raycaster.set(this._origenRayo, direccion);
+        const intersecciones = this._raycaster.intersectObjects(this.objetosColision, true);
+
+        if (intersecciones.length > 0 && intersecciones[0].distance < this.distanciaColision) {
+            return false;
+        }
+        return true;
+    }
+
     //movimiento
 	//se debe llamar la funcion en el cuadro de animacion 
     actualizar() {
@@ -96,11 +120,20 @@ class ControlesPrimeraPersona {
         // Calcular el vector derecho (Producto Cruz)
         this._vectorDerecha.crossVectors(this._vectorAdelante, this._vectorArriba).normalize();
 
-        // Aplicar el movimiento al presionar las teclas
-        if (this.teclas.w) this.camara.position.addScaledVector(this._vectorAdelante, this.velocidad);
-        if (this.teclas.s) this.camara.position.addScaledVector(this._vectorAdelante, -this.velocidad);
-        if (this.teclas.a) this.camara.position.addScaledVector(this._vectorDerecha, -this.velocidad);
-        if (this.teclas.d) this.camara.position.addScaledVector(this._vectorDerecha, this.velocidad);
+        // Calcular dirección de movimiento final basada en teclas presionadas
+        this._direccionAux.set(0, 0, 0);
+        if (this.teclas.w) this._direccionAux.add(this._vectorAdelante);
+        if (this.teclas.s) this._direccionAux.sub(this._vectorAdelante);
+        if (this.teclas.a) this._direccionAux.sub(this._vectorDerecha);
+        if (this.teclas.d) this._direccionAux.add(this._vectorDerecha);
+
+        if (this._direccionAux.lengthSq() > 0) {
+            this._direccionAux.normalize();
+            
+            if (this.puedeMoverse(this._direccionAux)) {
+                this.camara.position.addScaledVector(this._direccionAux, this.velocidad);
+            }
+        }
     }
 }
 

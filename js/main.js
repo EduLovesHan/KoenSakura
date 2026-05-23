@@ -2,14 +2,14 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { ControlesPrimeraPersona } from './controles.js';
+import { Skybox } from './skybox.js';
 
 //creacion de la escena, camara y renderizador
 
 const escene = new THREE.Scene();
-escene.background = new THREE.Color(0x87CEEB);
 
 const camara = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camara.position.set(0, 5, 15);
+camara.position.set(0, 3, 15);
 
 const renderizador = new THREE.WebGLRenderer({ antialias: true });
 renderizador.setSize(window.innerWidth, window.innerHeight);
@@ -23,6 +23,9 @@ window.addEventListener('resize', () => {
 });
 
 const Controles = new ControlesPrimeraPersona(camara, document.body);
+
+// Inicializar el Skybox
+const skybox = new Skybox(escene, 'assets/texturas/SkyBox/');
 
 // Iluminación básica de prueba
 // luz ambiental
@@ -41,7 +44,7 @@ loader.load('assets/modelos/plazaPrincipal.glb',
     (gltf) => {
         
         const model = gltf.scene;
-        // model.scale.set(2, 2, 2); // Si el modelo sigue pareciendo pequeño, aumenta este valor
+        // model.scale.set(2, 2, 2); // escalar modelo
         model.position.y = -1; // Ajuste de la posición vertical del modelo
         escene.add(model);
         console.log("Modelo cargado");

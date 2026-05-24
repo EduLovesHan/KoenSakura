@@ -9,7 +9,7 @@ import { Skybox } from './skybox.js';
 const escene = new THREE.Scene();
 
 const camara = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
-camara.position.set(-14, 3, 25);
+camara.position.set(0.8, 1.7, 25);
 
 
 const renderizador = new THREE.WebGLRenderer({ antialias: true });

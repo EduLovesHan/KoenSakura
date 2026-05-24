@@ -23,6 +23,8 @@ window.addEventListener('resize', () => {
     renderizador.setSize(window.innerWidth, window.innerHeight);
 });
 
+// Lista de objetos con los que la cámara puede colisionar
+const objetosColision = [];
 // audio config
 const listener = new THREE.AudioListener();
 camara.add(listener); 
@@ -42,7 +44,7 @@ document.body.addEventListener('click', () => {
     panelMenuSuperior.classList.add('oculto');
 });
 
-const Controles = new ControlesPrimeraPersona(camara, document.body, listener);
+const Controles = new ControlesPrimeraPersona(camara, document.body, objetosColision, listener);
 
 // Inicializar el Skybox
 const skybox = new Skybox(escene, 'assets/texturas/SkyBox/');
@@ -70,16 +72,31 @@ loader.load('assets/modelos/plazaPrincipal.glb',
         //model.position.x = 5;
         model.position.set(0, 0, 0); 
         escene.add(model);
-        
+
+        // Agregamos el modelo completo al array de colisiones.
+        // Esto hará que el Raycaster detecte automáticamente las paredes y verjas.
+        objetosColision.push(model);
+
         console.log("Modelo cargado");
     }, 
     undefined, 
     (error) => {
-        // debug para errores de carga
-        console.error("Error al cargar el modelo:", error);
+        console.error("Error al cargarel modelo:", error);
     }
 );
-
+// Función para crear cajas de colisión invisibles y optimizadas
+function crearHitbox(x, y, z, ancho, alto, profundo) {
+    const geometry = new THREE.BoxGeometry(ancho, alto, profundo);
+    const material = new THREE.MeshBasicMaterial({ 
+        color: 0xff0000, 
+        wireframe: true, 
+        visible: false // Cambia a true para ver las cajas mientras las posicionas
+    });
+    const hitbox = new THREE.Mesh(geometry, material);
+    hitbox.position.set(x, y, z);
+    escene.add(hitbox);
+    objetosColision.push(hitbox);
+}
 // logica del menu
 const btnMenuSuperior = document.getElementById('btn-menu-superior');
 const panelMenuSuperior = document.getElementById('panel-menu-superior');
@@ -150,6 +167,12 @@ function animar() {
     
     //actualizar controles
     Controles.actualizar();
+
+    // Muestra la posición de la cámara en la consola solo cuando el puntero está bloqueado (dentro del juego)
+    if (Controles.isLocked) {
+        console.log(`Posición Cámara -> X: ${camara.position.x.toFixed(2)}, Y: ${camara.position.y.toFixed(2)}, Z: ${camara.position.z.toFixed(2)}`);
+    }
+
     renderizador.render(escene, camara);
 }
 

@@ -1,17 +1,19 @@
-import { Vector3, MathUtils, Audio, AudioLoader } from 'three';
+import { Vector3, MathUtils, Raycaster, Audio, AudioLoader } from 'three';
 
 //Clase para controlar la camara en primera persona
 
 class ControlesPrimeraPersona {
 
-    constructor(camara, domElement, audioListener) {
+    constructor(camara, domElement, objetosColision = [], audioListener) {
         this.camara = camara;
         this.domElement = domElement;
+        this.objetosColision = objetosColision;
 
         // Propiedades de la camara
         this.isLocked = false;
         this.velocidad = 0.25;
         this.sensibilidad = 0.002;
+        this.distanciaColision = 0.7; // Radio de "cuerpo" de la cámara
 
         // teclas para movimiento
         this.teclas = { w: false, a: false, s: false, d: false };
@@ -20,13 +22,14 @@ class ControlesPrimeraPersona {
         this.yaw = Math.PI; // Empezamos mirando hacia el -Z
         this.pitch = 0;
         this.camara.rotation.order = 'YXZ'; // FPS
-        
-        // Aplicar la rotación a la cámara inmediatamente (sin esperar a mover el mouse)
-       this.camara.rotation.set(this.pitch, this.yaw, 0);
+        this.camara.rotation.set(this.pitch, this.yaw, 0); // Aplicar rotación inicial
 
         this._vectorAdelante = new Vector3();
         this._vectorArriba = new Vector3(0, 1, 0);
         this._vectorDerecha = new Vector3();
+        this._raycaster = new Raycaster();
+        this._direccionAux = new Vector3();
+        this._origenRayo = new Vector3(); // Para no crear vectores nuevos cada frame
 
         this._onMouseMove = this.onMouseMove.bind(this);
         this._onKeyDown = this.onKeyDown.bind(this);
@@ -102,6 +105,24 @@ class ControlesPrimeraPersona {
             case 's': this.teclas.s = false; break;
             case 'd': this.teclas.d = false; break;
         }
+    }
+
+    // Método para verificar si el camino está despejado
+    puedeMoverse(direccion) {
+        if (this.objetosColision.length === 0) return true;
+
+        // Bajamos el origen del rayo 1.2 unidades desde la cámara
+        // Si la cámara está en 1.7, el rayo se lanza desde 0.5 (altura de las rodillas)
+        this._origenRayo.copy(this.camara.position);
+        this._origenRayo.y -= 1.2; 
+
+        this._raycaster.set(this._origenRayo, direccion);
+        const intersecciones = this._raycaster.intersectObjects(this.objetosColision, true);
+
+        if (intersecciones.length > 0 && intersecciones[0].distance < this.distanciaColision) {
+            return false;
+        }
+        return true;
     }
 
     setSfxVolume(volumen) {

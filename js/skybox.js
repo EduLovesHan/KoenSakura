@@ -29,6 +29,11 @@ class Skybox {
         // Asignar el cubemap al fondo de la escena
         this.escena.background = textureCube;
     }
+
+    cambiarRuta(nuevaRuta) {
+        this.ruta = nuevaRuta;
+        this.cargar();
+    }
 }
 
 export { Skybox };

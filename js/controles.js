@@ -1,25 +1,28 @@
-import { Vector3, MathUtils } from 'three';
+import { Vector3, MathUtils, Audio, AudioLoader } from 'three';
 
 //Clase para controlar la camara en primera persona
 
 class ControlesPrimeraPersona {
 
-    constructor(camara, domElement) {
+    constructor(camara, domElement, audioListener) {
         this.camara = camara;
         this.domElement = domElement;
 
         // Propiedades de la camara
         this.isLocked = false;
-        this.velocidad = 0.15;
+        this.velocidad = 0.25;
         this.sensibilidad = 0.002;
 
         // teclas para movimiento
         this.teclas = { w: false, a: false, s: false, d: false };
 
         // Ángulos de Euler para la cámara
-        this.yaw = 0;
+        this.yaw = Math.PI; // Empezamos mirando hacia el -Z
         this.pitch = 0;
         this.camara.rotation.order = 'YXZ'; // FPS
+        
+        // Aplicar la rotación a la cámara inmediatamente (sin esperar a mover el mouse)
+       this.camara.rotation.set(this.pitch, this.yaw, 0);
 
         this._vectorAdelante = new Vector3();
         this._vectorArriba = new Vector3(0, 1, 0);
@@ -30,8 +33,24 @@ class ControlesPrimeraPersona {
         this._onKeyUp = this.onKeyUp.bind(this);
         this._onPointerlockChange = this.onPointerlockChange.bind(this);
 
+        // Configuración volumen SFX
+        this.sfxVolume = 1.5;
+        this.sfxMuted = false;
+
         // Conectar eventos automaticamente
         this.conectar();
+
+        // Configurar Audio para los pasos
+        this.pasosAudio = null;
+        if (audioListener) {
+            this.pasosAudio = new Audio(audioListener);
+            const audioLoader = new AudioLoader();
+            audioLoader.load('assets/audio/Footsteps.mp3', (buffer) => {
+                this.pasosAudio.setBuffer(buffer);
+                this.pasosAudio.setLoop(true); // Repetir mientras caminamos
+                this.pasosAudio.setVolume(this.sfxMuted ? 0 : this.sfxVolume); 
+            });
+        }
     }
 
     conectar() {
@@ -85,6 +104,16 @@ class ControlesPrimeraPersona {
         }
     }
 
+    setSfxVolume(volumen) {
+        this.sfxVolume = volumen;
+        if (this.pasosAudio) this.pasosAudio.setVolume(this.sfxMuted ? 0 : this.sfxVolume);
+    }
+
+    setSfxMute(isMuted) {
+        this.sfxMuted = isMuted;
+        if (this.pasosAudio) this.pasosAudio.setVolume(this.sfxMuted ? 0 : this.sfxVolume);
+    }
+
     //movimiento
 	//se debe llamar la funcion en el cuadro de animacion 
     actualizar() {
@@ -97,10 +126,20 @@ class ControlesPrimeraPersona {
         this._vectorDerecha.crossVectors(this._vectorAdelante, this._vectorArriba).normalize();
 
         // Aplicar el movimiento al presionar las teclas
-        if (this.teclas.w) this.camara.position.addScaledVector(this._vectorAdelante, this.velocidad);
-        if (this.teclas.s) this.camara.position.addScaledVector(this._vectorAdelante, -this.velocidad);
-        if (this.teclas.a) this.camara.position.addScaledVector(this._vectorDerecha, -this.velocidad);
-        if (this.teclas.d) this.camara.position.addScaledVector(this._vectorDerecha, this.velocidad);
+        let enMovimiento = false;
+        if (this.teclas.w) { this.camara.position.addScaledVector(this._vectorAdelante, this.velocidad); enMovimiento = true; }
+        if (this.teclas.s) { this.camara.position.addScaledVector(this._vectorAdelante, -this.velocidad); enMovimiento = true; }
+        if (this.teclas.a) { this.camara.position.addScaledVector(this._vectorDerecha, -this.velocidad); enMovimiento = true; }
+        if (this.teclas.d) { this.camara.position.addScaledVector(this._vectorDerecha, this.velocidad); enMovimiento = true; }
+
+        // Controlar la reproducción del sonido de los pasos
+        if (this.pasosAudio && this.pasosAudio.buffer) {
+            if (enMovimiento) {
+                if (!this.pasosAudio.isPlaying) this.pasosAudio.play();
+            } else {
+                if (this.pasosAudio.isPlaying) this.pasosAudio.pause();
+            }
+        }
     }
 }
 

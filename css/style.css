@@ -1,7 +1,12 @@
+
 body {
     margin: 0;
     overflow: hidden; 
     background-color: #000; 
+    overflow: hidden; 
+    background-color: #000;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #fff;
 }
 
 canvas {
@@ -9,3 +14,187 @@ canvas {
     width: 100vw;
     height: 100vh;
 }
+
+/*estilos de menu superior*/
+#btn-menu-superior {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 1000; 
+    background: transparent; 
+    border: none;
+    padding: 0; 
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+#btn-menu-superior:hover {
+    transform: scale(1.1); 
+}
+
+.icono-sakura {
+    width: 45px;
+    height: 45px;
+    display: block;
+    filter: drop-shadow(0px 0px 5px rgb(0, 0, 0));
+}
+
+/*Panel general*/
+#panel-menu-superior {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); 
+    z-index: 100;
+    background: #31021494; 
+    border: 10px solid #ff758c;
+    padding: 25px;
+    border-radius: 12px;
+    width: 350px;
+    height: 350px;
+    box-shadow: 0 0 25px rgba(255, 117, 140, 0.3);
+    backdrop-filter: blur(10px);
+    display: flex !important; 
+    flex-direction: column;
+    gap: 20px;
+    
+    /* Animaciones */
+    opacity: 1;
+    visibility: visible;
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s ease, visibility 0.5s;
+}
+
+#panel-menu-superior.oculto {
+    transform: translate(-50%, -150vh); /* Lo saca hacia arriba fuera de la vista */
+    opacity: 0;
+    visibility: hidden;
+    transition: transform 0.5s ease, opacity 0.5s ease, visibility 0.5s;
+}
+
+#panel-menu-superior h3 {
+    margin: 0;
+    color: #ffffff;
+    border-bottom: 2px solid #ffffff;
+    padding-bottom: 10px;
+    text-align: center;
+}
+
+/*contenedor de botones*/
+.botones-fila {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.btn-opcion {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    display: block;
+    flex: 1; 
+    border: none;
+    padding: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-opcion:hover {
+    background: #ff758c;
+}
+
+/* Contenido de Pestañas */
+.tab-contenido {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.slider-con-mute {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.slider-con-mute input[type="range"] {
+    flex: 1;
+}
+
+.control-grupo-fila {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-accion {
+    background: #ff758c;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-accion:hover {
+    background: #ff5e78;
+}
+
+/* Estilo de la ventana del menú */
+#menu-configuracion {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(15, 20, 25, 0.9);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 0 25px rgba(21, 179, 190, 0.9);
+    border: 1px solid hsl(0, 0%, 100%);
+    width: 320px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    backdrop-filter: blur(5px);
+}
+
+#menu-configuracion h2 {
+    margin: 0 0 10px 0;
+    text-align: center;
+    border-bottom: 2px solid #ff758c;
+    padding-bottom: 10px;
+    color: #ffffff;
+}
+
+.control-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Estilo de sliders */
+input[type="range"] {
+    width: 100%;
+    cursor: pointer;
+    accent-color: #ff758c; 
+}
+
+#btn-cerrar-menu {
+    background: #ff758c;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background 0.2s, transform 0.1s;
+    margin-top: 10px;
+}
+
+#btn-cerrar-menu:hover { background: #ff5e78; }
+#btn-cerrar-menu:active { transform: scale(0.95); }
+
+/* Clase para ocultar elementos  */
+.oculto { display: none !important; }

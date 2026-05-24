@@ -12,7 +12,7 @@ const escene = new THREE.Scene();
 const camara = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
 // Ajustamos el segundo valor (Y) para bajar la altura de la vista
-camara.position.set(-14, 1.7, 28);
+camara.position.set(0.8, 1.7, 28);
 
 const renderizador = new THREE.WebGLRenderer({ antialias: true });
 renderizador.setSize(window.innerWidth, window.innerHeight);

@@ -37,7 +37,7 @@ class ControlesPrimeraPersona {
         this._onPointerlockChange = this.onPointerlockChange.bind(this);
 
         // Configuración volumen SFX
-        this.sfxVolume = 1.5;
+        this.sfxVolume = 5.0;
         this.sfxMuted = false;
 
         // Conectar eventos automaticamente

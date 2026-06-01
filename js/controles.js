@@ -13,7 +13,7 @@ class ControlesPrimeraPersona {
         this.isLocked = false;
         this.velocidad = 0.25;
         this.sensibilidad = 0.002;
-        this.distanciaColision = 0.4; 
+        this.distanciaColision = 0.3; 
 
         // teclas para movimiento
         this.teclas = { w: false, a: false, s: false, d: false };
@@ -30,6 +30,7 @@ class ControlesPrimeraPersona {
         this._raycaster = new Raycaster();
         this._direccionAux = new Vector3();
         this._origenRayo = new Vector3(); // Para no crear vectores nuevos cada frame
+        this._normalMundo = new Vector3(); // Vector auxiliar para calcular la normal del mundo
 
         this._onMouseMove = this.onMouseMove.bind(this);
         this._onKeyDown = this.onKeyDown.bind(this);
@@ -111,16 +112,43 @@ class ControlesPrimeraPersona {
     puedeMoverse(direccion) {
         if (this.objetosColision.length === 0) return true;
 
-        // Bajamos el origen del rayo 1.2 unidades desde la cámara
-        // Si la cámara está en 1.7, el rayo se lanza desde 0.5 (altura de las rodillas)
+        // Bajamos el origen del rayo 0.7 unidades desde la cámara
+        // Si la cámara está en 1.7, el rayo se lanza desde 1.0 (altura del pecho)
+        // Esto evita que tropieces con pequeñas irregularidades, rampas o escalones.
         this._origenRayo.copy(this.camara.position);
-        this._origenRayo.y -= 1.2; 
+        this._origenRayo.y -= 0.7; 
 
-        this._raycaster.set(this._origenRayo, direccion);
-        const intersecciones = this._raycaster.intersectObjects(this.objetosColision, true);
+        // Ampliamos la detección de colisiones usando 3 rayos (Centro, Izquierda, Derecha)
+        // Esto le da un "ancho" al jugador y evita que se atasque al rozar las esquinas.
+        const anchoJugador = 0.2;
+        const dirPerpendicular = new Vector3().crossVectors(direccion, this._vectorArriba).normalize();
 
-        if (intersecciones.length > 0 && intersecciones[0].distance < this.distanciaColision) {
-            return false;
+        const origenes = [
+            this._origenRayo, // Centro
+            new Vector3().copy(this._origenRayo).addScaledVector(dirPerpendicular, anchoJugador), // Derecha
+            new Vector3().copy(this._origenRayo).addScaledVector(dirPerpendicular, -anchoJugador) // Izquierda
+        ];
+
+        for (const origen of origenes) {
+            this._raycaster.set(origen, direccion);
+            const intersecciones = this._raycaster.intersectObjects(this.objetosColision, true);
+
+            for (let i = 0; i < intersecciones.length; i++) {
+                const hit = intersecciones[i];
+                
+                if (hit.face) {
+                    // Convertir la normal a coordenadas del mundo (soluciona problemas de rotación de Blender)
+                    this._normalMundo.copy(hit.face.normal).transformDirection(hit.object.matrixWorld).normalize();
+                    if (this._normalMundo.y > 0.5) {
+                        continue; // Es suelo o rampa, lo ignoramos para no atascarnos
+                    }
+                }
+
+                if (hit.distance < this.distanciaColision) {
+                    return false; // Chocamos con una pared válida
+                }
+                break; // Si el objeto válido más cercano está lejos, dejamos de comprobar este rayo
+            }
         }
         return true;
     }

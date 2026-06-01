@@ -97,25 +97,26 @@ loader.load('assets/modelos/plazaPrincipal.glb',
 );
 
 // Límites del mapa (Cajas de colisión manuales que delimita el área)
-crearHitbox(-50, 1, 0, 0.5, 10, 150);   // Pared izquierda
-crearHitbox(50, 1, 0, 0.5, 10, 150);    // Pared derecha
-crearHitbox(0, 1, -75, 100, 10, 0.5);   // Pared frontal
-crearHitbox(0, 1, 75, 100, 10, 0.5);    // Pared trasera
-crearHitbox(0, -0.05, 0, 150, 0.1, 150); // Suelo 
+// crearHitbox(-100, 1, 0, 0.5, 10, 600);   // Pared izquierda
+// crearHitbox(100, 1, 0, 0.5, 10, 600);    // Pared derecha
+// crearHitbox(0, 1, -300, 200, 10, 0.5);  // Pared frontal (aún más profundo)
+// crearHitbox(0, 1, 300, 200, 10, 0.5);   // Pared trasera (aún más profundo)
+// crearHitbox(0, -0.05, 0, 200, 0.1, 600); // Suelo (aún más ampliado)
 
 // Función para crear cajas de colisión invisibles
-function crearHitbox(x, y, z, ancho, alto, profundo) {
-    const geometry = new THREE.BoxGeometry(ancho, alto, profundo);
-    const material = new THREE.MeshBasicMaterial({ 
-        color: 0xff0000, 
-        wireframe: true, 
-        visible: false 
-    });
-    const hitbox = new THREE.Mesh(geometry, material);
-    hitbox.position.set(x, y, z);
-    scene.add(hitbox);
-    objetosColision.push(hitbox);
-}
+// function crearHitbox(x, y, z, ancho, alto, profundo) {
+//     const geometry = new THREE.BoxGeometry(ancho, alto, profundo);
+//     const material = new THREE.MeshBasicMaterial({ 
+//         color: 0xff0000, 
+//         wireframe: true, 
+//         //visible: false 
+//         visible: true 
+//     });
+//     const hitbox = new THREE.Mesh(geometry, material);
+//     hitbox.position.set(x, y, z);
+//     scene.add(hitbox);
+//     objetosColision.push(hitbox);
+// }
 
 // sistema para detectar proximidad a objetos interactivos y mostrar cuadros de texto
 const objetosInteractivos = [];
@@ -132,7 +133,7 @@ loader.load('assets/modelos/letreroBasico.glb', (gltf) => {
     // Si quedó mirando hacia atrás, lo rotamos 180 grados (Math.PI)
     letreroModelo.rotation.y = Math.PI; 
     
-    escene.add(letreroModelo);
+    scene.add(letreroModelo);
     objetosColision.push(letreroModelo);
 
     // Registrar el objeto como interactivo una vez cargado
@@ -344,7 +345,7 @@ animar();
 loader.load('assets/modelos/farolaPrueba.glb', (gltf) => {
     const farol = gltf.scene;
     farol.position.set(30, 0, 60); 
-    escene.add(farol);
+    scene.add(farol);
     objetosColision.push(farol);
 
     // Crear una luz puntual para simular la iluminación del farol

@@ -1,11 +1,11 @@
-//importacion de librerias necesarias para el proyecto
+// importacion de librerias necesarias para el proyecto
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { ControlesPrimeraPersona } from './controles.js';
 import { Skybox } from './skybox.js';
 
-//creacion de la escena, camara y renderizador
-const escene = new THREE.Scene();
+// creacion de la escena, camara y renderizador
+const scene = new THREE.Scene();
 const camara = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
 camara.position.set(0.8, 3.5, 25);
 const renderizador = new THREE.WebGLRenderer({ antialias: true });
@@ -58,53 +58,62 @@ document.body.addEventListener('click', () => {
 const Controles = new ControlesPrimeraPersona(camara, document.body, objetosColision, listener);
 
 // Inicializar el Skybox
-const skybox = new Skybox(escene, 'assets/texturas/SkyBox/');
+const skybox = new Skybox(scene, 'assets/texturas/SkyBox/');
 
 // Iluminación básica de prueba (luz ambiental)
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); 
-escene.add(ambientLight);
+scene.add(ambientLight);
 
 // luz puntual
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.position.set(10, 20, 10);
-escene.add(directionalLight);
+scene.add(directionalLight);
 
 // carga del modelo 3D  en formato glTF (glb) 
 const loader = new GLTFLoader();
 
 loader.load('assets/modelos/plazaPrincipal.glb', 
     (gltf) => {
-        
         const model = gltf.scene;
-        // model.scale.set(2, 2, 2); // escalar modelo
-        //model.position.y = 0; // Ajuste de la posición vertical del modelo
-        //model.position.z = 0;
-        //model.position.x = 5;
         model.position.set(0, 0, 0); 
-        escene.add(model);
+        scene.add(model);
 
-        // Agregamos el modelo completo al array de colisiones.
-        // Esto hará que el Raycaster detecte automáticamente las paredes y verjas.
-        objetosColision.push(model);
+        // Recorrer el modelo para buscar las cajas de colisión exportadas de Blender
+        model.traverse((hijo) => {
+            // Los objetos tienen el prefijo 'caja_colision'
+            if (hijo.isMesh && hijo.name.toLowerCase().includes('caja_colision')) {
+                hijo.material.visible = false;
+                objetosColision.push(hijo);
+                console.log("Caja de colisión cargada:", hijo.name);
+            }
+        });
+
         console.log("Modelo cargado");
     }, 
     undefined, 
     (error) => {
-        console.error("Error al cargarel modelo:", error);
+        console.error("Error al cargar el modelo:", error);
     }
 );
 
-// Función para crear cajas de colisión invisibles y optimizadas
+// Límites del mapa (Cajas de colisión manuales que delimita el área)
+crearHitbox(-50, 1, 0, 0.5, 10, 150);   // Pared izquierda
+crearHitbox(50, 1, 0, 0.5, 10, 150);    // Pared derecha
+crearHitbox(0, 1, -75, 100, 10, 0.5);   // Pared frontal
+crearHitbox(0, 1, 75, 100, 10, 0.5);    // Pared trasera
+crearHitbox(0, -0.05, 0, 150, 0.1, 150); // Suelo 
+
+// Función para crear cajas de colisión invisibles
 function crearHitbox(x, y, z, ancho, alto, profundo) {
     const geometry = new THREE.BoxGeometry(ancho, alto, profundo);
     const material = new THREE.MeshBasicMaterial({ 
         color: 0xff0000, 
         wireframe: true, 
-        visible: false // Cambia a true para ver las cajas mientras las posicionas
+        visible: false 
     });
     const hitbox = new THREE.Mesh(geometry, material);
     hitbox.position.set(x, y, z);
-    escene.add(hitbox);
+    scene.add(hitbox);
     objetosColision.push(hitbox);
 }
 
@@ -327,7 +336,7 @@ function animar() {
         console.log(`Posición Cámara -> X: ${camara.position.x.toFixed(2)}, Y: ${camara.position.y.toFixed(2)}, Z: ${camara.position.z.toFixed(2)}`);
     }
 
-    renderizador.render(escene, camara);
+    renderizador.render(scene, camara);
 }
 
 animar();

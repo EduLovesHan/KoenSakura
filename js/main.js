@@ -7,7 +7,7 @@ import { Skybox } from './skybox.js';
 //creacion de la escena, camara y renderizador
 const escene = new THREE.Scene();
 const camara = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
-camara.position.set(0.8, 1.7, 25);
+camara.position.set(0.8, 3.5, 25);
 const renderizador = new THREE.WebGLRenderer({ antialias: true });
 renderizador.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderizador.domElement);
@@ -33,6 +33,20 @@ audioLoader.load('assets/audio/MusicaFondo.mp3', (buffer) => {
     sonidoFondo.setLoop(true); 
     sonidoFondo.setVolume(0.3);
 });
+
+// Cargar audio de click
+const sonidoClick = new THREE.Audio(listener);
+audioLoader.load('assets/audio/click-boton.mp3', (buffer) => {
+    sonidoClick.setBuffer(buffer);
+    sonidoClick.setLoop(false);
+    sonidoClick.setVolume(1.5);
+});
+
+function reproducirClick() {
+    if (listener.context.state === 'suspended') listener.context.resume();
+    if (sonidoClick.isPlaying) sonidoClick.stop();
+    if (sonidoClick.buffer) sonidoClick.play();
+}
 
 //reproducir musica al hacer click
 document.body.addEventListener('click', () => {
@@ -94,12 +108,59 @@ function crearHitbox(x, y, z, ancho, alto, profundo) {
     objetosColision.push(hitbox);
 }
 
+// sistema para detectar proximidad a objetos interactivos y mostrar cuadros de texto
+const objetosInteractivos = [];
+let objetoCercanoActual = null;
+const uiInteraccion = document.getElementById('ui-interaccion');
+const modalDialogo = document.getElementById('modal-dialogo');
+const dialogoTitulo = document.getElementById('dialogo-titulo');
+const dialogoTexto = document.getElementById('dialogo-texto');
+
+// Cargar el modelo del letrero 
+loader.load('assets/modelos/letreroBasico.glb', (gltf) => {
+    const letreroModelo = gltf.scene;
+    letreroModelo.position.set(40, 0, 60); 
+    // Si quedó mirando hacia atrás, lo rotamos 180 grados (Math.PI)
+    letreroModelo.rotation.y = Math.PI; 
+    
+    escene.add(letreroModelo);
+    objetosColision.push(letreroModelo);
+
+    // Registrar el objeto como interactivo una vez cargado
+    objetosInteractivos.push({
+        malla: letreroModelo,
+        distancia: 8, 
+        titulo: "Letrero de la Plaza",
+        texto: "¡Bienvenido a KoenSakura! Disfruta de la tranquilidad y la belleza de este pequeño espacio de paz."
+    });
+});
+
+// Escuchar tecla 'E' para interactuar
+document.addEventListener('keydown', (e) => {
+    if (e.key.toLowerCase() === 'e' && objetoCercanoActual) {
+        // Si estamos cerca de un objeto y presionamos E
+        if (modalDialogo && uiInteraccion) {
+            const estaOculto = modalDialogo.classList.contains('oculto');
+            if (estaOculto) {
+                // Abrir diálogo
+                dialogoTitulo.innerText = objetoCercanoActual.titulo;
+                dialogoTexto.innerText = objetoCercanoActual.texto;
+                modalDialogo.classList.remove('oculto');
+            } else {
+                // Cerrar diálogo
+                modalDialogo.classList.add('oculto');
+            }
+        }
+    }
+});
+
 //logica del menu superior
 const btnMenuSuperior = document.getElementById('btn-menu-superior');
 const panelMenuSuperior = document.getElementById('panel-menu-superior');
 
 btnMenuSuperior.addEventListener('click', (evento) => {
     evento.stopPropagation(); 
+    reproducirClick();
     panelMenuSuperior.classList.toggle('oculto');
 });
 
@@ -134,10 +195,12 @@ function inicializarCarrusel(selectorContenedor, idBtnNext, idBtnPrev) {
     if (btnNext && btnPrev) {
         btnNext.addEventListener('click', (e) => {
             e.stopPropagation();
+            reproducirClick();
             mostrarPagina(indiceActual + 1);
         });
         btnPrev.addEventListener('click', (e) => {
             e.stopPropagation();
+            reproducirClick();
             mostrarPagina(indiceActual - 1);
         });
     }
@@ -154,6 +217,8 @@ const contenidosPestañas = document.querySelectorAll('.tab-contenido');
 
 botonesPestañas.forEach(boton => {
     boton.addEventListener('click', () => {
+        reproducirClick();
+        
         //obtener pestaña a mostrar 
         const tabDestino = boton.getAttribute('data-tab');
 
@@ -199,10 +264,14 @@ if (musicaSlider && musicaMute) {
 
 if (sfxSlider && sfxMute) {
     sfxSlider.addEventListener('input', (e) => {
-        Controles.setSfxVolume(parseFloat(e.target.value));
+        const volumen = parseFloat(e.target.value);
+        Controles.setSfxVolume(volumen);
+        sonidoClick.setVolume(volumen);
     });
     sfxMute.addEventListener('change', (e) => {
-        Controles.setSfxMute(e.target.checked);
+        const isMuted = e.target.checked;
+        Controles.setSfxMute(isMuted);
+        sonidoClick.setVolume(isMuted ? 0 : parseFloat(sfxSlider.value));
     });
 }
 
@@ -224,6 +293,32 @@ if (luzDirSlider) {
 function animar() {
     requestAnimationFrame(animar);
     
+    // Detectar proximidad a objetos interactivos 
+    if (Controles.isLocked) {
+        let objetoEncontrado = null;
+        
+        for (const obj of objetosInteractivos) {
+            // Medir la distancia entre la cámara y el modelo 
+            const dist = camara.position.distanceTo(obj.malla.position);
+            if (dist <= obj.distancia) {
+                objetoEncontrado = obj;
+                break; 
+            }
+        }
+
+        objetoCercanoActual = objetoEncontrado;
+
+        // Mostrar/Ocultar mensaje
+        if (uiInteraccion) {
+            if (objetoCercanoActual && modalDialogo.classList.contains('oculto')) {
+                uiInteraccion.classList.remove('oculto');
+            } else {
+                uiInteraccion.classList.add('oculto');
+                if (modalDialogo && !objetoCercanoActual) modalDialogo.classList.add('oculto'); // Cierra el cuadro al alejarse
+            }
+        }
+    }
+
     //actualizar controles
     Controles.actualizar();
 
@@ -236,3 +331,15 @@ function animar() {
 }
 
 animar();
+
+loader.load('assets/modelos/farolaPrueba.glb', (gltf) => {
+    const farol = gltf.scene;
+    farol.position.set(30, 0, 60); 
+    escene.add(farol);
+    objetosColision.push(farol);
+
+    // Crear una luz puntual para simular la iluminación del farol
+    const luzFoco = new THREE.PointLight(0xffcc88, 5.0, 20);
+    luzFoco.position.set(5, 5, 5); 
+    farol.add(luzFoco); 
+});

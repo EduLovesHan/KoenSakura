@@ -311,3 +311,44 @@ input[type="range"] {
 
 /* Clase para ocultar elementos  */
 .oculto { display: none !important; }
+
+/* interacciones y cuadros de dialogo */
+#ui-interaccion {
+    position: absolute;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.6);
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 2px solid #84a547;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    pointer-events: none; /* Para no bloquear clics */
+    z-index: 50;
+}
+
+#modal-dialogo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(30, 10, 20, 0.95);
+    border: 5px solid #ff758c;
+    border-radius: 15px;
+    padding: 30px;
+    width: 400px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(255, 117, 140, 0.4);
+    z-index: 200;
+}
+
+.dialogo-contenido h3 { margin-top: 0; color: #84a547; font-size: 28px; }
+.dialogo-contenido p { font-size: 16px; line-height: 1.5; color: #eee; }
+.dialogo-cerrar {
+    margin-top: 25px;
+    font-size: 12px !important;
+    color: #ff758c !important;
+}

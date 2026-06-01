@@ -13,7 +13,7 @@ class ControlesPrimeraPersona {
         this.isLocked = false;
         this.velocidad = 0.25;
         this.sensibilidad = 0.002;
-        this.distanciaColision = 0.7; // Radio de "cuerpo" de la cámara
+        this.distanciaColision = 0.4; 
 
         // teclas para movimiento
         this.teclas = { w: false, a: false, s: false, d: false };
@@ -37,7 +37,7 @@ class ControlesPrimeraPersona {
         this._onPointerlockChange = this.onPointerlockChange.bind(this);
 
         // Configuración volumen SFX
-        this.sfxVolume = 5.0;
+        this.sfxVolume = 1.5;
         this.sfxMuted = false;
 
         // Conectar eventos automaticamente
@@ -148,10 +148,33 @@ class ControlesPrimeraPersona {
 
         // Aplicar el movimiento al presionar las teclas
         let enMovimiento = false;
-        if (this.teclas.w) { this.camara.position.addScaledVector(this._vectorAdelante, this.velocidad); enMovimiento = true; }
-        if (this.teclas.s) { this.camara.position.addScaledVector(this._vectorAdelante, -this.velocidad); enMovimiento = true; }
-        if (this.teclas.a) { this.camara.position.addScaledVector(this._vectorDerecha, -this.velocidad); enMovimiento = true; }
-        if (this.teclas.d) { this.camara.position.addScaledVector(this._vectorDerecha, this.velocidad); enMovimiento = true; }
+        
+        if (this.teclas.w) {
+            if (this.puedeMoverse(this._vectorAdelante)) {
+                this.camara.position.addScaledVector(this._vectorAdelante, this.velocidad);
+                enMovimiento = true;
+            }
+        }
+        if (this.teclas.s) {
+            this._direccionAux.copy(this._vectorAdelante).negate();
+            if (this.puedeMoverse(this._direccionAux)) {
+                this.camara.position.addScaledVector(this._vectorAdelante, -this.velocidad);
+                enMovimiento = true;
+            }
+        }
+        if (this.teclas.a) {
+            this._direccionAux.copy(this._vectorDerecha).negate();
+            if (this.puedeMoverse(this._direccionAux)) {
+                this.camara.position.addScaledVector(this._vectorDerecha, -this.velocidad);
+                enMovimiento = true;
+            }
+        }
+        if (this.teclas.d) {
+            if (this.puedeMoverse(this._vectorDerecha)) {
+                this.camara.position.addScaledVector(this._vectorDerecha, this.velocidad);
+                enMovimiento = true;
+            }
+        }
 
         // Controlar la reproducción del sonido de los pasos
         if (this.pasosAudio && this.pasosAudio.buffer) {

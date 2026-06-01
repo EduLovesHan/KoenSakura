@@ -1,17 +1,15 @@
-//importacion de librerias necesarias para el proyecto
+// importacion de librerias necesarias para el proyecto
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { ControlesPrimeraPersona } from './controles.js';
 import { Skybox } from './skybox.js';
 
-//creacion de la escena, camara y renderizador
-
-const escene = new THREE.Scene();
+// creacion de la escena, camara y renderizador
+const scene = new THREE.Scene();
 
 const camara = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
 camara.position.set(0.8, 1.7, 25);
-
-
+// camara.position.set(50.62, 1.7, 173.04);
 const renderizador = new THREE.WebGLRenderer({ antialias: true });
 renderizador.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderizador.domElement);
@@ -25,6 +23,7 @@ window.addEventListener('resize', () => {
 
 // Lista de objetos con los que la cámara puede colisionar
 const objetosColision = [];
+
 // audio config
 const listener = new THREE.AudioListener();
 camara.add(listener); 
@@ -37,7 +36,7 @@ audioLoader.load('assets/audio/MusicaFondo.mp3', (buffer) => {
     sonidoFondo.setVolume(0.3);
 });
 
-//reproducir musica al hacer click
+// reproducir musica al hacer click
 document.body.addEventListener('click', () => {
     if (listener.context.state === 'suspended') listener.context.resume();
     if (!sonidoFondo.isPlaying && sonidoFondo.buffer) sonidoFondo.play();
@@ -47,56 +46,45 @@ document.body.addEventListener('click', () => {
 const Controles = new ControlesPrimeraPersona(camara, document.body, objetosColision, listener);
 
 // Inicializar el Skybox
-const skybox = new Skybox(escene, 'assets/texturas/SkyBox/');
+const skybox = new Skybox(scene, 'assets/texturas/SkyBox/');
 
 // Iluminación básica de prueba
 // luz ambiental
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); 
-escene.add(ambientLight);
+scene.add(ambientLight);
 
 // luz puntual
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.position.set(10, 20, 10);
-escene.add(directionalLight);
+scene.add(directionalLight);
 
 // carga del modelo 3D  en formato glTF (glb) 
 const loader = new GLTFLoader();
 
 loader.load('assets/modelos/plazaPrincipal.glb', 
     (gltf) => {
-        
         const model = gltf.scene;
-        // model.scale.set(2, 2, 2); // escalar modelo
-        //model.position.y = 0; // Ajuste de la posición vertical del modelo
-        //model.position.z = 0;
-        //model.position.x = 5;
         model.position.set(0, 0, 0); 
-        escene.add(model);
+        scene.add(model);
 
-        // Agregamos el modelo completo al array de colisiones.
-        // Esto hará que el Raycaster detecte automáticamente las paredes y verjas.
-        objetosColision.push(model);
+        // Recorrer el modelo para buscar las cajas de colisión exportadas de Blender
+        model.traverse((hijo) => {
+            // Los objetos tienen el prefijo 'caja_colision'
+            if (hijo.isMesh && hijo.name.toLowerCase().includes('caja_colision')) {
+                hijo.material.visible = false;
+                objetosColision.push(hijo);
+                console.log("Caja de colisión cargada:", hijo.name);
+            }
+        });
 
         console.log("Modelo cargado");
     }, 
     undefined, 
     (error) => {
-        console.error("Error al cargarel modelo:", error);
+        console.error("Error al cargar el modelo:", error);
     }
 );
-// Función para crear cajas de colisión invisibles y optimizadas
-function crearHitbox(x, y, z, ancho, alto, profundo) {
-    const geometry = new THREE.BoxGeometry(ancho, alto, profundo);
-    const material = new THREE.MeshBasicMaterial({ 
-        color: 0xff0000, 
-        wireframe: true, 
-        visible: false // Cambia a true para ver las cajas mientras las posicionas
-    });
-    const hitbox = new THREE.Mesh(geometry, material);
-    hitbox.position.set(x, y, z);
-    escene.add(hitbox);
-    objetosColision.push(hitbox);
-}
+
 // logica del menu
 const btnMenuSuperior = document.getElementById('btn-menu-superior');
 const panelMenuSuperior = document.getElementById('panel-menu-superior');
@@ -129,7 +117,7 @@ botonesOpcion.forEach(boton => {
         } else if (tabId === 'sonido' && tabSonido) {
             tabSonido.classList.remove('oculto');
         }
-       });
+    });
 });
 
 // controlar el volumen, musica y efectos de sonido
@@ -161,7 +149,6 @@ if (sfxSlider && sfxMute) {
     });
 }
 
-
 function animar() {
     requestAnimationFrame(animar);
     
@@ -173,7 +160,7 @@ function animar() {
         console.log(`Posición Cámara -> X: ${camara.position.x.toFixed(2)}, Y: ${camara.position.y.toFixed(2)}, Z: ${camara.position.z.toFixed(2)}`);
     }
 
-    renderizador.render(escene, camara);
+    renderizador.render(scene, camara);
 }
 
 animar();

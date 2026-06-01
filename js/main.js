@@ -83,6 +83,27 @@ loader.load('assets/modelos/plazaPrincipal.glb',
     }
 );
 
+// Límites del mapa (Cajas de colisión manuales para delimitar el área)
+crearHitbox(-50, 1, 0, 0.5, 10, 150);   // Pared izquierda
+crearHitbox(50, 1, 0, 0.5, 10, 150);    // Pared derecha
+crearHitbox(0, 1, -75, 100, 10, 0.5);   // Pared frontal
+crearHitbox(0, 1, 75, 100, 10, 0.5);    // Pared trasera
+crearHitbox(0, -0.05, 0, 150, 0.1, 150); // Suelo (para evitar caer al vacío)
+
+// Función para crear cajas de colisión invisibles
+function crearHitbox(x, y, z, ancho, alto, profundo) {
+    const geometry = new THREE.BoxGeometry(ancho, alto, profundo);
+    const material = new THREE.MeshBasicMaterial({ 
+        color: 0xff0000, 
+        wireframe: true, 
+        visible: false // Cámbialo a true para ver los límites rojos mientras pruebas
+    });
+    const hitbox = new THREE.Mesh(geometry, material);
+    hitbox.position.set(x, y, z);
+    scene.add(hitbox);
+    objetosColision.push(hitbox);
+}
+
 // logica del menu
 const btnMenuSuperior = document.getElementById('btn-menu-superior');
 const panelMenuSuperior = document.getElementById('panel-menu-superior');

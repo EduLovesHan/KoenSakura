@@ -6,7 +6,6 @@ import { Skybox } from './skybox.js';
 
 // creacion de la escena, camara y renderizador
 const scene = new THREE.Scene();
-
 const camara = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
 camara.position.set(0.8, 1.7, 25);
 // camara.position.set(50.62, 1.7, 173.04);
@@ -48,8 +47,7 @@ const Controles = new ControlesPrimeraPersona(camara, document.body, objetosColi
 // Inicializar el Skybox
 const skybox = new Skybox(scene, 'assets/texturas/SkyBox/');
 
-// Iluminación básica de prueba
-// luz ambiental
+// Iluminación básica de prueba (luz ambiental)
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); 
 scene.add(ambientLight);
 
@@ -94,28 +92,76 @@ btnMenuSuperior.addEventListener('click', (evento) => {
     panelMenuSuperior.classList.toggle('oculto');
 });
 
-// Evitar el bloqueo del cursor
+// Evitar que hacer clic dentro del menú lo cierre (o dispare algo del juego)
 panelMenuSuperior.addEventListener('click', (evento) => {
     evento.stopPropagation();
 });
 
-// botones y pestañas con informacion del menu
-const botonesOpcion = document.querySelectorAll('.btn-opcion');
-const tabControles = document.getElementById('tab-controles');
-const tabSonido = document.getElementById('tab-sonido');
+// Creacion e inicializacion de carruseles
 
-botonesOpcion.forEach(boton => {
-    boton.addEventListener('click', (e) => {
-        // Ocultar las pestañas por defeault
-        if (tabControles) tabControles.classList.add('oculto');
-        if (tabSonido) tabSonido.classList.add('oculto');
-        
-        // mostrar la pestaña de acuerdo al boton
-        const tabId = e.target.dataset.tab;
-        if (tabId === 'controles' && tabControles) {
-            tabControles.classList.remove('oculto');
-        } else if (tabId === 'sonido' && tabSonido) {
-            tabSonido.classList.remove('oculto');
+function inicializarCarrusel(selectorContenedor, idBtnNext, idBtnPrev) {
+    let indiceActual = 0;
+    const contenedor = document.querySelector(selectorContenedor);
+    if (!contenedor) return () => {}; // si el contenedor no existe
+
+    const paginas = contenedor.querySelectorAll('.control-slide');
+    const puntos = contenedor.querySelectorAll('.punto');
+    const btnNext = document.getElementById(idBtnNext);
+    const btnPrev = document.getElementById(idBtnPrev);
+
+    function mostrarPagina(index) {
+        if (index >= paginas.length) indiceActual = 0;
+        else if (index < 0) indiceActual = paginas.length - 1;
+        else indiceActual = index;
+
+        paginas.forEach((pag, i) => {
+            pag.classList.toggle('active', i === indiceActual);
+            if (puntos[i]) puntos[i].classList.toggle('active', i === indiceActual);
+        });
+    }
+
+    if (btnNext && btnPrev) {
+        btnNext.addEventListener('click', (e) => {
+            e.stopPropagation();
+            mostrarPagina(indiceActual + 1);
+        });
+        btnPrev.addEventListener('click', (e) => {
+            e.stopPropagation();
+            mostrarPagina(indiceActual - 1);
+        });
+    }
+
+    return mostrarPagina; // Devolvemos la función para reiniciarlo desde las pestañas
+}
+
+const resetCarruselControles = inicializarCarrusel('#tab-controles', 'next-control', 'prev-control');
+const resetCarruselAjustes = inicializarCarrusel('#tab-ajustes', 'next-ajustes', 'prev-ajustes');
+
+//logica de pestañas del menu superior
+const botonesPestañas = document.querySelectorAll('.btn-opcion');
+const contenidosPestañas = document.querySelectorAll('.tab-contenido');
+
+botonesPestañas.forEach(boton => {
+    boton.addEventListener('click', () => {
+        //obtener pestaña a mostrar 
+        const tabDestino = boton.getAttribute('data-tab');
+
+        //ocultar contenido de las demas pestañas
+        contenidosPestañas.forEach(contenido => {
+            contenido.classList.add('oculto');
+        });
+
+        //mostrar la pestaña seleccionada 
+        const tabAMostrar = document.getElementById(`tab-${tabDestino}`);
+        if (tabAMostrar) {
+            tabAMostrar.classList.remove('oculto');
+            
+            //reiniciar carruseles al abrir cada pestaña
+            if (tabDestino === 'controles') {
+                resetCarruselControles(0); 
+            } else if (tabDestino === 'ajustes') {
+                resetCarruselAjustes(0); 
+            }
         }
     });
 });
@@ -146,6 +192,21 @@ if (sfxSlider && sfxMute) {
     });
     sfxMute.addEventListener('change', (e) => {
         Controles.setSfxMute(e.target.checked);
+    });
+}
+
+// Controlar Iluminación
+const luzAmbSlider = document.getElementById('luz-amb-slider');
+const luzDirSlider = document.getElementById('luz-dir-slider');
+
+if (luzAmbSlider) {
+    luzAmbSlider.addEventListener('input', (e) => {
+        ambientLight.intensity = parseFloat(e.target.value);
+    });
+}
+if (luzDirSlider) {
+    luzDirSlider.addEventListener('input', (e) => {
+        directionalLight.intensity = parseFloat(e.target.value);
     });
 }
 

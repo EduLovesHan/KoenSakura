@@ -126,22 +126,28 @@ const modalDialogo = document.getElementById('modal-dialogo');
 const dialogoTitulo = document.getElementById('dialogo-titulo');
 const dialogoTexto = document.getElementById('dialogo-texto');
 
+// Datos de los letreros a distribuir por el mapa
+const datosLetreros = [
+    { posicion: new THREE.Vector3(40, 0, 60), rotacionY: Math.PI, titulo: "Letrero de la Plaza", texto: "¡Bienvenido a KoenSakura! Disfruta de la tranquilidad y la belleza de este pequeño espacio de paz." }
+];
+
 // Cargar el modelo del letrero 
 loader.load('assets/modelos/letreroBasico.glb', (gltf) => {
-    const letreroModelo = gltf.scene;
-    letreroModelo.position.set(40, 0, 60); 
-    // Si quedó mirando hacia atrás, lo rotamos 180 grados (Math.PI)
-    letreroModelo.rotation.y = Math.PI; 
-    
-    scene.add(letreroModelo);
-    objetosColision.push(letreroModelo);
+    datosLetreros.forEach((datos) => {
+        const letreroModelo = gltf.scene.clone(); // Clonamos el modelo
+        letreroModelo.position.copy(datos.posicion); 
+        letreroModelo.rotation.y = datos.rotacionY; 
+        
+        scene.add(letreroModelo);
+        objetosColision.push(letreroModelo);
 
-    // Registrar el objeto como interactivo una vez cargado
-    objetosInteractivos.push({
-        malla: letreroModelo,
-        distancia: 8, 
-        titulo: "Letrero de la Plaza",
-        texto: "¡Bienvenido a KoenSakura! Disfruta de la tranquilidad y la belleza de este pequeño espacio de paz."
+        // Registrar el objeto como interactivo
+        objetosInteractivos.push({
+            malla: letreroModelo,
+            distancia: 8, 
+            titulo: datos.titulo,
+            texto: datos.texto
+        });
     });
 });
 
@@ -342,14 +348,93 @@ function animar() {
 
 animar();
 
-loader.load('assets/modelos/farolaPrueba.glb', (gltf) => {
-    const farol = gltf.scene;
-    farol.position.set(30, 0, 60); 
-    scene.add(farol);
-    objetosColision.push(farol);
+// Posiciones de las farolas en el mapa
+const posicionesFarolas = [
+    
+    new THREE.Vector3(10, -1, 35),
+    new THREE.Vector3(-10, -1, 35),
+    new THREE.Vector3(-35, -1, 35),
+    new THREE.Vector3(-60, -1, 35),
+    new THREE.Vector3(35, -1, 35),
+    new THREE.Vector3(60, -1, 35),
+    new THREE.Vector3(85, -1, 35),
+    new THREE.Vector3(110, -1, 35),
+    new THREE.Vector3(116, -1, 75),
+    new THREE.Vector3(116, -1, 100),
+    new THREE.Vector3(116, -1, 125),
+    new THREE.Vector3(95, -1, 134),
+    new THREE.Vector3(70, -1, 134),
+    new THREE.Vector3(45, -1, 134),
+    new THREE.Vector3(40, -1, 160),
+    new THREE.Vector3(20, -1, 190),
+    new THREE.Vector3(-5, -1, 190),
+    new THREE.Vector3(-30, -1, 190),
+    new THREE.Vector3(-55, -1, 190),
+    new THREE.Vector3(-105, -1, 190),
+    new THREE.Vector3(-117, -1, 165),
+    new THREE.Vector3(-117, -1, 140),
+    new THREE.Vector3(-117, -1, 115),
+];
 
-    // Crear una luz puntual para simular la iluminación del farol
-    const luzFoco = new THREE.PointLight(0xffcc88, 5.0, 20);
-    luzFoco.position.set(5, 5, 5); 
-    farol.add(luzFoco); 
+loader.load('assets/modelos/farolaPrueba.glb', (gltf) => {
+    posicionesFarolas.forEach((posicion) => {
+        const farol = gltf.scene.clone();
+        farol.position.copy(posicion); 
+        scene.add(farol);
+        objetosColision.push(farol);
+
+        //creacion de luz puntual pra la farola
+        const luzFoco = new THREE.PointLight(0xffcc88, 50.0, 50); 
+        luzFoco.position.set(0, 7, 0);
+       
+        // Crear un cubo para representar el foco brillando
+        const geometriaFoco = new THREE.BoxGeometry(0.3, 0.3, 0.3);
+        const materialFoco = new THREE.MeshBasicMaterial({ color: 0xffcc88 }); 
+        const mallaFoco = new THREE.Mesh(geometriaFoco, materialFoco);
+        mallaFoco.position.copy(luzFoco.position); // posicionar donde esta la luz (sirve como guia)
+        
+        farol.add(luzFoco); 
+        farol.add(mallaFoco);
+        
+    });
 });
+
+
+const posicionesEstatuas = [
+    
+    new THREE.Vector3(5, 0, 35),
+    new THREE.Vector3(-5, 0, 35)
+    
+    
+];
+
+// Cargar el modelo de la estatua
+loader.load('assets/modelos/estatua.glb', (gltf) => {
+    posicionesEstatuas.forEach((posicion) => {
+        const estatua = gltf.scene.clone();
+        estatua.position.copy(posicion); 
+        estatua.rotation.y = 3 * Math.PI / 2; 
+        scene.add(estatua);
+        objetosColision.push(estatua); 
+    });
+});
+
+//para cargar cualquier objeto multiples veces se definen las diferentes posiciones
+
+const posicionesCerezos = [
+    //new THREE.Vector3(35, 0, 35),
+    //new THREE.Vector3(35, 0, 40)
+];
+
+// Cargar el modelo 
+loader.load('assets/modelos/arbolCerezoPequeño.glb', (gltf) => {
+    posicionesCerezos.forEach((posicion) => {
+        const cerezo = gltf.scene.clone(); 
+        cerezo.position.copy(posicion); 
+        cerezo.rotation.y = 3 * Math.PI / 2; // Rotar si es necesario
+        scene.add(cerezo);
+        objetosColision.push(cerezo); // para que el objeto choque con la cámara
+    });
+});
+
+

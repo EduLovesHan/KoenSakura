@@ -11,7 +11,7 @@ class ControlesPrimeraPersona {
 
         // Propiedades de la camara
         this.isLocked = false;
-        this.velocidad = 0.25;
+        this.velocidad = 0.5;
         this.sensibilidad = 0.002;
         this.distanciaColision = 0.3; 
 
@@ -136,18 +136,9 @@ class ControlesPrimeraPersona {
             for (let i = 0; i < intersecciones.length; i++) {
                 const hit = intersecciones[i];
                 
-                if (hit.face) {
-                    // Convertir la normal a coordenadas del mundo (soluciona problemas de rotación de Blender)
-                    this._normalMundo.copy(hit.face.normal).transformDirection(hit.object.matrixWorld).normalize();
-                    if (this._normalMundo.y > 0.5) {
-                        continue; // Es suelo o rampa, lo ignoramos para no atascarnos
-                    }
-                }
-
                 if (hit.distance < this.distanciaColision) {
                     return false; // Chocamos con una pared válida
                 }
-                break; // Si el objeto válido más cercano está lejos, dejamos de comprobar este rayo
             }
         }
         return true;

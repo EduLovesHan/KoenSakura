@@ -1,0 +1,374 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+
+body {
+    margin: 0;
+    overflow: hidden; 
+    background-color: #000;
+    font-family: 'Fredoka One', cursive, sans-serif; 
+    color: #fff;
+    
+}
+canvas {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+}
+#panel-menu-superior h3 {
+    margin: -55px auto 10px auto;
+    background-color: #84a547; 
+    color: #fff;
+    padding: 10px 40px;
+    border-radius: 15px;
+    border: 4px solid #637c34;
+    text-align: center;
+    font-size: 24px;
+    letter-spacing: 2px;
+    box-shadow: 0px 5px 0px #637c34; 
+}
+
+/*estilos de menu superior*/
+#btn-menu-superior {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 1000; 
+    background: transparent; 
+    border: none;
+    padding: 0; 
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    height: 45px;
+    width: 5px;
+}
+
+#btn-menu-superior:hover {
+    transform: scale(1.1); 
+}
+
+.icono-sakura {
+    width: 45px;
+    height: 45px;
+    display: block;
+    filter: drop-shadow(0px 0px 5px rgb(0, 0, 0));
+}
+
+/*Panel general*/
+#panel-menu-superior {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); 
+    z-index: 100;
+    background: #31021494; 
+    border: 10px solid #ff758c;
+    padding: 25px;
+    border-radius: 12px;
+    width: 350px;
+    height: 350px;
+    box-shadow: 0 0 25px rgba(255, 117, 140, 0.3);
+    backdrop-filter: blur(10px);
+    display: flex !important; 
+    flex-direction: column;
+    gap: 20px;
+    box-shadow: 0px 8px 0px #ad2033; 
+
+    /* Animaciones */
+    opacity: 1;
+    visibility: visible;
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s ease, visibility 0.5s;
+}
+
+#panel-menu-superior.oculto {
+    transform: translate(-50%, -150vh);
+    opacity: 0;
+    visibility: hidden;
+    transition: transform 0.5s ease, opacity 0.5s ease, visibility 0.5s;
+}
+
+/*contenedor de botones*/
+.botones-fila {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.btn-opcion {
+    font-family: 'Fredoka One', cursive, sans-serif; 
+    letter-spacing: 1px;
+    background: #84a547;
+    color: white;
+    display: block;
+    flex: 1; 
+    border: none;
+    padding: 8px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-opcion:hover {
+    background: #f06779;
+}
+
+/* Contenido de Pestañas */
+.tab-contenido {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.slider-con-mute {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.slider-con-mute input[type="range"] {
+    flex: 1;
+}
+
+.control-grupo-fila {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Estilo de la ventana del menú */
+#menu-configuracion {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(15, 20, 25, 0.9);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 0 25px rgba(21, 179, 190, 0.9);
+    border: 1px solid hsl(0, 0%, 100%);
+    width: 320px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    backdrop-filter: blur(5px);
+}
+
+.control-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Estilo de sliders */
+input[type="range"] {
+    width: 100%;
+    cursor: pointer;
+    accent-color: #ff758c; 
+}
+
+/* --- CONTROLES WASD VISUALES --- */
+.teclado-wasd {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 1px;
+}
+
+.fila-teclas {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.tecla-grupo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+
+.tecla-3d {
+    background-color: #ff758c; 
+    color: white;
+    font-family: 'Fredoka One', cursive;
+    font-size: 24px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px;
+    box-shadow: 0px 6px 0px #c24d60, 0px 8px 5px rgba(0,0,0,0.4); 
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+.etiqueta-tecla {
+    font-family: 'Fredoka One', Tahoma, sans-serif;
+    font-size: 11px;
+    color: #fff;
+    padding: 3px 8px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+}
+
+
+.control-carousel {
+    position: relative;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.control-slide {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    animation: fadeIn 0.4s ease; 
+}
+
+.control-slide.active {
+    display: flex;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.titulo-carrusel {
+    margin: 0 0 10px 0;
+    color: #ffffff;
+    letter-spacing: 1px;
+    font-size: 18px;
+}
+
+.desc-control {
+    font-size: 12px;
+    margin-top: 10px;
+    color: #eee;
+    text-align: center;
+}
+
+
+.tecla-3d.extra {
+    width: auto;
+    padding: 0 15px;
+    font-size: 18px;
+}
+
+.carrusel-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.btn-nav {
+    background: #ff758c;
+    border: none;
+    color: white;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #c24d60;
+    transition: all 0.1s;
+}
+
+.btn-nav:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #c24d60;
+}
+
+.indicador-puntos {
+    display: flex;
+    gap: 8px;
+}
+
+.punto {
+    width: 10px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+.punto.active {
+    background: #ff758c;
+    transform: scale(1.3);
+}
+
+.mouse-icon {
+    font-size: 40px;
+    margin-bottom: 5px;
+}
+
+
+.oculto { display: none !important; }
+
+/* interacciones y cuadros de dialogo */
+#ui-interaccion {
+    position: absolute;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.6);
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 2px solid #84a547;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    pointer-events: none; /* Para no bloquear clics */
+    z-index: 50;
+}
+
+#modal-dialogo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(30, 10, 20, 0.95);
+    border: 5px solid #ff758c;
+    border-radius: 15px;
+    padding: 30px;
+    width: 400px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(255, 117, 140, 0.4);
+    z-index: 200;
+}
+
+.dialogo-contenido h3 { margin-top: 0; color: #84a547; font-size: 28px; }
+.dialogo-texto-container { min-height: 80px; text-align: center; }
+.dialogo-contenido p { font-size: 16px; line-height: 1.5; color: #eee; margin: 0; }
+
+.dialogo-controles {
+    display: flex;
+    justify-content: center;
+    margin-top: 25px;
+    border-top: 1px solid rgba(255, 117, 140, 0.3);
+    padding-top: 15px;
+}
+
+.dialogo-cerrar {
+    margin: 0 !important;
+    font-size: 14px !important;
+    color: #ff758c !important;
+    cursor: pointer;
+}
+
+.tecla-inline {
+    background-color: #ff758c;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    box-shadow: 0px 3px 0px #c24d60;
+}
+
+

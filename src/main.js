@@ -1,13 +1,14 @@
-import { inicializarMotor } from '../src/core/motor.js';
-import { ControlesPrimeraPersona } from '../src/player/controles.js'; 
-import { Skybox } from '../src/world/skybox.js';
+import './style.css';
+import { inicializarMotor } from './core/motor.js';
+import { ControlesPrimeraPersona } from './player/controles.js'; 
+import { Skybox } from './world/skybox.js';
 
-import { inicializarUI } from '../src/ui/menu.js';
-import { inicializarAudio, reproducirClick, configurarControlesAudio } from '../src/sfx/GestorAudio.js';
-import { inicializarIluminacion, configurarControlesIluminacion } from '../src/world/iluminacion.js';
-import { cargarEscenario } from '../src/world/CargadorModelos.js';
-import { crearHitbox } from '../src/world/colisiones.js';
-import { inicializarInteracciones, actualizarInteracciones } from '../src/player/interacciones.js';
+import { inicializarUI } from './ui/menu.js';
+import { inicializarAudio, reproducirClick, configurarControlesAudio } from './audio/GestorAudio.js';
+import { inicializarIluminacion, configurarControlesIluminacion } from './world/iluminacion.js';
+import { cargarEscenario } from './world/CargadorModelos.js';
+import { crearHitbox } from './world/colisiones.js';
+import { inicializarInteracciones, actualizarInteracciones } from './player/interacciones.js';
 
 //Configuracion inicial del motor, escena, cámara y renderizador
 const { scene, camara, renderizador } = inicializarMotor();

@@ -188,9 +188,9 @@ input[type="range"] {
     gap: 8px;
 }
 
-/* La magia de la tecla 3D Rosada */
+
 .tecla-3d {
-    background-color: #ff758c; /* Tu rosa Sakura */
+    background-color: #ff758c; 
     color: white;
     font-family: 'Fredoka One', cursive;
     font-size: 24px;
@@ -200,7 +200,6 @@ input[type="range"] {
     justify-content: center;
     align-items: center;
     border-radius: 12px;
-    /* Sombra para el efecto 3D */
     box-shadow: 0px 6px 0px #c24d60, 0px 8px 5px rgba(0,0,0,0.4); 
     text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
 }
@@ -214,25 +213,25 @@ input[type="range"] {
     letter-spacing: 0.5px;
 }
 
-/* --- ESTILOS DEL CARRUSEL DE CONTROLES --- */
+
 .control-carousel {
     position: relative;
-    height: 150px; /* Ajusta según el alto de tu panel */
+    height: 150px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .control-slide {
-    display: none; /* Ocultas por defecto */
+    display: none;
     flex-direction: column;
     align-items: center;
     width: 100%;
-    animation: fadeIn 0.4s ease; /* Animación de entrada */
+    animation: fadeIn 0.4s ease; 
 }
 
 .control-slide.active {
-    display: flex; /* Solo se muestra la activa */
+    display: flex;
 }
 
 @keyframes fadeIn {
@@ -254,14 +253,13 @@ input[type="range"] {
     text-align: center;
 }
 
-/* Teclas más largas para Space */
+
 .tecla-3d.extra {
     width: auto;
     padding: 0 15px;
     font-size: 18px;
 }
 
-/* --- NAVEGACIÓN (FLECHAS Y PUNTOS) --- */
 .carrusel-nav {
     display: flex;
     justify-content: space-between;
@@ -309,7 +307,7 @@ input[type="range"] {
     margin-bottom: 5px;
 }
 
-/* Clase para ocultar elementos  */
+
 .oculto { display: none !important; }
 
 /* interacciones y cuadros de dialogo */
@@ -346,9 +344,29 @@ input[type="range"] {
 }
 
 .dialogo-contenido h3 { margin-top: 0; color: #84a547; font-size: 28px; }
-.dialogo-contenido p { font-size: 16px; line-height: 1.5; color: #eee; }
-.dialogo-cerrar {
+.dialogo-texto-container { min-height: 80px; text-align: center; }
+.dialogo-contenido p { font-size: 16px; line-height: 1.5; color: #eee; margin: 0; }
+
+.dialogo-controles {
+    display: flex;
+    justify-content: center;
     margin-top: 25px;
-    font-size: 12px !important;
+    border-top: 1px solid rgba(255, 117, 140, 0.3);
+    padding-top: 15px;
+}
+
+.dialogo-cerrar {
+    margin: 0 !important;
+    font-size: 14px !important;
     color: #ff758c !important;
+    cursor: pointer;
+}
+
+.tecla-inline {
+    background-color: #ff758c;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    box-shadow: 0px 3px 0px #c24d60;
 }

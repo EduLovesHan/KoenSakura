@@ -1,4 +1,3 @@
-
 export function inicializarUI(onInteraccion) {
     // Lógica del menú superior
     const btnMenuSuperior = document.getElementById('btn-menu-superior');

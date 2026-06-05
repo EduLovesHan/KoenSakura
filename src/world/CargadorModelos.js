@@ -2,20 +2,39 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { procesarColisiones } from './colisiones.js';
 import { registrarObjetoInteractivo } from '../player/interacciones.js';
+import { registrarAnimaciones, registrarTexturaAgua } from './animaciones.js';
 
 export function cargarEscenario(scene, objetosColision) {
     const loader = new GLTFLoader();
 
     // Cargar Plaza Principal
-    loader.load('assets/modelos/plazaPrincipal.glb', 
+    loader.load('assets/modelos/plazaPrincipal.glb',
         (gltf) => {
             const model = gltf.scene;
-            model.position.set(0, 0, 0); 
+            model.position.set(0, 0, 0);
             scene.add(model);
             procesarColisiones(model, scene, objetosColision);
+
+            // Registrar animaciones
+            registrarAnimaciones(model, gltf.animations);
+
+            // Detectar y registrar texturas del agua
+            model.traverse((hijo) => {
+                const nombre = hijo.name.toLowerCase();
+                if (hijo.isMesh && nombre.includes('agua1')) {
+                    hijo.material.transparent = true;
+                    hijo.material.opacity = 0.6;
+
+                    const textura = hijo.material.normalMap || hijo.material.map;
+                    if (textura) {
+                        registrarTexturaAgua(textura);
+                    }
+                }
+            });
+
             console.log("Plaza cargada con éxito");
-        }, 
-        undefined, 
+        },
+        undefined,
         (error) => {
             console.error("Error al cargar la plaza:", error);
         }
@@ -24,21 +43,21 @@ export function cargarEscenario(scene, objetosColision) {
     // Cargar modelos
     loader.load('assets/modelos/letreroBasico.glb', (gltf) => {
         const letreroModelo = gltf.scene;
-        letreroModelo.position.set(40, 0, 60); 
-        letreroModelo.rotation.y = Math.PI; 
-        
+        letreroModelo.position.set(40, 0, 60);
+        letreroModelo.rotation.y = Math.PI;
+
         scene.add(letreroModelo);
         procesarColisiones(letreroModelo, scene, objetosColision);
 
         registrarObjetoInteractivo(
-            letreroModelo, 
-            8, 
-            "Letrero de la Plaza", 
+            letreroModelo,
+            8,
+            "Letrero de la Plaza",
             "¡Bienvenido a KoenSakura! Disfruta de la tranquilidad y la belleza de este pequeño espacio de paz."
         );
     });
 
-  //clonar modelos en las posiciones del mundo
+    //clonar modelos en las posiciones del mundo
     const posicionesFarolas = [
         new THREE.Vector3(10, -1, 35), new THREE.Vector3(-10, -1, 35), new THREE.Vector3(-35, -1, 35),
         new THREE.Vector3(-60, -1, 35), new THREE.Vector3(35, -1, 35), new THREE.Vector3(60, -1, 35),
@@ -53,9 +72,9 @@ export function cargarEscenario(scene, objetosColision) {
     loader.load('assets/modelos/farolaPrueba.glb', (gltf) => {
         posicionesFarolas.forEach((posicion) => {
             const farol = gltf.scene.clone();
-            farol.position.copy(posicion); 
+            farol.position.copy(posicion);
             scene.add(farol);
-            procesarColisiones(farol, scene, objetosColision, 1.5, 1.5); 
+            procesarColisiones(farol, scene, objetosColision, 1.5, 1.5);
         });
     });
 }

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import GUI from 'lil-gui';
+import { obtenerDebugGUI } from '../core/debug.js';
 
 // Array global de cajas de colisión AABB
 export const collidableBoxes = [];
@@ -38,7 +38,7 @@ export function inicializarDebugColisiones(scene, camara, controles) {
     escenaGlobal = scene;
     if (debugGui) return;
 
-    debugGui = new GUI({ title: 'Panel de Depuración' });
+    debugGui = obtenerDebugGUI();
     
     // Carpeta: Físicas y Colisiones
     const carpetaColisiones = debugGui.addFolder('Físicas y Colisiones');

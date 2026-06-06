@@ -3,6 +3,60 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { procesarColisiones } from './colisiones.js';
 import { registrarObjetoInteractivo } from '../player/interacciones.js';
 import { registrarMaterialEmisivo } from './iluminacion.js';
+import vertexShader from '../shaders/phong.vert?raw';
+import fragmentShader from '../shaders/phong.frag?raw';
+
+export const phongUniformsGlobales = {
+    uAmbientColor: { value: new THREE.Color().setRGB((0xd8 + 0.001) / 255, (0xe2 + 0.001) / 255, (0xf0 + 0.001) / 255) },
+    uAmbientIntensity: { value: 0.6 },
+    uLightColor: { value: new THREE.Color().setRGB(1.0, (0xf5 + 0.001) / 255, (0xe6 + 0.001) / 255) },
+    uLightIntensity: { value: 1.5 },
+    uLightPosition: { value: new THREE.Vector3(10, 20, 10) },
+    uSpecularColor: { value: new THREE.Color(0xffffff) },
+    uSpecularIntensity: { value: 0.0 },
+    uShininess: { value: 30.0 },
+    uCameraPosition: { value: new THREE.Vector3() }
+};
+
+function crearMaterialPhong(mesh) {
+    const originalMaterial = mesh.material;
+    const map = originalMaterial.map || null;
+    const baseColor = originalMaterial.color ? originalMaterial.color.clone() : new THREE.Color(0xffffff);
+
+    return new THREE.ShaderMaterial({
+        vertexShader,
+        fragmentShader,
+        uniforms: {
+            uAmbientColor: phongUniformsGlobales.uAmbientColor,
+            uAmbientIntensity: phongUniformsGlobales.uAmbientIntensity,
+            uLightColor: phongUniformsGlobales.uLightColor,
+            uLightIntensity: phongUniformsGlobales.uLightIntensity,
+            uLightPosition: phongUniformsGlobales.uLightPosition,
+            uSpecularColor: phongUniformsGlobales.uSpecularColor,
+            uSpecularIntensity: phongUniformsGlobales.uSpecularIntensity,
+            uShininess: phongUniformsGlobales.uShininess,
+            uCameraPosition: phongUniformsGlobales.uCameraPosition,
+            uMap: { value: map },
+            uHasTexture: { value: map ? 1.0 : 0.0 },
+            uBaseColor: { value: baseColor }
+        }
+    });
+}
+
+function aplicarMaterialPhong(model) {
+    model.traverse((child) => {
+        if (child.isMesh && child.material) {
+            if (child.name.toLowerCase().includes('caja_colision')) return;
+            
+            // Omitir mallas con materiales emisivos (luz propia, ej. farolas)
+            const mats = Array.isArray(child.material) ? child.material : [child.material];
+            const tieneEmisivo = mats.some(mat => mat.emissive && (mat.emissive.r > 0 || mat.emissive.g > 0 || mat.emissive.b > 0));
+            if (tieneEmisivo) return;
+
+            child.material = crearMaterialPhong(child);
+        }
+    });
+}
 
 export function cargarEscenario(scene, objetosColision) {
     const loader = new GLTFLoader();
@@ -12,6 +66,7 @@ export function cargarEscenario(scene, objetosColision) {
         (gltf) => {
             const model = gltf.scene;
             model.position.set(0, 0, 0); 
+            aplicarMaterialPhong(model);
             scene.add(model);
             
             // Buscar y registrar materiales emisivos en la plaza
@@ -40,6 +95,7 @@ export function cargarEscenario(scene, objetosColision) {
         letreroModelo.position.set(40, 0, 60); 
         letreroModelo.rotation.y = Math.PI; 
         
+        aplicarMaterialPhong(letreroModelo);
         scene.add(letreroModelo);
         procesarColisiones(letreroModelo, scene, objetosColision);
 
@@ -75,6 +131,8 @@ export function cargarEscenario(scene, objetosColision) {
                 });
             }
         });
+
+        aplicarMaterialPhong(gltf.scene);
 
         posicionesFarolas.forEach((posicion) => {
             const farol = gltf.scene.clone();

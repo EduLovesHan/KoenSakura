@@ -5,8 +5,8 @@ import { Skybox } from './world/skybox.js';
 
 import { inicializarUI } from './ui/menu.js';
 import { inicializarAudio, reproducirClick, configurarControlesAudio } from './audio/GestorAudio.js';
-import { inicializarIluminacion, configurarControlesIluminacion } from './world/iluminacion.js';
-import { cargarEscenario } from './world/CargadorModelos.js';
+import { inicializarIluminacion, configurarControlesIluminacion, ambientLight, directionalLight } from './world/iluminacion.js';
+import { cargarEscenario, phongUniformsGlobales } from './world/CargadorModelos.js';
 import { crearHitbox, inicializarDebugColisiones, actualizarPlayerBox } from './world/colisiones.js';
 import { inicializarInteracciones, actualizarInteracciones } from './player/interacciones.js';
 
@@ -49,6 +49,16 @@ function animar() {
     // Actualizar logica
     actualizarInteracciones(camara, Controles.isLocked);
     Controles.actualizar();
+    
+    // Sincronizar y actualizar los uniforms de Phong en cada frame
+    if (phongUniformsGlobales && ambientLight && directionalLight) {
+        phongUniformsGlobales.uAmbientIntensity.value = ambientLight.intensity;
+        phongUniformsGlobales.uAmbientColor.value.copy(ambientLight.color);
+        phongUniformsGlobales.uLightIntensity.value = directionalLight.intensity;
+        phongUniformsGlobales.uLightColor.value.copy(directionalLight.color);
+        phongUniformsGlobales.uLightPosition.value.copy(directionalLight.position).applyMatrix4(camara.matrixWorldInverse);
+        phongUniformsGlobales.uCameraPosition.value.set(0, 0, 0); // En espacio de cámara la posición de cámara es origen
+    }
     
     // Mantener la esfera de noche centrada en la cámara
     if (skybox && typeof skybox.actualizar === 'function') {

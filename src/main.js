@@ -1,4 +1,5 @@
 import './style.css';
+import * as THREE from 'three';
 import { inicializarMotor } from './core/motor.js';
 import { ControlesPrimeraPersona } from './player/controles.js';
 import { Skybox } from './world/skybox.js';
@@ -9,10 +10,12 @@ import { inicializarIluminacion, configurarControlesIluminacion, ambientLight, d
 import { cargarEscenario, phongUniformsGlobales } from './world/CargadorModelos.js';
 import { crearHitbox, inicializarDebugColisiones, actualizarPlayerBox } from './world/colisiones.js';
 import { inicializarInteracciones, actualizarInteracciones } from './player/interacciones.js';
+import { actualizarAnimaciones } from './world/animaciones.js';
 
 //Configuracion inicial del motor, escena, cámara y renderizador
 const { scene, camara, renderizador } = inicializarMotor();
 const objetosColision = [];
+const reloj = new THREE.Clock();
 
 //configuracion del audio y controles de movimiento
 const listener = inicializarAudio(camara);
@@ -45,8 +48,10 @@ inicializarUI(reproducirClick);
 //bucle de renderizado
 function animar() {
     requestAnimationFrame(animar);
-    
+    const delta = reloj.getDelta();
+
     // Actualizar logica
+    actualizarAnimaciones(delta);
     actualizarInteracciones(camara, Controles.isLocked);
     Controles.actualizar();
     

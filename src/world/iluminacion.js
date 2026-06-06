@@ -8,6 +8,12 @@ export const materialesEmisivos = [];
 export let ambientLight, directionalLight;
 let esDeDia = true;
 
+// ── Pool de PointLights para farolas (Object Pooling + Distance Culling) ──
+const NUM_LUCES_POOL = 6;
+export const lucesPool = [];
+export const posicionesFarolasGlobal = [];
+const ALTURA_LUZ_FAROLA = 4.0; // Offset Y desde la base del modelo hasta la bombilla
+
 // Registrar material para brillar en la noche
 export function registrarMaterialEmisivo(material) {
     if (material && !materialesEmisivos.includes(material)) {
@@ -31,6 +37,14 @@ export function inicializarIluminacion(scene) {
     directionalLight.intensity = 1.5;
     directionalLight.position.set(10, 20, 10);
     scene.add(directionalLight);
+
+    // Inicializar pool de 3 PointLights para farolas (apagadas por defecto)
+    for (let i = 0; i < NUM_LUCES_POOL; i++) {
+        const luz = new THREE.PointLight(0xffaa00, 0, 20); // color cálido, intensidad 0, distancia 20
+        luz.position.set(0, -100, 0); // fuera de vista hasta asignación
+        scene.add(luz);
+        lucesPool.push(luz);
+    }
 }
 
 // Función auxiliar para refrescar el panel lil-gui de manera recursiva
@@ -56,6 +70,65 @@ function refrescarGUI() {
         };
         actualizarControladores(gui);
     }
+}
+
+// Registrar una posición de farola para el sistema de Object Pooling
+export function registrarPosicionFarola(posicion) {
+    posicionesFarolasGlobal.push(posicion.clone());
+}
+
+// Lógica de proximidad: reasignar las 3 Point Lights (uniforms) a las farolas más cercanas
+// Recibe la cámara completa para transformar posiciones a espacio de cámara (view space)
+export function actualizarLucesFarolas(camara) {
+    if (esDeDia) {
+        // De día: apagar las luces del pool (uniforms)
+        phongUniformsGlobales.uPointLightIntensity.value = 0.0;
+        for (const luz of lucesPool) {
+            luz.intensity = 0;
+        }
+        return;
+    }
+
+    // De noche: calcular distancias y asignar las 3 más cercanas
+    const camaraPos = camara.position;
+    const distancias = posicionesFarolasGlobal.map((pos, idx) => ({
+        idx,
+        dist: camaraPos.distanceToSquared(pos) // squared para evitar sqrt innecesario
+    }));
+
+    distancias.sort((a, b) => a.dist - b.dist);
+
+    // Vector temporal para transformar posiciones a espacio de cámara
+    const tempVec = new THREE.Vector3();
+
+    const uniformPos = [
+        phongUniformsGlobales.uPointLightPos0,
+        phongUniformsGlobales.uPointLightPos1,
+        phongUniformsGlobales.uPointLightPos2,
+        phongUniformsGlobales.uPointLightPos3,
+        phongUniformsGlobales.uPointLightPos4,
+        phongUniformsGlobales.uPointLightPos5
+    ];
+
+    for (let i = 0; i < NUM_LUCES_POOL; i++) {
+        if (i < distancias.length) {
+            const posFarola = posicionesFarolasGlobal[distancias[i].idx];
+            // Posición en espacio mundo con offset de altura
+            tempVec.set(posFarola.x, posFarola.y + ALTURA_LUZ_FAROLA, posFarola.z);
+            // Transformar a espacio de cámara (view space) para el shader
+            tempVec.applyMatrix4(camara.matrixWorldInverse);
+            uniformPos[i].value.copy(tempVec);
+
+            // También mover la PointLight real (por si se usa para otros efectos)
+            lucesPool[i].position.set(posFarola.x, posFarola.y + ALTURA_LUZ_FAROLA, posFarola.z);
+            lucesPool[i].intensity = 2.0;
+        } else {
+            uniformPos[i].value.set(0, -100, 0);
+            lucesPool[i].intensity = 0;
+        }
+    }
+
+    phongUniformsGlobales.uPointLightIntensity.value = 2.0;
 }
 
 // Función principal para animar el clima suavemente con GSAP
@@ -162,6 +235,25 @@ export function cambiarClimaSuave(esDeDiaTarget, skybox, duracion = 3.5) {
     materialesEmisivos.forEach(mat => {
         gsap.to(mat, {
             emissiveIntensity: targetEmissiveIntensity,
+            duration: duracion,
+            ease: ease
+        });
+    });
+
+    // 7. Animar luces del pool de farolas (Object Pooling) — uniforms + PointLights
+    const targetPoolIntensity = esDeDiaTarget ? 0.0 : 2.0;
+    // Animar el uniform compartido del shader
+    gsap.killTweensOf(phongUniformsGlobales.uPointLightIntensity);
+    gsap.to(phongUniformsGlobales.uPointLightIntensity, {
+        value: targetPoolIntensity,
+        duration: duracion,
+        ease: ease
+    });
+    // Animar las PointLights reales (por coherencia)
+    lucesPool.forEach(luz => {
+        gsap.killTweensOf(luz);
+        gsap.to(luz, {
+            intensity: targetPoolIntensity,
             duration: duracion,
             ease: ease
         });

@@ -6,7 +6,7 @@ import { Skybox } from './world/skybox.js';
 
 import { inicializarUI } from './ui/menu.js';
 import { inicializarAudio, reproducirClick, configurarControlesAudio } from './audio/GestorAudio.js';
-import { inicializarIluminacion, configurarControlesIluminacion, ambientLight, directionalLight } from './world/iluminacion.js';
+import { inicializarIluminacion, configurarControlesIluminacion, ambientLight, directionalLight, actualizarLucesFarolas } from './world/iluminacion.js';
 import { cargarEscenario, phongUniformsGlobales } from './world/CargadorModelos.js';
 import { crearHitbox, inicializarDebugColisiones, actualizarPlayerBox } from './world/colisiones.js';
 import { inicializarInteracciones, actualizarInteracciones } from './player/interacciones.js';
@@ -54,6 +54,9 @@ function animar() {
     actualizarAnimaciones(delta);
     actualizarInteracciones(camara, Controles.isLocked);
     Controles.actualizar();
+
+    // Object Pooling: reasignar las 3 PointLights a las farolas más cercanas
+    actualizarLucesFarolas(camara);
     
     // Sincronizar y actualizar los uniforms de Phong en cada frame
     if (phongUniformsGlobales && ambientLight && directionalLight) {

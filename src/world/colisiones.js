@@ -143,7 +143,7 @@ export function crearHitbox(x, y, z, ancho, alto, profundo, scene, objetosColisi
 }
 
 // Colisiones para los modelos 3D 
-export function procesarColisiones(modelo, scene, objetosColision, paddingX = 1.0, paddingZ = 1.0) {
+export function procesarColisiones(modelo, scene, objetosColision) {
     escenaGlobal = scene;
     let tieneCajaBlender = false;
 
@@ -177,12 +177,44 @@ export function procesarColisiones(modelo, scene, objetosColision, paddingX = 1.
     });
 
     if (!tieneCajaBlender) {
-        const caja = new THREE.Box3().setFromObject(modelo);
+        // Calcular una caja delimitadora ajustada excluyendo hojas, ramas, flores y planos de sombra
+        const caja = new THREE.Box3();
+        let meshesContados = 0;
+
+        modelo.traverse((child) => {
+            if (child.isMesh && child.visible !== false) {
+                const nombreHijo = child.name.toLowerCase();
+                const esExcluido = nombreHijo.includes('hoja') || 
+                                   nombreHijo.includes('leaf') || 
+                                   nombreHijo.includes('leaves') || 
+                                   nombreHijo.includes('foliage') || 
+                                   nombreHijo.includes('rama') || 
+                                   nombreHijo.includes('branch') || 
+                                   nombreHijo.includes('sakura') || 
+                                   nombreHijo.includes('flor') || 
+                                   nombreHijo.includes('flower') || 
+                                   nombreHijo.includes('copa') || 
+                                   nombreHijo.includes('shadow') || 
+                                   nombreHijo.includes('plane') || 
+                                   nombreHijo.includes('suelo') || 
+                                   nombreHijo.includes('floor');
+                
+                if (!esExcluido) {
+                    child.geometry.computeBoundingBox();
+                    const tempBox = new THREE.Box3().copy(child.geometry.boundingBox).applyMatrix4(child.matrixWorld);
+                    caja.union(tempBox);
+                    meshesContados++;
+                }
+            }
+        });
+
+        // Si no se encontró ningún mesh o todos fueron excluidos, usamos el objeto completo como fallback
+        if (meshesContados === 0) {
+            caja.setFromObject(modelo);
+        }
+
         const tamaño = caja.getSize(new THREE.Vector3());
         const centro = caja.getCenter(new THREE.Vector3());
-
-        if (tamaño.x < paddingX) tamaño.x = paddingX;
-        if (tamaño.z < paddingZ) tamaño.z = paddingZ;
 
         const hitbox = new THREE.Mesh(
             new THREE.BoxGeometry(tamaño.x, tamaño.y, tamaño.z),

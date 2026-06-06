@@ -4,13 +4,19 @@ import GUI from 'lil-gui';
 // Array global de cajas de colisión AABB
 export const collidableBoxes = [];
 
+// Array para mallas inclinadas y suelos reales
+export const mallasSuelo = [];
+const raycasterSuelo = new THREE.Raycaster();
+const vectorAbajo = new THREE.Vector3(0, -1, 0);
+
 // Box3 global que representa la hitbox del jugador
 export const playerBox = new THREE.Box3();
 
 // Dimensiones de la hitbox del jugador
 const playerHalfWidth = 0.4;
-const playerHeight = 2.0;
-const camOffset = 1.7; // Distancia desde los pies hasta los ojos/cámara
+const camOffset = 3.5;
+const playerHeight = 4.0;
+const margenPies = 0.2;
 
 // Parámetros de depuración
 let mostrarHitboxes = false;
@@ -23,7 +29,7 @@ let escenaGlobal = null;
 export function actualizarPlayerBox(posCamara) {
     playerBox.min.set(
         posCamara.x - playerHalfWidth,
-        posCamara.y - camOffset,
+        posCamara.y - camOffset + margenPies,
         posCamara.z - playerHalfWidth
     );
     playerBox.max.set(
@@ -136,16 +142,29 @@ export function crearHitbox(x, y, z, ancho, alto, profundo, scene, objetosColisi
     registrarBoxColision(box);
 }
 
-// Colisiones para los modelos 3D (boxes directo de blender o automaticas)
+// Colisiones para los modelos 3D 
 export function procesarColisiones(modelo, scene, objetosColision, paddingX = 1.0, paddingZ = 1.0) {
     escenaGlobal = scene;
     let tieneCajaBlender = false;
 
+    // Actualizar matrices del modelo
+    modelo.updateMatrixWorld(true);
+
     modelo.traverse((hijo) => {
-        if (hijo.isMesh && hijo.name.toLowerCase().includes('caja_colision_i')) {
+        if (hijo.isMesh && (hijo.name.toLowerCase().includes('colision_escalera') || hijo.name.toLowerCase().includes('colision_suelo'))) {
             hijo.material.visible = false;
+            mallasSuelo.push(hijo);
+            tieneCajaBlender = true;
+        }
+
+
+        if (hijo.isMesh && hijo.name.toLowerCase().includes('caja_colision_i')) {
+            // hijo.material.visible = false;
             objetosColision.push(hijo);
             tieneCajaBlender = true;
+
+            const box = new THREE.Box3().setFromObject(hijo);
+            registrarBoxColision(box);
         }
         if (hijo.isMesh && hijo.name.toLowerCase().includes('caja_colision_v')) {
             hijo.material.visible = true;
@@ -184,18 +203,40 @@ export function resolverMovimientoJugador(posCamara, vectorMovimiento) {
     const nuevaPos = posCamara.clone();
     const tempBox = new THREE.Box3();
 
+    const maxStepHeight = 0.4;
+
     // 1. Probar y resolver movimiento en el eje X
     nuevaPos.x += vectorMovimiento.x;
     actualizarBoxTemporal(nuevaPos, tempBox);
+
     let colisionX = false;
     for (const box of collidableBoxes) {
         if (tempBox.intersectsBox(box)) {
             colisionX = true;
+
+            const posicionSubida = nuevaPos.clone();
+            posicionSubida.y += maxStepHeight;
+            const tempBoxSubida = new THREE.Box3();
+            actualizarBoxTemporal(posicionSubida, tempBoxSubida);
+
+            let colisionEnSubida = false;
+            for (const b of collidableBoxes) {
+                if (tempBoxSubida.intersectsBox(b)) {
+                    colisionEnSubida = true;
+                    break;
+                }
+            }
+
+            if (!colisionEnSubida) {
+                nuevaPos.y += vectorMovimiento.x * 0.5;
+                colisionX = false;
+            }
+
             break;
         }
     }
     if (colisionX) {
-        nuevaPos.x -= vectorMovimiento.x; // Revertir movimiento en X (deslizar)
+        nuevaPos.x -= vectorMovimiento.x;
     }
 
     // 2. Probar y resolver movimiento en el eje Z
@@ -205,31 +246,52 @@ export function resolverMovimientoJugador(posCamara, vectorMovimiento) {
     for (const box of collidableBoxes) {
         if (tempBox.intersectsBox(box)) {
             colisionZ = true;
+
+            const posicionSubida = nuevaPos.clone();
+            posicionSubida.y += maxStepHeight;
+            const tempBoxSubida = new THREE.Box3();
+            actualizarBoxTemporal(posicionSubida, tempBoxSubida);
+
+            let colisionEnSubida = false;
+            for (const b of collidableBoxes) {
+                if (tempBoxSubida.intersectsBox(b)) {
+                    colisionEnSubida = true;
+                    break;
+                }
+            }
+
+            if (!colisionEnSubida) {
+                colisionZ = false;
+            }
+
             break;
         }
     }
     if (colisionZ) {
-        nuevaPos.z -= vectorMovimiento.z; // Revertir movimiento en Z (deslizar)
+        nuevaPos.z -= vectorMovimiento.z;
     }
 
-    // 3. Probar y resolver movimiento en el eje Y (por estabilidad, aunque sea plano)
-    nuevaPos.y += vectorMovimiento.y;
-    actualizarBoxTemporal(nuevaPos, tempBox);
-    let colisionY = false;
-    for (const box of collidableBoxes) {
-        if (tempBox.intersectsBox(box)) {
-            colisionY = true;
-            break;
-        }
-    }
-    if (colisionY) {
-        nuevaPos.y -= vectorMovimiento.y; // Revertir movimiento en Y
+    // 3. Probar y resolver movimiento en el eje Y usando Raycaster para la rampa
+    const origenRayo = nuevaPos.clone();
+    origenRayo.y += 5.0;
+
+    raycasterSuelo.set(origenRayo, vectorAbajo);
+
+    const intersecciones = raycasterSuelo.intersectObjects(mallasSuelo);
+
+    if (intersecciones.length > 0) {
+        const alturaSuelo = intersecciones[0].point.y;
+        nuevaPos.y = alturaSuelo + camOffset;
+    } else {
+        nuevaPos.y += vectorMovimiento.y;
     }
 
     // Actualizar la hitbox oficial del jugador a la nueva posición resuelta
     actualizarPlayerBox(nuevaPos);
 
     return nuevaPos;
+
+
 }
 
 // Función auxiliar para actualizar una caja Box3 temporal

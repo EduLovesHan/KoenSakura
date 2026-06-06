@@ -8,7 +8,7 @@ import { inicializarUI } from './ui/menu.js';
 import { inicializarAudio, reproducirClick, configurarControlesAudio } from './audio/GestorAudio.js';
 import { inicializarIluminacion, configurarControlesIluminacion } from './world/iluminacion.js';
 import { cargarEscenario } from './world/CargadorModelos.js';
-import { crearHitbox } from './world/colisiones.js';
+import { crearHitbox, inicializarDebugColisiones, actualizarPlayerBox } from './world/colisiones.js';
 import { inicializarInteracciones, actualizarInteracciones } from './player/interacciones.js';
 import { actualizarAnimaciones } from './world/animaciones.js';
 
@@ -26,6 +26,10 @@ configurarControlesAudio(Controles);
 const skybox = new Skybox(scene, 'assets/texturas/SkyBoxAtardecer/', '.png');
 inicializarIluminacion(scene);
 configurarControlesIluminacion(skybox);
+
+// Inicializar depuración de colisiones e hitbox del jugador
+inicializarDebugColisiones(scene, camara, Controles);
+actualizarPlayerBox(camara.position);
 
 //carga de los modelos y objetos interactivos en el mapa
 cargarEscenario(scene, objetosColision);
@@ -50,12 +54,11 @@ function animar() {
     actualizarAnimaciones(delta);
     actualizarInteracciones(camara, Controles.isLocked);
     Controles.actualizar();
-
-    // mostrar coordenadas para debug
-    if (Controles.isLocked) {
-        console.log(`Posición Cámara -> X: ${camara.position.x.toFixed(2)}, Y: ${camara.position.y.toFixed(2)}, Z: ${camara.position.z.toFixed(2)}`);
+    
+    // Mantener la esfera de noche centrada en la cámara
+    if (skybox && typeof skybox.actualizar === 'function') {
+        skybox.actualizar(camara);
     }
-
     renderizador.render(scene, camara);
 }
 //iniciar el bucle 

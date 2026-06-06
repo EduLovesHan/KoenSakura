@@ -1,3 +1,27 @@
+import { animacionesUI } from './GestorAnimaciones.js';
+import { gsap } from 'gsap';
+
+export function cerrarMenuSuperior() {
+    const panelMenuSuperior = document.getElementById('panel-menu-superior');
+    if (panelMenuSuperior && !panelMenuSuperior.classList.contains('oculto')) {
+        animacionesUI.desaparecerMenu(panelMenuSuperior, () => {
+            panelMenuSuperior.classList.add('oculto');
+        });
+        
+        const btnMenuSuperior = document.getElementById('btn-menu-superior');
+        if (btnMenuSuperior) {
+            const icono = btnMenuSuperior.querySelector('.icono-sakura');
+            if (icono) {
+                gsap.to(icono, {
+                    rotation: 0,
+                    duration: 0.5,
+                    ease: 'power2.inOut'
+                });
+            }
+        }
+    }
+}
+
 export function inicializarUI(onInteraccion) {
     // Lógica del menú superior
     const btnMenuSuperior = document.getElementById('btn-menu-superior');
@@ -7,7 +31,36 @@ export function inicializarUI(onInteraccion) {
         btnMenuSuperior.addEventListener('click', (evento) => {
             evento.stopPropagation(); 
             onInteraccion(); 
-            panelMenuSuperior.classList.toggle('oculto');
+            
+            const estaOculto = panelMenuSuperior.classList.contains('oculto');
+            const icono = btnMenuSuperior.querySelector('.icono-sakura');
+
+            if (estaOculto) {
+                // Abrir
+                panelMenuSuperior.classList.remove('oculto');
+                animacionesUI.aparecerMenu(panelMenuSuperior);
+                
+                if (icono) {
+                    gsap.to(icono, {
+                        rotation: 180,
+                        duration: 0.5,
+                        ease: 'power2.inOut'
+                    });
+                }
+            } else {
+                // Cerrar
+                animacionesUI.desaparecerMenu(panelMenuSuperior, () => {
+                    panelMenuSuperior.classList.add('oculto');
+                });
+                
+                if (icono) {
+                    gsap.to(icono, {
+                        rotation: 0,
+                        duration: 0.5,
+                        ease: 'power2.inOut'
+                    });
+                }
+            }
         });
     }
 
@@ -62,6 +115,11 @@ export function inicializarUI(onInteraccion) {
     const contenidosPestañas = document.querySelectorAll('.tab-contenido');
 
     botonesPestañas.forEach(boton => {
+        // Efecto de hover dinámico en los botones de pestañas del menú
+        boton.addEventListener('mouseenter', () => {
+            animacionesUI.pulsoBoton(boton);
+        });
+
         boton.addEventListener('click', () => {
             onInteraccion();
             

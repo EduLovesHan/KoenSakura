@@ -3,6 +3,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { procesarColisiones } from './colisiones.js';
 import { registrarObjetoInteractivo } from '../player/interacciones.js';
 import { registrarAnimaciones, registrarTexturaAgua } from './animaciones.js';
+import { registrarMaterialEmisivo } from './iluminacion.js';
 
 export function cargarEscenario(scene, objetosColision) {
     const loader = new GLTFLoader();
@@ -13,6 +14,19 @@ export function cargarEscenario(scene, objetosColision) {
             const model = gltf.scene;
             model.position.set(0, 0, 0);
             scene.add(model);
+
+            // Buscar y registrar materiales emisivos en la plaza
+            model.traverse((child) => {
+                if (child.isMesh && child.material) {
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach(mat => {
+                        if (mat.emissive && (mat.emissive.r > 0 || mat.emissive.g > 0 || mat.emissive.b > 0)) {
+                            registrarMaterialEmisivo(mat);
+                        }
+                    });
+                }
+            });
+
             procesarColisiones(model, scene, objetosColision);
 
             // Registrar animaciones
@@ -70,6 +84,18 @@ export function cargarEscenario(scene, objetosColision) {
     ];
 
     loader.load('assets/modelos/farolaPrueba.glb', (gltf) => {
+        // Buscar y registrar materiales emisivos en la plantilla antes de clonar
+        gltf.scene.traverse((child) => {
+            if (child.isMesh && child.material) {
+                const mats = Array.isArray(child.material) ? child.material : [child.material];
+                mats.forEach(mat => {
+                    if (mat.emissive && (mat.emissive.r > 0 || mat.emissive.g > 0 || mat.emissive.b > 0)) {
+                        registrarMaterialEmisivo(mat);
+                    }
+                });
+            }
+        });
+
         posicionesFarolas.forEach((posicion) => {
             const farol = gltf.scene.clone();
             farol.position.copy(posicion);

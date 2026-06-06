@@ -1,4 +1,5 @@
-import { Vector3, MathUtils, Raycaster, Audio, AudioLoader } from 'three';
+import { Vector3, MathUtils, Audio, AudioLoader } from 'three';
+import { resolverMovimientoJugador } from '../world/colisiones.js';
 
 //Clase para controlar la camara en primera persona
 
@@ -13,7 +14,6 @@ class ControlesPrimeraPersona {
         this.isLocked = false;
         this.velocidad = 0.5;
         this.sensibilidad = 0.002;
-        this.distanciaColision = 0.3; 
 
         // teclas para movimiento
         this.teclas = { w: false, a: false, s: false, d: false };
@@ -27,10 +27,6 @@ class ControlesPrimeraPersona {
         this._vectorAdelante = new Vector3();
         this._vectorArriba = new Vector3(0, 1, 0);
         this._vectorDerecha = new Vector3();
-        this._raycaster = new Raycaster();
-        this._direccionAux = new Vector3();
-        this._origenRayo = new Vector3(); // Para no crear vectores nuevos cada frame
-        this._normalMundo = new Vector3(); // Vector auxiliar para calcular la normal del mundo
 
         this._onMouseMove = this.onMouseMove.bind(this);
         this._onKeyDown = this.onKeyDown.bind(this);
@@ -58,18 +54,17 @@ class ControlesPrimeraPersona {
     }
 
     conectar() {
-        this.domElement.addEventListener('click', () => this.domElement.requestPointerLock());
+        this.domElement.addEventListener('click', (e) => {
+            // No ocultar cursor si se hace clic dentro del menú superior, botón sakura o lil-gui
+            if (e.target.closest('#panel-menu-superior') || e.target.closest('#btn-menu-superior') || e.target.closest('.lil-gui')) {
+                return;
+            }
+            this.domElement.requestPointerLock();
+        });
         document.addEventListener('pointerlockchange', this._onPointerlockChange);
         document.addEventListener('mousemove', this._onMouseMove);
         document.addEventListener('keydown', this._onKeyDown);
         document.addEventListener('keyup', this._onKeyUp);
-    }
-
-    desconectar() {
-        document.removeEventListener('pointerlockchange', this._onPointerlockChange);
-        document.removeEventListener('mousemove', this._onMouseMove);
-        document.removeEventListener('keydown', this._onKeyDown);
-        document.removeEventListener('keyup', this._onKeyUp);
     }
 
     // eventos
@@ -107,43 +102,6 @@ class ControlesPrimeraPersona {
             case 'd': this.teclas.d = false; break;
         }
     }
-
-    // Método para verificar si el camino está despejado
-    puedeMoverse(direccion) {
-        if (this.objetosColision.length === 0) return true;
-
-        // Bajamos el origen del rayo 0.7 unidades desde la cámara
-        // Si la cámara está en 1.7, el rayo se lanza desde 1.0 (altura del pecho)
-        // Esto evita que tropieces con pequeñas irregularidades, rampas o escalones.
-        this._origenRayo.copy(this.camara.position);
-        this._origenRayo.y -= 0.7; 
-
-        // Ampliamos la detección de colisiones usando 3 rayos (Centro, Izquierda, Derecha)
-        // Esto le da un "ancho" al jugador y evita que se atasque al rozar las esquinas.
-        const anchoJugador = 0.2;
-        const dirPerpendicular = new Vector3().crossVectors(direccion, this._vectorArriba).normalize();
-
-        const origenes = [
-            this._origenRayo, // Centro
-            new Vector3().copy(this._origenRayo).addScaledVector(dirPerpendicular, anchoJugador), // Derecha
-            new Vector3().copy(this._origenRayo).addScaledVector(dirPerpendicular, -anchoJugador) // Izquierda
-        ];
-
-        for (const origen of origenes) {
-            this._raycaster.set(origen, direccion);
-            const intersecciones = this._raycaster.intersectObjects(this.objetosColision, true);
-
-            for (let i = 0; i < intersecciones.length; i++) {
-                const hit = intersecciones[i];
-                
-                if (hit.distance < this.distanciaColision) {
-                    return false; // Chocamos con una pared válida
-                }
-            }
-        }
-        return true;
-    }
-
     setSfxVolume(volumen) {
         this.sfxVolume = volumen;
         if (this.pasosAudio) this.pasosAudio.setVolume(this.sfxMuted ? 0 : this.sfxVolume);
@@ -155,42 +113,35 @@ class ControlesPrimeraPersona {
     }
 
     //movimiento
-	//se debe llamar la funcion en el cuadro de animacion 
     actualizar() {
         if (!this.isLocked) return;
 
-        // Calcular hacia donde va la camara
+        // Calcular hacia donde va la camara (movimiento plano en el eje XZ)
         this._vectorAdelante.set(-Math.sin(this.yaw), 0, -Math.cos(this.yaw)).normalize();
 
         // Calcular el vector derecho (Producto Cruz)
         this._vectorDerecha.crossVectors(this._vectorAdelante, this._vectorArriba).normalize();
 
-        // Aplicar el movimiento al presionar las teclas
+        // Calcular desplazamiento deseado combinando todas las teclas presionadas
+        const desplazamiento = new Vector3(0, 0, 0);
+
+        if (this.teclas.w) desplazamiento.add(this._vectorAdelante);
+        if (this.teclas.s) desplazamiento.addScaledVector(this._vectorAdelante, -1);
+        if (this.teclas.a) desplazamiento.addScaledVector(this._vectorDerecha, -1);
+        if (this.teclas.d) desplazamiento.add(this._vectorDerecha);
+
         let enMovimiento = false;
-        
-        if (this.teclas.w) {
-            if (this.puedeMoverse(this._vectorAdelante)) {
-                this.camara.position.addScaledVector(this._vectorAdelante, this.velocidad);
-                enMovimiento = true;
-            }
-        }
-        if (this.teclas.s) {
-            this._direccionAux.copy(this._vectorAdelante).negate();
-            if (this.puedeMoverse(this._direccionAux)) {
-                this.camara.position.addScaledVector(this._vectorAdelante, -this.velocidad);
-                enMovimiento = true;
-            }
-        }
-        if (this.teclas.a) {
-            this._direccionAux.copy(this._vectorDerecha).negate();
-            if (this.puedeMoverse(this._direccionAux)) {
-                this.camara.position.addScaledVector(this._vectorDerecha, -this.velocidad);
-                enMovimiento = true;
-            }
-        }
-        if (this.teclas.d) {
-            if (this.puedeMoverse(this._vectorDerecha)) {
-                this.camara.position.addScaledVector(this._vectorDerecha, this.velocidad);
+
+        if (desplazamiento.lengthSq() > 0) {
+            // Normalizar la dirección del desplazamiento acumulado y escalarla por la velocidad
+            desplazamiento.normalize().multiplyScalar(this.velocidad);
+
+            // Resolver colisión por deslizamiento (AABB)
+            const nuevaPosicion = resolverMovimientoJugador(this.camara.position, desplazamiento);
+
+            // Verificar si hubo un desplazamiento real para considerarlo en movimiento
+            if (this.camara.position.distanceToSquared(nuevaPosicion) > 0.0001) {
+                this.camara.position.copy(nuevaPosicion);
                 enMovimiento = true;
             }
         }

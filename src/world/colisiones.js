@@ -1,7 +1,128 @@
 import * as THREE from 'three';
+import GUI from 'lil-gui';
+
+// Array global de cajas de colisión AABB
+export const collidableBoxes = [];
+
+// Box3 global que representa la hitbox del jugador
+export const playerBox = new THREE.Box3();
+
+// Dimensiones de la hitbox del jugador
+const playerHalfWidth = 0.4;
+const playerHeight = 2.0;
+const camOffset = 1.7; // Distancia desde los pies hasta los ojos/cámara
+
+// Parámetros de depuración
+let mostrarHitboxes = false;
+const boxHelpers = [];
+let playerHelper = null;
+let debugGui = null;
+let escenaGlobal = null;
+
+// Actualiza el Box3 del jugador según la posición de la cámara
+export function actualizarPlayerBox(posCamara) {
+    playerBox.min.set(
+        posCamara.x - playerHalfWidth,
+        posCamara.y - camOffset,
+        posCamara.z - playerHalfWidth
+    );
+    playerBox.max.set(
+        posCamara.x + playerHalfWidth,
+        posCamara.y - camOffset + playerHeight,
+        posCamara.z + playerHalfWidth
+    );
+}
+
+// Inicializar la interfaz lil-gui y el modo de depuración
+export function inicializarDebugColisiones(scene, camara, controles) {
+    escenaGlobal = scene;
+    if (debugGui) return;
+
+    debugGui = new GUI({ title: 'Panel de Depuración' });
+    
+    // Carpeta: Físicas y Colisiones
+    const carpetaColisiones = debugGui.addFolder('Físicas y Colisiones');
+    
+    const params = {
+        mostrarHitboxes: false
+    };
+
+    carpetaColisiones.add(params, 'mostrarHitboxes')
+        .name('Mostrar Hitboxes')
+        .onChange((val) => {
+            mostrarHitboxes = val;
+            actualizarHelpersVisibilidad(scene);
+        });
+
+    // Carpeta: Cámara y Movimiento
+    if (camara || controles) {
+        const carpetaCamara = debugGui.addFolder('Cámara y Movimiento');
+
+        if (controles) {
+            carpetaCamara.add(controles, 'velocidad', 0, 1, 0.01)
+                .name('Velocidad Caminar');
+        }
+
+        if (camara) {
+            carpetaCamara.add(camara.position, 'x')
+                .name('Posición X')
+                .listen();
+            carpetaCamara.add(camara.position, 'y')
+                .name('Posición Y')
+                .listen();
+            carpetaCamara.add(camara.position, 'z')
+                .name('Posición Z')
+                .listen();
+        }
+    }
+
+    // Ejes de referencia (AxesHelper)
+    const axesHelper = new THREE.AxesHelper(15);
+    axesHelper.visible = false;
+    scene.add(axesHelper);
+
+    debugGui.add(axesHelper, 'visible')
+        .name('Mostrar Ejes (X:R, Y:V, Z:A)');
+}
+
+// Actualizar la visibilidad de los helpers en la escena
+function actualizarHelpersVisibilidad(scene) {
+    // Eliminar helpers antiguos
+    boxHelpers.forEach(h => scene.remove(h));
+    boxHelpers.length = 0;
+
+    if (playerHelper) {
+        scene.remove(playerHelper);
+        playerHelper = null;
+    }
+
+    if (mostrarHitboxes) {
+        // Crear helpers verdes para los obstáculos estáticos
+        collidableBoxes.forEach(box => {
+            const helper = new THREE.Box3Helper(box, 0x00ff00);
+            scene.add(helper);
+            boxHelpers.push(helper);
+        });
+
+        // Crear helper rojo para la hitbox del jugador
+        playerHelper = new THREE.Box3Helper(playerBox, 0xff0000);
+        scene.add(playerHelper);
+    }
+}
+
+// Registrar un Box3 en la lista y crear su helper si está activo el modo debug
+function registrarBoxColision(box) {
+    collidableBoxes.push(box);
+    if (mostrarHitboxes && escenaGlobal) {
+        const helper = new THREE.Box3Helper(box, 0x00ff00);
+        escenaGlobal.add(helper);
+        boxHelpers.push(helper);
+    }
+}
 
 // Crear cajas de colisión invisibles manuales (boundboxing)
 export function crearHitbox(x, y, z, ancho, alto, profundo, scene, objetosColision) {
+    escenaGlobal = scene;
     const geometry = new THREE.BoxGeometry(ancho, alto, profundo);
     const material = new THREE.MeshBasicMaterial({ visible: false }); 
     const hitbox = new THREE.Mesh(geometry, material);
@@ -9,10 +130,15 @@ export function crearHitbox(x, y, z, ancho, alto, profundo, scene, objetosColisi
     
     scene.add(hitbox);
     objetosColision.push(hitbox);
+
+    // Generar Box3 y registrarlo en collidableBoxes
+    const box = new THREE.Box3().setFromObject(hitbox);
+    registrarBoxColision(box);
 }
 
 // Colisiones para los modelos 3D (boxes directo de blender o automaticas)
 export function procesarColisiones(modelo, scene, objetosColision, paddingX = 1.0, paddingZ = 1.0) {
+    escenaGlobal = scene;
     let tieneCajaBlender = false;
     
     modelo.traverse((hijo) => {
@@ -20,6 +146,9 @@ export function procesarColisiones(modelo, scene, objetosColision, paddingX = 1.
             hijo.material.visible = false;
             objetosColision.push(hijo); 
             tieneCajaBlender = true;
+
+            const box = new THREE.Box3().setFromObject(hijo);
+            registrarBoxColision(box);
         }
     });
 
@@ -39,5 +168,75 @@ export function procesarColisiones(modelo, scene, objetosColision, paddingX = 1.
         
         scene.add(hitbox);
         objetosColision.push(hitbox); 
+
+        const box = new THREE.Box3().setFromObject(hitbox);
+        registrarBoxColision(box);
     }
+}
+
+// Lógica de resolución de colisiones y deslizamiento AABB
+export function resolverMovimientoJugador(posCamara, vectorMovimiento) {
+    const nuevaPos = posCamara.clone();
+    const tempBox = new THREE.Box3();
+
+    // 1. Probar y resolver movimiento en el eje X
+    nuevaPos.x += vectorMovimiento.x;
+    actualizarBoxTemporal(nuevaPos, tempBox);
+    let colisionX = false;
+    for (const box of collidableBoxes) {
+        if (tempBox.intersectsBox(box)) {
+            colisionX = true;
+            break;
+        }
+    }
+    if (colisionX) {
+        nuevaPos.x -= vectorMovimiento.x; // Revertir movimiento en X (deslizar)
+    }
+
+    // 2. Probar y resolver movimiento en el eje Z
+    nuevaPos.z += vectorMovimiento.z;
+    actualizarBoxTemporal(nuevaPos, tempBox);
+    let colisionZ = false;
+    for (const box of collidableBoxes) {
+        if (tempBox.intersectsBox(box)) {
+            colisionZ = true;
+            break;
+        }
+    }
+    if (colisionZ) {
+        nuevaPos.z -= vectorMovimiento.z; // Revertir movimiento en Z (deslizar)
+    }
+
+    // 3. Probar y resolver movimiento en el eje Y (por estabilidad, aunque sea plano)
+    nuevaPos.y += vectorMovimiento.y;
+    actualizarBoxTemporal(nuevaPos, tempBox);
+    let colisionY = false;
+    for (const box of collidableBoxes) {
+        if (tempBox.intersectsBox(box)) {
+            colisionY = true;
+            break;
+        }
+    }
+    if (colisionY) {
+        nuevaPos.y -= vectorMovimiento.y; // Revertir movimiento en Y
+    }
+
+    // Actualizar la hitbox oficial del jugador a la nueva posición resuelta
+    actualizarPlayerBox(nuevaPos);
+
+    return nuevaPos;
+}
+
+// Función auxiliar para actualizar una caja Box3 temporal
+function actualizarBoxTemporal(posCamara, targetBox) {
+    targetBox.min.set(
+        posCamara.x - playerHalfWidth,
+        posCamara.y - camOffset,
+        posCamara.z - playerHalfWidth
+    );
+    targetBox.max.set(
+        posCamara.x + playerHalfWidth,
+        posCamara.y - camOffset + playerHeight,
+        posCamara.z + playerHalfWidth
+    );
 }

@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 
 // ── Estado interno del módulo ──
-let mixer = null;
+// Array de mixers: soporta múltiples modelos animados (peces, agua, etc.)
+const mixers = [];
 
 // Texturas de agua registradas para animación UV
 const texturasAgua1 = [];
@@ -13,8 +14,10 @@ const velAgua1 = { u: 0.0002, v: 0.000 };
 export function registrarAnimaciones(modelo, clips) {
     if (!clips || clips.length === 0) return;
 
-    mixer = new THREE.AnimationMixer(modelo);
+    const mixer = new THREE.AnimationMixer(modelo);
     clips.forEach((clip) => mixer.clipAction(clip).play());
+    // Guardar en el array para que todos se actualicen cada frame
+    mixers.push(mixer);
 }
 
 //Registrar una textura de agua para animación UV
@@ -26,8 +29,10 @@ export function registrarTexturaAgua(textura) {
 
 //Llamar por frame desde main.js con el delta del reloj 
 export function actualizarAnimaciones(delta) {
-    // Actualizar AnimationMixer (peces y cualquier clip del GLB)
-    if (mixer) mixer.update(delta);
+    // Actualizar todos los AnimationMixers registrados (peces, otros clips GLB)
+    for (const mixer of mixers) {
+        mixer.update(delta);
+    }
 
     // Desplazar UV de las texturas de agua
     texturasAgua1.forEach((tex) => {

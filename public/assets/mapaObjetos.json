@@ -1,0 +1,80 @@
+[
+  {
+    "archivo": "assets/modelos/arbolPino.glb",
+    "instancias": [
+      {
+        "posicion": [5, 0, 30], 
+        "escala": 0.5
+      },
+      {
+        "posicion": [-5, 0, 30],
+        "escala": 0.5
+      }
+    ]
+  },
+  {
+    "archivo": "assets/modelos/estatuaHachiko.glb",
+    "instancias": [
+      {
+        "posicion": [-50, 0, 80], 
+        "escala": 1
+
+      }
+    ]
+  },
+  
+  {
+    "archivo": "assets/modelos/plazaPrincipal.glb",
+    "tieneAgua": true,
+    "tieneAnimaciones": true,
+    "instancias": [
+      {
+        "posicion": [0, 0, 0]
+      }
+    ]
+  },
+  {
+    "archivo": "assets/modelos/letreroBasico.glb",
+    "instancias": [
+      {
+        "posicion": [40, 0, 60],
+        "rotacion": [0, 3.141592653589793, 0],
+        "interactivo": {
+          "distancia": 8,
+          "titulo": "Letrero de la Plaza",
+          "texto": "¡Bienvenido a KoenSakura! Disfruta de la tranquilidad y la belleza de este pequeño espacio de paz."
+        }
+      }
+    ]
+  },
+  {
+    "archivo": "assets/modelos/farolaPrueba.glb",
+    "esFarola": true,
+    "colisionPadding": [1.5, 1.5],
+    "instancias": [
+      { "posicion": [10, -1, 35] },
+      { "posicion": [-10, -1, 35] },
+      { "posicion": [-35, -1, 35] },
+      { "posicion": [-60, -1, 35] },
+      { "posicion": [35, -1, 35] },
+      { "posicion": [60, -1, 35] },
+      { "posicion": [85, -1, 35] },
+      { "posicion": [110, -1, 35] },
+      { "posicion": [116, -1, 75] },
+      { "posicion": [116, -1, 100] },
+      { "posicion": [116, -1, 125] },
+      { "posicion": [95, -1, 134] },
+      { "posicion": [70, -1, 134] },
+      { "posicion": [45, -1, 134] },
+      { "posicion": [40, -1, 160] },
+      { "posicion": [20, -1, 190] },
+      { "posicion": [-5, -1, 190] },
+      { "posicion": [-30, -1, 190] },
+      { "posicion": [-55, -1, 190] },
+      { "posicion": [-105, -1, 190] },
+      { "posicion": [-117, -1, 165] },
+      { "posicion": [-117, -1, 140] },
+      { "posicion": [-117, -1, 115] }
+    ]
+  }
+]

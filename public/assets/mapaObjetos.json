@@ -16,13 +16,134 @@
     "archivo": "assets/modelos/estatuaHachiko.glb",
     "instancias": [
       {
-        "posicion": [-60, 0, 80], 
+        "posicion": [-65, 0, 80], 
         "escala": 1.25,
         "rotacion": [0, 3.141592653589793, 0]
         }
-
     ]
   },
+   {
+    "archivo": "assets/modelos/mostrador.glb",
+    "instancias": [
+      {
+        "posicion": [-66, 0, 80], 
+        "escala": 2
+        }
+    ]
+  },
+  {
+    "archivo": "assets/modelos/toro.glb",
+    "instancias": [
+      { 
+        "posicion": [-65, 0, 85], 
+        "escala": 1,
+        "rotacion": [0, 1.52, 0]
+      },
+      { 
+        "posicion": [-65, 0, 75],
+        "escala": 1,
+        "rotacion": [0, 1.52, 0]
+      },
+      { 
+        "posicion": [-105, 0, 68],
+        "escala": 1,
+        "rotacion": [0, 1.52, 0]
+      },
+      { 
+        "posicion": [-105, 0, 63],
+        "escala": 1,
+        "rotacion": [0, 1.52, 0]
+      }
+    ]
+  },
+
+{
+    "archivo": "assets/modelos/lampara.glb",
+    "instancias": [
+      { 
+        "posicion": [-81, 1.5, 75], 
+        "escala": 3.5,
+        "rotacion": [0, 3.14, 0]
+      },
+      { 
+        "posicion": [-83, 3, 86],
+        "escala": 3.5,
+        "rotacion": [0, 3.14, 0]
+      },
+       { 
+        "posicion": [-105, 1.5, 75], 
+        "escala": 3.5,
+        "rotacion": [0, 3.14, 0]
+      }
+    ]
+  },
+  {
+    "archivo": "assets/modelos/cerezo2.glb",
+    "instancias": [
+      { 
+        "posicion": [-45, 0, 35], 
+        "escala": 3,
+        "rotacion": [0, 3.14, 0]
+      },
+      { 
+        "posicion": [-20, 0, 35],
+        "escala": 3,
+        "rotacion": [0, 3.14, 0]
+      },
+      { 
+        "posicion": [25, 0, 35],
+        "escala": 3,
+        "rotacion": [0, 3.14, 0]
+      },
+      { 
+        "posicion": [45, 0, 35],
+        "escala": 3,
+        "rotacion": [0, 3.14, 0]
+      },
+      { 
+        "posicion": [75, 0, 35],
+        "escala": 3,
+        "rotacion": [0, 3.14, 0]
+      },
+      { 
+        "posicion": [100, 0, 35],
+        "escala": 3,
+        "rotacion": [0, 3.14, 0]
+      },
+       { 
+        "posicion": [-65, 0, 100], 
+        "escala": 3,
+        "rotacion": [0, 3.14, 0]
+      }
+    ]
+  },
+
+  {
+    "archivo": "assets/modelos/arbustos.glb",
+    "instancias": [
+      { 
+        "posicion": [5, 0, 105], 
+        "escala": 4,
+        "rotacion": [0, 3.14, 0]
+      },
+      { 
+        "posicion": [-5, 0, 105],
+        "escala": 4,
+        "rotacion": [0, 3.14, 0]
+      },
+      { 
+        "posicion": [-5, 0, 115],
+        "escala": 4,
+        "rotacion": [0, 3.14, 0]
+      },
+      { 
+        "posicion": [5, 0, 115],
+        "escala": 4,
+        "rotacion": [0, 3.14, 0]
+      }
+    ]
+  },
+
   {
     "archivo": "assets/modelos/pedestal.glb",
     "instancias": [
@@ -33,7 +154,7 @@
       }
     ]
   },
-  
+ 
   {
     "archivo": "assets/modelos/muñeca.glb",
     "instancias": [

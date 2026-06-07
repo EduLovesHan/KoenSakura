@@ -137,8 +137,8 @@ export async function cargarEscenario(scene, objetosColision) {
                     // Añadir clon a la escena
                     scene.add(clon);
 
-                    // Colisiones (caja exacta)
-                    procesarColisiones(clon, scene, objetosColision);
+                    // Colisiones (caja exacta, con soporte de hitboxManual y shrinkFactor del JSON)
+                    procesarColisiones(clon, scene, objetosColision, item);
 
                     // Si es farola, registrar su posición para el pool de iluminación por proximidad
                     if (item.esFarola) {

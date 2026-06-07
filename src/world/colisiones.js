@@ -142,14 +142,42 @@ export function crearHitbox(x, y, z, ancho, alto, profundo, scene, objetosColisi
     registrarBoxColision(box);
 }
 
-// Colisiones para los modelos 3D 
-export function procesarColisiones(modelo, scene, objetosColision) {
+// Colisiones para los modelos 3D
+// configItem: objeto del JSON con posibles propiedades { hitboxManual, shrinkFactor }
+//   - hitboxManual: { centro: [x,y,z], tamaño: [w,h,d] } → caja manual absoluta
+//   - shrinkFactor: número 0-1, porcentaje del tamaño original a conservar (default 0.85)
+export function procesarColisiones(modelo, scene, objetosColision, configItem = {}) {
     escenaGlobal = scene;
     let tieneCajaBlender = false;
 
     // Actualizar matrices del modelo
     modelo.updateMatrixWorld(true);
 
+    // ── Paso 3 (fallback): Si el JSON trae hitboxManual, usarlo directamente ──
+    if (configItem.hitboxManual) {
+        const hm = configItem.hitboxManual;
+        const centro = new THREE.Vector3(hm.centro[0], hm.centro[1], hm.centro[2]);
+        const tamaño = new THREE.Vector3(hm.tamaño[0], hm.tamaño[1], hm.tamaño[2]);
+
+        // Si la hitbox manual es relativa al modelo, sumar la posición del modelo
+        centro.add(modelo.position);
+
+        const box = new THREE.Box3();
+        box.setFromCenterAndSize(centro, tamaño);
+
+        const hitbox = new THREE.Mesh(
+            new THREE.BoxGeometry(tamaño.x, tamaño.y, tamaño.z),
+            new THREE.MeshBasicMaterial({ visible: false })
+        );
+        hitbox.position.copy(centro);
+        scene.add(hitbox);
+        objetosColision.push(hitbox);
+
+        registrarBoxColision(box);
+        return; // Hitbox manual definida, no necesitamos nada más
+    }
+
+    // ── Detectar cajas de colisión embebidas desde Blender ──
     modelo.traverse((hijo) => {
         if (hijo.isMesh && (hijo.name.toLowerCase().includes('colision_escalera') || hijo.name.toLowerCase().includes('colision_suelo'))) {
             hijo.material.visible = false;
@@ -157,9 +185,7 @@ export function procesarColisiones(modelo, scene, objetosColision) {
             tieneCajaBlender = true;
         }
 
-
         if (hijo.isMesh && hijo.name.toLowerCase().includes('caja_colision_i')) {
-            // hijo.material.visible = false;
             objetosColision.push(hijo);
             tieneCajaBlender = true;
 
@@ -177,47 +203,70 @@ export function procesarColisiones(modelo, scene, objetosColision) {
     });
 
     if (!tieneCajaBlender) {
-        // Calcular una caja delimitadora ajustada excluyendo hojas, ramas, flores y planos de sombra
+        // ── Paso 1: Filtrar mallas invisibles o basura ──
+        // Solo considerar hijos que sean Mesh válidos Y visibles.
+        // Ignorar Object3D vacíos, luces, y mallas con nombres de follaje/sombra.
         const caja = new THREE.Box3();
         let meshesContados = 0;
 
+        const nombresExcluidos = [
+            'hoja', 'leaf', 'leaves', 'foliage',
+            'rama', 'branch',
+            'sakura', 'flor', 'flower', 'petal',
+            'copa', 'canopy', 'crown',
+            'shadow', 'sombra',
+            'plane', 'suelo', 'floor', 'ground'
+        ];
+
         modelo.traverse((child) => {
-            if (child.isMesh && child.visible !== false) {
-                const nombreHijo = child.name.toLowerCase();
-                const esExcluido = nombreHijo.includes('hoja') || 
-                                   nombreHijo.includes('leaf') || 
-                                   nombreHijo.includes('leaves') || 
-                                   nombreHijo.includes('foliage') || 
-                                   nombreHijo.includes('rama') || 
-                                   nombreHijo.includes('branch') || 
-                                   nombreHijo.includes('sakura') || 
-                                   nombreHijo.includes('flor') || 
-                                   nombreHijo.includes('flower') || 
-                                   nombreHijo.includes('copa') || 
-                                   nombreHijo.includes('shadow') || 
-                                   nombreHijo.includes('plane') || 
-                                   nombreHijo.includes('suelo') || 
-                                   nombreHijo.includes('floor');
-                
-                if (!esExcluido) {
-                    child.geometry.computeBoundingBox();
-                    const tempBox = new THREE.Box3().copy(child.geometry.boundingBox).applyMatrix4(child.matrixWorld);
-                    caja.union(tempBox);
-                    meshesContados++;
-                }
-            }
+            // Solo procesar mallas reales y visibles
+            if (!child.isMesh) return;
+            if (!child.visible) return;
+            if (!child.geometry) return;
+
+            const nombreHijo = child.name.toLowerCase();
+
+            // Filtrar mallas de follaje, sombras, y planos decorativos
+            const esExcluido = nombresExcluidos.some(tag => nombreHijo.includes(tag));
+            if (esExcluido) return;
+
+            // Ignorar mallas con geometría degenerada (sin vértices reales)
+            const posAttr = child.geometry.getAttribute('position');
+            if (!posAttr || posAttr.count < 3) return;
+
+            // Calcular la bounding box de esta malla individual en espacio mundo
+            child.geometry.computeBoundingBox();
+            const tempBox = new THREE.Box3()
+                .copy(child.geometry.boundingBox)
+                .applyMatrix4(child.matrixWorld);
+
+            caja.union(tempBox);
+            meshesContados++;
         });
 
-        // Si no se encontró ningún mesh o todos fueron excluidos, usamos el objeto completo como fallback
+        // Si no se encontró ningún mesh válido, fallback al objeto completo
         if (meshesContados === 0) {
             caja.setFromObject(modelo);
         }
 
-        const tamaño = caja.getSize(new THREE.Vector3());
+        // ── Paso 2: Encogimiento global (Shrink Factor) ──
+        // Reduce la caja un porcentaje para que quede más pegada al modelo real.
+        // shrinkFactor = 0.85 significa conservar el 85% del tamaño (encoger 15%).
+        const shrinkFactor = configItem.shrinkFactor !== undefined
+            ? configItem.shrinkFactor
+            : 0.85;
+
+        const tamañoOriginal = caja.getSize(new THREE.Vector3());
         const centro = caja.getCenter(new THREE.Vector3());
 
+        const tamañoReducido = tamañoOriginal.clone().multiplyScalar(shrinkFactor);
+
+        // Re-armar la caja desde el centro con las dimensiones reducidas
+        caja.setFromCenterAndSize(centro, tamañoReducido);
+
+        // Crear la hitbox visual (invisible) y registrar
         const hitbox = new THREE.Mesh(
-            new THREE.BoxGeometry(tamaño.x, tamaño.y, tamaño.z),
+            new THREE.BoxGeometry(tamañoReducido.x, tamañoReducido.y, tamañoReducido.z),
             new THREE.MeshBasicMaterial({ visible: false })
         );
         hitbox.position.copy(centro);
@@ -230,112 +279,149 @@ export function procesarColisiones(modelo, scene, objetosColision) {
     }
 }
 
-// Lógica de resolución de colisiones y deslizamiento AABB
-export function resolverMovimientoJugador(posCamara, vectorMovimiento) {
-    const nuevaPos = posCamara.clone();
-    const tempBox = new THREE.Box3();
+// ── Margen de separación (skin) para evitar incrustación matemática ──
+const COLLISION_SKIN = 0.05;
 
+// Lógica de resolución de colisiones con deslizamiento por ejes separados
+export function resolverMovimientoJugador(posCamara, vectorMovimiento) {
+    // Posición base: donde el jugador está AHORA (antes de mover)
+    const posBase = posCamara.clone();
     const maxStepHeight = 0.4;
 
-    // 1. Probar y resolver movimiento en el eje X
-    nuevaPos.x += vectorMovimiento.x;
-    actualizarBoxTemporal(nuevaPos, tempBox);
+    // ──────────────────────────────────────────────────────
+    // Paso 1: Evaluar movimiento SOLO en el eje X
+    // ──────────────────────────────────────────────────────
+    let movXPermitido = vectorMovimiento.x;
 
-    let colisionX = false;
-    for (const box of collidableBoxes) {
-        if (tempBox.intersectsBox(box)) {
-            colisionX = true;
+    if (movXPermitido !== 0) {
+        // Candidata: posición actual + solo el desplazamiento X
+        const candidataX = posBase.clone();
+        candidataX.x += movXPermitido;
 
-            const posicionSubida = nuevaPos.clone();
-            posicionSubida.y += maxStepHeight;
-            const tempBoxSubida = new THREE.Box3();
-            actualizarBoxTemporal(posicionSubida, tempBoxSubida);
+        // Construir la hitbox del jugador en esa candidata, inflada por el skin
+        const boxTestX = new THREE.Box3();
+        actualizarBoxTemporal(candidataX, boxTestX, COLLISION_SKIN);
 
-            let colisionEnSubida = false;
-            for (const b of collidableBoxes) {
-                if (tempBoxSubida.intersectsBox(b)) {
-                    colisionEnSubida = true;
-                    break;
+        let colisionX = false;
+        for (const box of collidableBoxes) {
+            if (boxTestX.intersectsBox(box)) {
+                colisionX = true;
+
+                // Intentar step-up: ¿puedo subir un escalón?
+                const candidataSubida = candidataX.clone();
+                candidataSubida.y += maxStepHeight;
+                const boxSubida = new THREE.Box3();
+                actualizarBoxTemporal(candidataSubida, boxSubida, COLLISION_SKIN);
+
+                let colisionSubida = false;
+                for (const b of collidableBoxes) {
+                    if (boxSubida.intersectsBox(b)) {
+                        colisionSubida = true;
+                        break;
+                    }
                 }
-            }
 
-            if (!colisionEnSubida) {
-                nuevaPos.y += vectorMovimiento.x * 0.5;
-                colisionX = false;
-            }
+                if (!colisionSubida) {
+                    // Puedo subir el escalón: aceptar X y elevar Y
+                    posBase.y += maxStepHeight;
+                    colisionX = false;
+                }
 
-            break;
+                break;
+            }
+        }
+
+        if (colisionX) {
+            movXPermitido = 0; // Bloquear X, pero Z sigue libre
         }
     }
-    if (colisionX) {
-        nuevaPos.x -= vectorMovimiento.x;
-    }
 
-    // 2. Probar y resolver movimiento en el eje Z
-    nuevaPos.z += vectorMovimiento.z;
-    actualizarBoxTemporal(nuevaPos, tempBox);
-    let colisionZ = false;
-    for (const box of collidableBoxes) {
-        if (tempBox.intersectsBox(box)) {
-            colisionZ = true;
+    // Aplicar el resultado de X a la posición base
+    posBase.x += movXPermitido;
 
-            const posicionSubida = nuevaPos.clone();
-            posicionSubida.y += maxStepHeight;
-            const tempBoxSubida = new THREE.Box3();
-            actualizarBoxTemporal(posicionSubida, tempBoxSubida);
+    // ──────────────────────────────────────────────────────
+    // Paso 2: Evaluar movimiento SOLO en el eje Z
+    //         (partiendo de la posBase ya resuelta en X)
+    // ──────────────────────────────────────────────────────
+    let movZPermitido = vectorMovimiento.z;
 
-            let colisionEnSubida = false;
-            for (const b of collidableBoxes) {
-                if (tempBoxSubida.intersectsBox(b)) {
-                    colisionEnSubida = true;
-                    break;
+    if (movZPermitido !== 0) {
+        const candidataZ = posBase.clone();
+        candidataZ.z += movZPermitido;
+
+        const boxTestZ = new THREE.Box3();
+        actualizarBoxTemporal(candidataZ, boxTestZ, COLLISION_SKIN);
+
+        let colisionZ = false;
+        for (const box of collidableBoxes) {
+            if (boxTestZ.intersectsBox(box)) {
+                colisionZ = true;
+
+                // Intentar step-up en Z
+                const candidataSubida = candidataZ.clone();
+                candidataSubida.y += maxStepHeight;
+                const boxSubida = new THREE.Box3();
+                actualizarBoxTemporal(candidataSubida, boxSubida, COLLISION_SKIN);
+
+                let colisionSubida = false;
+                for (const b of collidableBoxes) {
+                    if (boxSubida.intersectsBox(b)) {
+                        colisionSubida = true;
+                        break;
+                    }
                 }
-            }
 
-            if (!colisionEnSubida) {
-                colisionZ = false;
-            }
+                if (!colisionSubida) {
+                    posBase.y += maxStepHeight;
+                    colisionZ = false;
+                }
 
-            break;
+                break;
+            }
+        }
+
+        if (colisionZ) {
+            movZPermitido = 0; // Bloquear Z, pero X ya fue aceptado
         }
     }
-    if (colisionZ) {
-        nuevaPos.z -= vectorMovimiento.z;
-    }
 
-    // 3. Probar y resolver movimiento en el eje Y usando Raycaster para la rampa
-    const origenRayo = nuevaPos.clone();
+    // Aplicar el resultado de Z
+    posBase.z += movZPermitido;
+
+    // ──────────────────────────────────────────────────────
+    // Paso 3: Resolver Y usando Raycaster para rampas/suelo
+    // ──────────────────────────────────────────────────────
+    const origenRayo = posBase.clone();
     origenRayo.y += 5.0;
 
     raycasterSuelo.set(origenRayo, vectorAbajo);
-
     const intersecciones = raycasterSuelo.intersectObjects(mallasSuelo);
 
     if (intersecciones.length > 0) {
         const alturaSuelo = intersecciones[0].point.y;
-        nuevaPos.y = alturaSuelo + camOffset;
+        posBase.y = alturaSuelo + camOffset;
     } else {
-        nuevaPos.y += vectorMovimiento.y;
+        posBase.y += vectorMovimiento.y;
     }
 
-    // Actualizar la hitbox oficial del jugador a la nueva posición resuelta
-    actualizarPlayerBox(nuevaPos);
+    // Actualizar la hitbox oficial del jugador a la posición final
+    actualizarPlayerBox(posBase);
 
-    return nuevaPos;
-
-
+    return posBase;
 }
 
-// Función auxiliar para actualizar una caja Box3 temporal
-function actualizarBoxTemporal(posCamara, targetBox) {
+// Función auxiliar para construir el Box3 del jugador en una posición dada.
+// skin: margen de inflado para evitar incrustación (0 = caja exacta).
+function actualizarBoxTemporal(posCamara, targetBox, skin = 0) {
     targetBox.min.set(
-        posCamara.x - playerHalfWidth,
+        posCamara.x - playerHalfWidth - skin,
         posCamara.y - camOffset,
-        posCamara.z - playerHalfWidth
+        posCamara.z - playerHalfWidth - skin
     );
     targetBox.max.set(
-        posCamara.x + playerHalfWidth,
+        posCamara.x + playerHalfWidth + skin,
         posCamara.y - camOffset + playerHeight,
-        posCamara.z + playerHalfWidth
+        posCamara.z + playerHalfWidth + skin
     );
 }
+

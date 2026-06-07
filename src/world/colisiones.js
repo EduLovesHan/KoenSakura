@@ -45,7 +45,7 @@ export function inicializarDebugColisiones(scene, camara, controles) {
     if (debugGui) return;
 
     debugGui = obtenerDebugGUI();
-    
+
     // Carpeta: Físicas y Colisiones
     const carpetaColisiones = debugGui.addFolder('Físicas y Colisiones');
 
@@ -128,12 +128,14 @@ export function crearHitbox(x, y, z, ancho, alto, profundo, scene, objetosColisi
     const hitbox = new THREE.Mesh(geometry, material);
     hitbox.position.set(x, y, z);
 
-    scene.add(hitbox);
-    objetosColision.push(hitbox);
+    // cod cambiado
+    // scene.add(hitbox);
+    // objetosColision.push(hitbox);
 
     // Generar Box3 y registrarlo en collidableBoxes
     const box = new THREE.Box3().setFromObject(hitbox);
-    registrarBoxColision(box);
+    // cod cambiado
+    // registrarBoxColision(box);
 }
 
 // Colisiones para los modelos 3D
@@ -173,14 +175,19 @@ export function procesarColisiones(modelo, scene, objetosColision, configItem = 
 
     // ── Detectar cajas de colisión embebidas desde Blender ──
     modelo.traverse((hijo) => {
+        if (!hijo.isMesh) return;
+
+        const nombreHijo = hijo.name.toLowerCase();
+
         if (hijo.isMesh && (hijo.name.toLowerCase().includes('colision_escalera') || hijo.name.toLowerCase().includes('colision_suelo'))) {
             hijo.material.visible = false;
+            // hijo.material.visible = true;
             mallasSuelo.push(hijo);
             tieneCajaBlender = true;
         }
 
         if (hijo.isMesh && hijo.name.toLowerCase().includes('caja_colision_i')) {
-            hijo.material.visible = false; // Ocultar por ahora
+            hijo.material.visible = false;
             objetosColision.push(hijo);
             tieneCajaBlender = true;
 

@@ -187,7 +187,7 @@ export function procesarColisiones(modelo, scene, objetosColision, configItem = 
         }
 
         if (hijo.isMesh && hijo.name.toLowerCase().includes('caja_colision_i')) {
-            // hijo.material.visible = false;
+            hijo.material.visible = false;
             objetosColision.push(hijo);
             tieneCajaBlender = true;
 
@@ -243,7 +243,7 @@ export function procesarColisiones(modelo, scene, objetosColision, configItem = 
                     .copy(child.geometry.boundingBox)
                     .applyMatrix4(child.matrixWorld);
 
-                // caja.union(tempBox);
+                caja.union(tempBox);
                 meshesContados++;
             });
 

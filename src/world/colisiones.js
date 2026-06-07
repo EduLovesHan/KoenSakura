@@ -45,7 +45,7 @@ export function inicializarDebugColisiones(scene, camara, controles) {
     if (debugGui) return;
 
     debugGui = obtenerDebugGUI();
-    
+
     // Carpeta: Físicas y Colisiones
     const carpetaColisiones = debugGui.addFolder('Físicas y Colisiones');
 
@@ -184,21 +184,21 @@ export function procesarColisiones(modelo, scene, objetosColision) {
         modelo.traverse((child) => {
             if (child.isMesh && child.visible !== false) {
                 const nombreHijo = child.name.toLowerCase();
-                const esExcluido = nombreHijo.includes('hoja') || 
-                                   nombreHijo.includes('leaf') || 
-                                   nombreHijo.includes('leaves') || 
-                                   nombreHijo.includes('foliage') || 
-                                   nombreHijo.includes('rama') || 
-                                   nombreHijo.includes('branch') || 
-                                   nombreHijo.includes('sakura') || 
-                                   nombreHijo.includes('flor') || 
-                                   nombreHijo.includes('flower') || 
-                                   nombreHijo.includes('copa') || 
-                                   nombreHijo.includes('shadow') || 
-                                   nombreHijo.includes('plane') || 
-                                   nombreHijo.includes('suelo') || 
-                                   nombreHijo.includes('floor');
-                
+                const esExcluido = nombreHijo.includes('hoja') ||
+                    nombreHijo.includes('leaf') ||
+                    nombreHijo.includes('leaves') ||
+                    nombreHijo.includes('foliage') ||
+                    nombreHijo.includes('rama') ||
+                    nombreHijo.includes('branch') ||
+                    nombreHijo.includes('sakura') ||
+                    nombreHijo.includes('flor') ||
+                    nombreHijo.includes('flower') ||
+                    nombreHijo.includes('copa') ||
+                    nombreHijo.includes('shadow') ||
+                    nombreHijo.includes('plane') ||
+                    nombreHijo.includes('suelo') ||
+                    nombreHijo.includes('floor');
+
                 if (!esExcluido) {
                     child.geometry.computeBoundingBox();
                     const tempBox = new THREE.Box3().copy(child.geometry.boundingBox).applyMatrix4(child.matrixWorld);

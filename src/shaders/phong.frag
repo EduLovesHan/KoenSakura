@@ -13,6 +13,8 @@ uniform vec3 uCameraPosition; // vec3(0,0,0) en espacio de cámara
 uniform sampler2D uMap;
 uniform float uHasTexture;
 uniform vec3 uBaseColor;
+uniform float uOpacity;
+uniform float uAlphaTest;
 
 // ── Point Lights del Pool (farolas) ──
 uniform vec3 uPointLightPos0;
@@ -78,10 +80,19 @@ void main() {
     if (uHasTexture > 0.5) {
         texColor = texture2D(uMap, vUv);
     }
+    
+    // Calcular alpha final combinando la textura y la opacidad del material
+    float finalAlpha = texColor.a * uOpacity;
+    
+    // Alpha test
+    if (finalAlpha < uAlphaTest) {
+        discard;
+    }
+    
     vec3 baseColor = texColor.rgb * uBaseColor;
     
     // Combinar iluminación Phong + Point Lights
     vec3 colorFinal = (ambient + diffuse + pointDiffuse) * baseColor + specular;
     
-    gl_FragColor = vec4(colorFinal, texColor.a);
+    gl_FragColor = vec4(colorFinal, finalAlpha);
 }

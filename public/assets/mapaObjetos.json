@@ -16,13 +16,35 @@
     "archivo": "assets/modelos/estatuaHachiko.glb",
     "instancias": [
       {
-        "posicion": [-50, 0, 80], 
+        "posicion": [-60, 0, 80], 
+        "escala": 1.25,
+        "rotacion": [0, 3.141592653589793, 0]
+        }
+
+    ]
+  },
+  {
+    "archivo": "assets/modelos/pedestal.glb",
+    "instancias": [
+      {
+        "posicion": [-105, 0, 65.5], 
         "escala": 1
 
       }
     ]
   },
   
+  {
+    "archivo": "assets/modelos/muñeca.glb",
+    "instancias": [
+      {
+        "posicion": [-105, 1.5, 65.5], 
+        "escala": 0.4,
+          "rotacion": [0, 1.52, 0]
+
+      }
+    ]
+  },
   {
     "archivo": "assets/modelos/plazaPrincipal.glb",
     "tieneAgua": true,

@@ -93,9 +93,9 @@ export function inicializarDebugColisiones(scene, camara, controles) {
 
 // Actualizar la visibilidad de los helpers en la escena
 function actualizarHelpersVisibilidad(scene) {
-    // Eliminar helpers antiguos
-    boxHelpers.forEach(h => scene.remove(h));
-    boxHelpers.length = 0;
+    boxHelpers.forEach(helper => {
+        helper.visible = mostrarHitboxes;
+    });
 
     if (playerHelper) {
         scene.remove(playerHelper);
@@ -103,13 +103,6 @@ function actualizarHelpersVisibilidad(scene) {
     }
 
     if (mostrarHitboxes) {
-        // Crear helpers verdes para los obstáculos estáticos
-        collidableBoxes.forEach(box => {
-            const helper = new THREE.Box3Helper(box, 0x00ff00);
-            scene.add(helper);
-            boxHelpers.push(helper);
-        });
-
         // Crear helper rojo para la hitbox del jugador
         playerHelper = new THREE.Box3Helper(playerBox, 0xff0000);
         scene.add(playerHelper);
@@ -119,10 +112,11 @@ function actualizarHelpersVisibilidad(scene) {
 // Registrar un Box3 en la lista y crear su helper si está activo el modo debug
 function registrarBoxColision(box) {
     collidableBoxes.push(box);
-    if (mostrarHitboxes && escenaGlobal) {
-        const helper = new THREE.Box3Helper(box, 0x00ff00);
+    if (escenaGlobal) {
+        const helper = new THREE.Box3Helper(box, 0x00ff00); // Líneas verdes
+        helper.visible = mostrarHitboxes; // Sincronizado con el estado actual del menú
         escenaGlobal.add(helper);
-        boxHelpers.push(helper);
+        boxHelpers.push(helper); // Asegúrate de guardarlo en tu array global de helpers
     }
 }
 
@@ -186,6 +180,7 @@ export function procesarColisiones(modelo, scene, objetosColision, configItem = 
         }
 
         if (hijo.isMesh && hijo.name.toLowerCase().includes('caja_colision_i')) {
+            hijo.material.visible = false; // Ocultar por ahora
             objetosColision.push(hijo);
             tieneCajaBlender = true;
 
@@ -193,7 +188,7 @@ export function procesarColisiones(modelo, scene, objetosColision, configItem = 
             registrarBoxColision(box);
         }
         if (hijo.isMesh && hijo.name.toLowerCase().includes('caja_colision_v')) {
-            hijo.material.visible = true;
+            hijo.material.visible = false; // Ocultar por ahora
             objetosColision.push(hijo);
             tieneCajaBlender = true;
 
@@ -203,79 +198,81 @@ export function procesarColisiones(modelo, scene, objetosColision, configItem = 
     });
 
     if (!tieneCajaBlender) {
-        // ── Paso 1: Filtrar mallas invisibles o basura ──
-        // Solo considerar hijos que sean Mesh válidos Y visibles.
-        // Ignorar Object3D vacíos, luces, y mallas con nombres de follaje/sombra.
-        const caja = new THREE.Box3();
-        let meshesContados = 0;
+        if (modelo.userData.generarHitboxAutomata === true) {
+            // ── Paso 1: Filtrar mallas invisibles o basura ──
+            // Solo considerar hijos que sean Mesh válidos Y visibles.
+            // Ignorar Object3D vacíos, luces, y mallas con nombres de follaje/sombra.
+            const caja = new THREE.Box3();
+            let meshesContados = 0;
 
-        const nombresExcluidos = [
-            'hoja', 'leaf', 'leaves', 'foliage',
-            'rama', 'branch',
-            'sakura', 'flor', 'flower', 'petal',
-            'copa', 'canopy', 'crown',
-            'shadow', 'sombra',
-            'plane', 'suelo', 'floor', 'ground'
-        ];
+            const nombresExcluidos = [
+                'hoja', 'leaf', 'leaves', 'foliage',
+                'rama', 'branch',
+                'sakura', 'flor', 'flower', 'petal',
+                'copa', 'canopy', 'crown',
+                'shadow', 'sombra',
+                'plane', 'suelo', 'floor', 'ground'
+            ];
 
-        modelo.traverse((child) => {
-            // Solo procesar mallas reales y visibles
-            if (!child.isMesh) return;
-            if (!child.visible) return;
-            if (!child.geometry) return;
+            modelo.traverse((child) => {
+                // Solo procesar mallas reales y visibles
+                if (!child.isMesh) return;
+                if (!child.visible) return;
+                if (!child.geometry) return;
 
-            const nombreHijo = child.name.toLowerCase();
+                const nombreHijo = child.name.toLowerCase();
 
-            // Filtrar mallas de follaje, sombras, y planos decorativos
-            const esExcluido = nombresExcluidos.some(tag => nombreHijo.includes(tag));
-            if (esExcluido) return;
+                // Filtrar mallas de follaje, sombras, y planos decorativos
+                const esExcluido = nombresExcluidos.some(tag => nombreHijo.includes(tag));
+                if (esExcluido) return;
 
-            // Ignorar mallas con geometría degenerada (sin vértices reales)
-            const posAttr = child.geometry.getAttribute('position');
-            if (!posAttr || posAttr.count < 3) return;
+                // Ignorar mallas con geometría degenerada (sin vértices reales)
+                const posAttr = child.geometry.getAttribute('position');
+                if (!posAttr || posAttr.count < 3) return;
 
-            // Calcular la bounding box de esta malla individual en espacio mundo
-            child.geometry.computeBoundingBox();
-            const tempBox = new THREE.Box3()
-                .copy(child.geometry.boundingBox)
-                .applyMatrix4(child.matrixWorld);
+                // Calcular la bounding box de esta malla individual en espacio mundo
+                child.geometry.computeBoundingBox();
+                const tempBox = new THREE.Box3()
+                    .copy(child.geometry.boundingBox)
+                    .applyMatrix4(child.matrixWorld);
 
-            caja.union(tempBox);
-            meshesContados++;
-        });
+                caja.union(tempBox);
+                meshesContados++;
+            });
 
-        // Si no se encontró ningún mesh válido, fallback al objeto completo
-        if (meshesContados === 0) {
-            caja.setFromObject(modelo);
+            // Si no se encontró ningún mesh válido, fallback al objeto completo
+            if (meshesContados === 0) {
+                caja.setFromObject(modelo);
+            }
+
+            // ── Paso 2: Encogimiento global (Shrink Factor) ──
+            // Reduce la caja un porcentaje para que quede más pegada al modelo real.
+            // shrinkFactor = 0.85 significa conservar el 85% del tamaño (encoger 15%).
+            const shrinkFactor = configItem.shrinkFactor !== undefined
+                ? configItem.shrinkFactor
+                : 0.85;
+
+            const tamañoOriginal = caja.getSize(new THREE.Vector3());
+            const centro = caja.getCenter(new THREE.Vector3());
+
+            const tamañoReducido = tamañoOriginal.clone().multiplyScalar(shrinkFactor);
+
+            // Re-armar la caja desde el centro con las dimensiones reducidas
+            caja.setFromCenterAndSize(centro, tamañoReducido);
+
+            // Crear la hitbox visual (invisible) y registrar
+            const hitbox = new THREE.Mesh(
+                new THREE.BoxGeometry(tamañoReducido.x, tamañoReducido.y, tamañoReducido.z),
+                new THREE.MeshBasicMaterial({ visible: false })
+            );
+            hitbox.position.copy(centro);
+
+            scene.add(hitbox);
+            objetosColision.push(hitbox);
+
+            const box = new THREE.Box3().setFromObject(hitbox);
+            registrarBoxColision(box);
         }
-
-        // ── Paso 2: Encogimiento global (Shrink Factor) ──
-        // Reduce la caja un porcentaje para que quede más pegada al modelo real.
-        // shrinkFactor = 0.85 significa conservar el 85% del tamaño (encoger 15%).
-        const shrinkFactor = configItem.shrinkFactor !== undefined
-            ? configItem.shrinkFactor
-            : 0.85;
-
-        const tamañoOriginal = caja.getSize(new THREE.Vector3());
-        const centro = caja.getCenter(new THREE.Vector3());
-
-        const tamañoReducido = tamañoOriginal.clone().multiplyScalar(shrinkFactor);
-
-        // Re-armar la caja desde el centro con las dimensiones reducidas
-        caja.setFromCenterAndSize(centro, tamañoReducido);
-
-        // Crear la hitbox visual (invisible) y registrar
-        const hitbox = new THREE.Mesh(
-            new THREE.BoxGeometry(tamañoReducido.x, tamañoReducido.y, tamañoReducido.z),
-            new THREE.MeshBasicMaterial({ visible: false })
-        );
-        hitbox.position.copy(centro);
-
-        scene.add(hitbox);
-        objetosColision.push(hitbox);
-
-        const box = new THREE.Box3().setFromObject(hitbox);
-        registrarBoxColision(box);
     }
 }
 

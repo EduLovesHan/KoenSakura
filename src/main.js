@@ -20,30 +20,31 @@ const textoPorcentaje = document.getElementById('carga-porcentaje');
 const loadingManager = new THREE.LoadingManager();
 
 let porcentajeMaximo = 0;
-let cargaCompletada = false;
+let timeoutCierre;
+
+loadingManager.onStart = () => {
+    clearTimeout(timeoutCierre);
+};
 
 loadingManager.onProgress = (_url, cargados, total) => {
-    if (cargaCompletada) return;
-
     const porcentajeActual = Math.round((cargados / total) * 100);
     porcentajeMaximo = Math.max(porcentajeMaximo, porcentajeActual);
-
     barraRelleno.style.width = `${porcentajeMaximo}%`;
     textoPorcentaje.textContent = `Cargando... ${porcentajeMaximo}%`;
 };
 
 loadingManager.onLoad = () => {
-    if (cargaCompletada) return;
-    cargaCompletada = true;
+    timeoutCierre = setTimeout(() => {
+        barraRelleno.style.width = '100%';
+        textoPorcentaje.textContent = '¡Listo! 100%';
 
-    barraRelleno.style.width = '100%';
-    textoPorcentaje.textContent = '¡Listo! 100%';
-    setTimeout(() => {
-        pantallaCarga.classList.add('fadeout');
-        pantallaCarga.addEventListener('transitionend', () => {
-            pantallaCarga.remove();
-        }, { once: true });
-    }, 2500);
+        setTimeout(() => {
+            pantallaCarga.classList.add('fadeout');
+            pantallaCarga.addEventListener('transitionend', () => {
+                pantallaCarga.remove();
+            }, { once: true });
+        }, 2500);
+    }, 600);
 };
 
 loadingManager.onError = (url) => {

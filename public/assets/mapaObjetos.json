@@ -3,11 +3,19 @@
     "archivo": "assets/modelos/arbolPino.glb",
     "instancias": [
       {
-        "posicion": [5, 0, 30], 
+        "posicion": [
+          5,
+          0,
+          30
+        ],
         "escala": 0.5
       },
       {
-        "posicion": [-5, 0, 30],
+        "posicion": [
+          -5,
+          0,
+          30
+        ],
         "escala": 0.5
       }
     ]
@@ -16,32 +24,48 @@
     "archivo": "assets/modelos/estatuaHachiko.glb",
     "instancias": [
       {
-        "posicion": [-60, 0, 80], 
+        "posicion": [
+          -60,
+          0,
+          80
+        ],
         "escala": 1.25,
-        "rotacion": [0, 3.141592653589793, 0]
-        }
-
+        "rotacion": [
+          0,
+          3.141592653589793,
+          0
+        ]
+      }
     ]
   },
   {
     "archivo": "assets/modelos/pedestal.glb",
     "instancias": [
       {
-        "posicion": [-105, 0, 65.5], 
+        "posicion": [
+          -105,
+          0,
+          65.5
+        ],
         "escala": 1
-
       }
     ]
   },
-  
   {
     "archivo": "assets/modelos/muñeca.glb",
     "instancias": [
       {
-        "posicion": [-105, 1.5, 65.5], 
+        "posicion": [
+          -105,
+          1.5,
+          65.5
+        ],
         "escala": 0.4,
-          "rotacion": [0, 1.52, 0]
-
+        "rotacion": [
+          0,
+          1.52,
+          0
+        ]
       }
     ]
   },
@@ -51,7 +75,11 @@
     "tieneAnimaciones": true,
     "instancias": [
       {
-        "posicion": [0, 0, 0]
+        "posicion": [
+          0,
+          0,
+          0
+        ]
       }
     ]
   },
@@ -59,8 +87,16 @@
     "archivo": "assets/modelos/letreroBasico.glb",
     "instancias": [
       {
-        "posicion": [40, 0, 60],
-        "rotacion": [0, 3.141592653589793, 0],
+        "posicion": [
+          40,
+          0,
+          60
+        ],
+        "rotacion": [
+          0,
+          3.141592653589793,
+          0
+        ],
         "interactivo": {
           "distancia": 8,
           "titulo": "Letrero de la Plaza",
@@ -72,31 +108,190 @@
   {
     "archivo": "assets/modelos/farolaPrueba.glb",
     "esFarola": true,
-    "colisionPadding": [1.5, 1.5],
+    "colisionPadding": [
+      1.5,
+      1.5
+    ],
     "instancias": [
-      { "posicion": [10, -1, 35] },
-      { "posicion": [-10, -1, 35] },
-      { "posicion": [-35, -1, 35] },
-      { "posicion": [-60, -1, 35] },
-      { "posicion": [35, -1, 35] },
-      { "posicion": [60, -1, 35] },
-      { "posicion": [85, -1, 35] },
-      { "posicion": [110, -1, 35] },
-      { "posicion": [116, -1, 75] },
-      { "posicion": [116, -1, 100] },
-      { "posicion": [116, -1, 125] },
-      { "posicion": [95, -1, 134] },
-      { "posicion": [70, -1, 134] },
-      { "posicion": [45, -1, 134] },
-      { "posicion": [40, -1, 160] },
-      { "posicion": [20, -1, 190] },
-      { "posicion": [-5, -1, 190] },
-      { "posicion": [-30, -1, 190] },
-      { "posicion": [-55, -1, 190] },
-      { "posicion": [-105, -1, 190] },
-      { "posicion": [-117, -1, 165] },
-      { "posicion": [-117, -1, 140] },
-      { "posicion": [-117, -1, 115] }
+      {
+        "posicion": [
+          10,
+          -1,
+          35
+        ]
+      },
+      {
+        "posicion": [
+          -10,
+          -1,
+          35
+        ]
+      },
+      {
+        "posicion": [
+          -35,
+          -1,
+          35
+        ]
+      },
+      {
+        "posicion": [
+          -60,
+          -1,
+          35
+        ]
+      },
+      {
+        "posicion": [
+          35,
+          -1,
+          35
+        ]
+      },
+      {
+        "posicion": [
+          60,
+          -1,
+          35
+        ]
+      },
+      {
+        "posicion": [
+          85,
+          -1,
+          35
+        ]
+      },
+      {
+        "posicion": [
+          110,
+          -1,
+          35
+        ]
+      },
+      {
+        "posicion": [
+          116,
+          -1,
+          75
+        ]
+      },
+      {
+        "posicion": [
+          116,
+          -1,
+          100
+        ]
+      },
+      {
+        "posicion": [
+          116,
+          -1,
+          125
+        ]
+      },
+      {
+        "posicion": [
+          95,
+          -1,
+          134
+        ]
+      },
+      {
+        "posicion": [
+          70,
+          -1,
+          134
+        ]
+      },
+      {
+        "posicion": [
+          45,
+          -1,
+          134
+        ]
+      },
+      {
+        "posicion": [
+          40,
+          -1,
+          160
+        ]
+      },
+      {
+        "posicion": [
+          20,
+          -1,
+          190
+        ]
+      },
+      {
+        "posicion": [
+          -5,
+          -1,
+          190
+        ]
+      },
+      {
+        "posicion": [
+          -30,
+          -1,
+          190
+        ]
+      },
+      {
+        "posicion": [
+          -55,
+          -1,
+          190
+        ]
+      },
+      {
+        "posicion": [
+          -105,
+          -1,
+          190
+        ]
+      },
+      {
+        "posicion": [
+          -117,
+          -1,
+          165
+        ]
+      },
+      {
+        "posicion": [
+          -117,
+          -1,
+          140
+        ]
+      },
+      {
+        "posicion": [
+          -117,
+          -1,
+          115
+        ]
+      }
+    ]
+  },
+  {
+    "archivo": "assets/modelos/monje.glb",
+    "instancias": [
+      {
+        "posicion": [
+          -103.8,
+          2.3,
+          42.5
+        ],
+        "rotacion": [
+          0,
+          1.52,
+          0
+        ],
+        "escala": 2.8
+      }
     ]
   }
 ]

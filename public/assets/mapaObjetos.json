@@ -1,14 +1,54 @@
 [
   {
-    "archivo": "assets/modelos/arbolPino.glb",
+    "archivo": "assets/modelos/arbol1.glb",
     "instancias": [
       {
-        "posicion": [5, 0, 30], 
-        "escala": 0.5
+        "posicion": [10, 0, 30], 
+        "escala": 1.5
       },
       {
-        "posicion": [-5, 0, 30],
-        "escala": 0.5
+        "posicion": [-10, 0, 30],
+        "escala":1.5
+      },
+       {
+        "posicion": [60, 0, 135], 
+        "escala": 2
+      },
+      {
+        "posicion": [-20, 0, 190],
+        "escala": 2
+      }
+      ,
+      {
+        "posicion": [-70, 0, 190],
+        "escala": 2
+      }
+    ]
+  },
+   {
+    "archivo": "assets/modelos/banca.glb",
+    "instancias": [
+      {
+        "posicion": [-25, 0, 95], 
+        "escala": 2,
+        "rotacion": [0, 1.52, 0]
+      },
+      {
+        "posicion": [-27, 0, 37], 
+        "escala": 2,
+        "rotacion": [0, -1.52, 0]
+      }
+      ,
+      {
+        "posicion": [26, 0, 35], 
+        "escala": 2,
+        "rotacion": [0, -1.52, 0]
+      }
+      ,
+      {
+        "posicion": [35, 0, 95], 
+        "escala": 2,
+        "rotacion": [0, 1.52, 0]
       }
     ]
   },
@@ -16,9 +56,36 @@
     "archivo": "assets/modelos/estatuaHachiko.glb",
     "instancias": [
       {
-        "posicion": [-65, 0, 80], 
-        "escala": 1.25,
+        "posicion": [-65, -0.25, 80], 
+        "escala": 1.5,
         "rotacion": [0, 3.141592653589793, 0]
+        }
+    ]
+  },
+  
+  {
+    "archivo": "assets/modelos/pinturaMar.glb",
+    "instancias": [
+      {
+        "posicion": [-50, 0, 140], 
+        "escala": 0.7,
+        "rotacion": [0, 3.141592653589793, 0]
+        }
+    ]
+  },
+ 
+  {
+    "archivo": "assets/modelos/plantaSakura.glb",
+    "instancias": [
+      {
+        "posicion": [-65, 0.7, 44],  
+        "escala": 1.5,
+        "rotacion": [0, 1.52, 0]
+        },
+         {
+        "posicion": [-65, 0.1, 46],  
+        "escala": 2.2,
+        "rotacion": [0, 1.52, 0]
         }
     ]
   },
@@ -27,8 +94,116 @@
     "instancias": [
       {
         "posicion": [-66, 0, 80], 
-        "escala": 2
+        "escala": 2.25
+        },
+         {
+        "posicion": [-66, 0, 45], 
+        "escala": 2.25
         }
+    ]
+  },
+    {
+    "archivo": "assets/modelos/cerezo.glb",
+    "instancias": [
+      {
+        "posicion": [88, 0.2, 180], 
+        "escala": 5,
+        "rotacion": [0, 3.141592653589793, 0]
+        },
+         {
+        "posicion": [18, 0.2, 125], 
+        "escala": 5
+        ,
+        "rotacion": [0, -3.141592653589793, 0]
+        },
+         {
+        "posicion": [18, 0.2, 95], 
+        "escala": 5
+        },
+         {
+        "posicion": [-18, 0.2, 125], 
+        "escala": 5
+        },
+         {
+        "posicion": [-18, 0.2, 95], 
+        "escala": 5,
+        "rotacion": [0, -3.141592653589793, 0]
+        }
+    ]
+  },
+  {
+    "archivo": "assets/modelos/bonsai.glb",
+    "instancias": [
+     
+      { 
+        "posicion": [-115, 0, 125],
+        "escala": 3.5,
+        "rotacion": [0, 1.52, 0]
+      }
+      ,
+      { 
+        "posicion": [-115, 0, 180],
+        "escala": 3.5,
+        "rotacion": [0, 1.52, 0]
+      }
+    ]
+  },
+   {
+    "archivo": "assets/modelos/toroStone.glb",
+    "instancias": [
+      {
+        "posicion": [53.5,0, 185], 
+        "escala": 6,
+        "rotacion": [0, 3.14, 0]
+        }
+        ,
+      {
+        "posicion": [53.5, 0, 175],
+        "escala": 6,
+        "rotacion": [0, 3.14, 0]
+      },
+
+
+
+
+
+
+      {
+        "posicion": [13, 0, 95],
+        "escala": 6,
+        "rotacion": [0, 1.52, 0]
+      },
+      {
+        "posicion": [-13, 0, 95],
+        "escala": 6,
+        "rotacion": [0, 1.52, 0]
+      },
+      {
+        "posicion": [-15, 0, 125],
+        "escala": 6,
+        "rotacion": [0, 1.52, 0]
+      },
+      {
+        "posicion": [15, 0, 125],
+        "escala": 6,
+        "rotacion": [0, 1.52, 0]
+      }
+    ]
+  },
+  {
+    "archivo": "assets/modelos/vegetacion.glb",
+    "instancias": [
+      {
+        "posicion": [52, 0, 190], 
+        "escala": 4,
+        "rotacion": [0, 1.52, 0]
+        },
+         {
+        "posicion": [52,1, 150], 
+        "escala": 4,
+        "rotacion": [0, -1.52, 0]
+        }
+        
     ]
   },
   {
@@ -58,25 +233,52 @@
   },
 
 {
-    "archivo": "assets/modelos/lampara.glb",
+    "archivo": "assets/modelos/linterna.glb",
     "instancias": [
       { 
         "posicion": [-81, 1.5, 75], 
-        "escala": 3.5,
+        "escala": 0.75,
         "rotacion": [0, 3.14, 0]
       },
       { 
-        "posicion": [-83, 3, 86],
+        "posicion": [-105, 1.5, 75],
+        "escala": 0.75,
+        "rotacion": [0, 3.14, 0]
+      }
+    ]
+  },
+
+  {
+    "archivo": "assets/modelos/arbol2.glb",
+    "instancias": [
+      { 
+        "posicion": [-65, 0, 35], 
+        "escala": 3,
+        "rotacion": [0, -1.52, 0]
+      }
+    ]
+  },
+    {
+    "archivo": "assets/modelos/lampara.glb",
+    "instancias": [
+      { 
+        "posicion": [50, 0,95], 
         "escala": 3.5,
         "rotacion": [0, 3.14, 0]
       },
-       { 
-        "posicion": [-105, 1.5, 75], 
+       {
+        "posicion": [-90, 0, 165], 
+        "escala": 3.5,
+        "rotacion": [0, 3.14, 0]
+      },
+      {
+        "posicion": [-30, 0, 165], 
         "escala": 3.5,
         "rotacion": [0, 3.14, 0]
       }
     ]
   },
+
   {
     "archivo": "assets/modelos/cerezo2.glb",
     "instancias": [
@@ -91,7 +293,7 @@
         "rotacion": [0, 3.14, 0]
       },
       { 
-        "posicion": [25, 0, 35],
+        "posicion": [18, 0, 35],
         "escala": 3,
         "rotacion": [0, 3.14, 0]
       },
@@ -111,34 +313,77 @@
         "rotacion": [0, 3.14, 0]
       },
        { 
-        "posicion": [-65, 0, 100], 
+        "posicion": [-65, 0, 95], 
         "escala": 3,
         "rotacion": [0, 3.14, 0]
+      },
+       { 
+        "posicion": [115, 0, 60], 
+        "escala": 3,
+        "rotacion": [0, 3.14, 0]
+      },
+       { 
+        "posicion": [115, 0, 85], 
+        "escala": 3,
+        "rotacion": [0, 3.14, 0]
+      },
+      { 
+        "posicion": [115, 0, 135], 
+        "escala": 3,
+        "rotacion": [0, 3.14, 0]
+      },
+      { 
+        "posicion": [80, 0, 135], 
+        "escala": 3,
+        "rotacion": [0, 3.14, 0]
+      }
+        ,
+      { 
+        "posicion": [-115, 0, 150],
+        "escala": 3,
+        "rotacion": [0, 1.52, 0]
+      }
+      ,
+      { 
+        "posicion": [20, 0, 190],
+        "escala": 3,
+        "rotacion": [0, 1.52, 0]
+      }
+      ,
+      { 
+        "posicion": [40, 0, 150],
+        "escala": 3,
+        "rotacion": [0, 1.52, 0]
+      },
+      { 
+        "posicion": [-45, 0, 190],
+        "escala": 3,
+        "rotacion": [0, 1.52, 0]
       }
     ]
   },
 
   {
-    "archivo": "assets/modelos/arbustos.glb",
+    "archivo": "assets/modelos/bamboo.glb",
     "instancias": [
       { 
-        "posicion": [5, 0, 105], 
-        "escala": 4,
+        "posicion": [4, -0.7, 103], 
+        "escala": 1,
         "rotacion": [0, 3.14, 0]
       },
       { 
-        "posicion": [-5, 0, 105],
-        "escala": 4,
+        "posicion": [4, -0.7, 115],
+        "escala": 1,
         "rotacion": [0, 3.14, 0]
       },
       { 
-        "posicion": [-5, 0, 115],
-        "escala": 4,
+        "posicion": [-4, -0.7, 115],
+        "escala": 1,
         "rotacion": [0, 3.14, 0]
       },
       { 
-        "posicion": [5, 0, 115],
-        "escala": 4,
+        "posicion": [-4, -0.7, 103],
+        "escala": 1,
         "rotacion": [0, 3.14, 0]
       }
     ]
@@ -180,10 +425,9 @@
     "archivo": "assets/modelos/letreroBasico.glb",
     "instancias": [
       {
-        "posicion": [40, 0, 60],
+        "posicion": [50, 0, 60],
         "rotacion": [0, 3.141592653589793, 0],
         "interactivo": {
-          "distancia": 8,
           "titulo": "Letrero de la Plaza",
           "texto": "¡Bienvenido a KoenSakura! Disfruta de la tranquilidad y la belleza de este pequeño espacio de paz."
         }
@@ -195,8 +439,8 @@
     "esFarola": true,
     "colisionPadding": [1.5, 1.5],
     "instancias": [
-      { "posicion": [10, -1, 35] },
-      { "posicion": [-10, -1, 35] },
+      { "posicion": [8, -1, 35] },
+      { "posicion": [-8, -1, 35] },
       { "posicion": [-35, -1, 35] },
       { "posicion": [-60, -1, 35] },
       { "posicion": [35, -1, 35] },
@@ -209,15 +453,18 @@
       { "posicion": [95, -1, 134] },
       { "posicion": [70, -1, 134] },
       { "posicion": [45, -1, 134] },
-      { "posicion": [40, -1, 160] },
-      { "posicion": [20, -1, 190] },
-      { "posicion": [-5, -1, 190] },
+      { "posicion": [42, -1, 160] },
+      { "posicion": [35, -1, 190] },
+      { "posicion": [7, -1, 190] },
+      { "posicion": [-7, -1, 190] },
       { "posicion": [-30, -1, 190] },
       { "posicion": [-55, -1, 190] },
       { "posicion": [-105, -1, 190] },
       { "posicion": [-117, -1, 165] },
       { "posicion": [-117, -1, 140] },
-      { "posicion": [-117, -1, 115] }
+      { "posicion": [-117, -1, 115] },
+      { "posicion": [-45, -1, 100] },
+       { "posicion": [-80, -1, 190] }
     ]
   }
 ]

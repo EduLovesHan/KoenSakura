@@ -1,18 +1,23 @@
 import * as THREE from 'three';
 
-// Clase para gestionar y cargar un Skybox basado en Cubemap y un domo nocturno para transición suave (crossfade)
 class Skybox {
-    constructor(escena) {
+    /**
+     * @param {THREE.Scene} escena
+     * @param {THREE.LoadingManager|null} loadingManager  
+     */
+    constructor(escena, loadingManager = null) {
         this.escena = escena;
-        this.loader = new THREE.CubeTextureLoader();
-        
+        this.loader = loadingManager
+            ? new THREE.CubeTextureLoader(loadingManager)
+            : new THREE.CubeTextureLoader();
+
         const texturas = [
             'right.png', 'left.png',
             'top.png', 'bottom.png',
             'front.png', 'back.png'
         ];
 
-        // 1. Precargar Skybox de Día (Atardecer)
+        // Skybox de Día
         this.loader.setPath('assets/texturas/SkyBoxAtardecer/');
         this.texturaDia = this.loader.load(
             texturas,
@@ -21,7 +26,7 @@ class Skybox {
             (error) => console.error("Error al precargar Skybox de Día:", error)
         );
 
-        // 2. Precargar Skybox de Noche
+        // Skybox de Noche
         this.loader.setPath('assets/texturas/SkyBoxNoche/');
         this.texturaNoche = this.loader.load(
             texturas,
@@ -33,11 +38,11 @@ class Skybox {
         // Asignar el de día como fondo de escena inicial
         this.escena.background = this.texturaDia;
 
-        // 3. Crear el domo nocturno para el Crossfade
+        // Crear el domo nocturno para el Crossfade
         const radio = 800;
         const geometriaEsfera = new THREE.SphereGeometry(radio, 32, 32);
 
-        // Shader personalizado para mapear la CubeTexture de Noche con opacidad
+        // Shader para mapear la CubeTexture de Noche con opacidad
         this.materialEsferaNoche = new THREE.ShaderMaterial({
             uniforms: {
                 tCube: { value: this.texturaNoche },
@@ -75,7 +80,7 @@ class Skybox {
         this.escena.add(this.esferaNoche);
     }
 
-    // Centrar la esfera de noche en la posición de la cámara en cada frame
+    // Centrar la esfera de noche en la posición de la cámara
     actualizar(camara) {
         if (this.esferaNoche && camara) {
             this.esferaNoche.position.copy(camara.position);

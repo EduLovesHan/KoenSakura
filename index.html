@@ -1,34 +1,67 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paseo Virtual KoenSakura</title>
 </head>
+
 <body>
+    <!-- Pantalla de carga -->
+    <div id="pantalla-carga">
+        <div class="carga-contenido">
+            <!-- Pétalos -->
+            <div class="petalo p1">🌸</div>
+            <div class="petalo p2">🌸</div>
+            <div class="petalo p3">🌸</div>
+            <div class="petalo p4">🌸</div>
+
+            <!-- Logo / Título -->
+            <div class="carga-logo">
+                <span class="logo-kanji">桜</span>
+            </div>
+            <h1 class="carga-titulo">KoenSakura</h1>
+            <p class="carga-subtitulo">Paseo Virtual · 3D</p>
+
+            <!-- Spinner -->
+            <div class="carga-spinner">
+                <div class="spinner-anillo"></div>
+                <div class="spinner-nucleo">🌸</div>
+            </div>
+
+            <!-- Barra de progreso -->
+            <div class="carga-barra-contenedor">
+                <div class="carga-barra-relleno" id="carga-barra"></div>
+            </div>
+
+            <!-- Porcentaje -->
+            <p class="carga-porcentaje" id="carga-porcentaje">Cargando... 0%</p>
+        </div>
+    </div>
     <button id="btn-menu-superior">
         <img src="assets/texturas/otros/sakura.png" class="icono-sakura" alt="Abrir menú">
     </button>
-    
+
 
     <!-- Mensaje que muestra la posible interaccion -->
-<div id="ui-interaccion" class="oculto">
-    Presiona <span class="tecla-3d extra">E</span> para interactuar
-</div>
-
-<!-- cuadro de diálogo -->
-<div id="modal-dialogo" class="oculto">
-    <div class="dialogo-contenido">
-        <h3 id="dialogo-titulo">Letrero</h3>
-        <p id="dialogo-texto">Aquí va la información del modelo...</p>
-        <p class="dialogo-cerrar">Presiona E para cerrar</p>
+    <div id="ui-interaccion" class="oculto">
+        Presiona <span class="tecla-3d extra">E</span> para interactuar
     </div>
-</div>
+
+    <!-- cuadro de diálogo -->
+    <div id="modal-dialogo" class="oculto">
+        <div class="dialogo-contenido">
+            <h3 id="dialogo-titulo">Letrero</h3>
+            <p id="dialogo-texto">Aquí va la información del modelo...</p>
+            <p class="dialogo-cerrar">Presiona E para cerrar</p>
+        </div>
+    </div>
 
 
     <div id="panel-menu-superior" class="oculto">
         <h3>Menú</h3>
-        
+
         <div class="botones-fila">
             <button class="btn-opcion" data-tab="general">General</button>
             <button class="btn-opcion" data-tab="ayuda">Ayuda</button>
@@ -40,7 +73,9 @@
         </div>
 
         <div id="tab-general" class="tab-contenido oculto">
-              <p>Una experiencia web interactiva en 3D desarrollada como proyecto final de Programación Gráfica. Consiste en un recorrido virtual inmersivo en primera persona a través de una plaza con estética japonesa al estilo low-poly.</p>
+            <p>Una experiencia web interactiva en 3D desarrollada como proyecto final de Programación Gráfica. Consiste
+                en un recorrido virtual inmersivo en primera persona a través de una plaza con estética japonesa al
+                estilo low-poly.</p>
         </div>
 
         <div id="tab-ayuda" class="tab-contenido oculto">
@@ -51,7 +86,7 @@
 
         <div id="tab-controles" class="tab-contenido oculto">
             <div class="control-carousel">
-                
+
                 <div class="control-slide active" data-index="0">
                     <div class="teclado-wasd">
                         <div class="fila-teclas">
@@ -112,7 +147,7 @@
 
         <div id="tab-ajustes" class="tab-contenido oculto">
             <div class="control-carousel">
-                
+
                 <!-- Pestaña 1: Sonido -->
                 <div class="control-slide active" data-index="0">
                     <h4 class="titulo-carrusel">Sonido</h4>
@@ -142,7 +177,7 @@
                         </div>
                     </div>
                 </div>
-                
+
             </div>
 
             <div class="carrusel-nav">
@@ -157,9 +192,10 @@
 
         <div id="tab-creditos" class="tab-contenido oculto">
             <p><strong>Desarrollado por:</strong> ...</p>
-            </div>
+        </div>
 
     </div>
     <script type="module" src="/src/main.js"></script>
 </body>
+
 </html>

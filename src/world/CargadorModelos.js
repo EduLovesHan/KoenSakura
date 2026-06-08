@@ -46,10 +46,10 @@ function crearMaterialPhong(originalMaterial) {
     const opacidadOriginal = originalMaterial.opacity !== undefined
         ? originalMaterial.opacity
         : 1.0;
-    
+
     // Si la opacidad es < 1 o el material original ya era transparente
     const esTransparente = originalMaterial.transparent || opacidadOriginal < 1.0;
-    
+
     // Si el original tiene alphaTest configurado, o usamos un fallback minúsculo si es transparente
     const alphaTestOriginal = originalMaterial.alphaTest !== undefined && originalMaterial.alphaTest > 0
         ? originalMaterial.alphaTest
@@ -105,13 +105,34 @@ function crearMaterialPhong(originalMaterial) {
 
 /**
  * Aplica el shader Phong SOLO a mallas estáticas (Mesh).
- * EXCLUYE:
- *   - SkinnedMesh (peces con bones) → conservan MeshStandardMaterial para animación
- *   - Mallas cuyo nombre contiene 'agua' → conservan material GLTF para transparencia/UV
- *   - Mallas con materiales emisivos → tienen luz propia (farolas)
+ * Excluye:
+ *   - SkinnedMesh → conservan material para animación
+ *   - Mallas cuyo nombre contiene 'agua' → conservan material para transparencia/UV
+ *   - Mallas con materiales emisivos → tienen luz propia
  *   - Cajas de colisión
+ *   - Modelo 'muñeca' → conserva material GLTF original para transparencias alpha
  */
 function aplicarMaterialPhong(model) {
+    // ── EXCLUIR modelo completo si es la muñeca ──
+    // Conserva su MeshStandardMaterial original para que las texturas
+    // con canal alpha (pelo, ropa, accesorios) se rendericen correctamente.
+    const nombreModelo = (model.name || '').toLowerCase();
+    const esModeloExcluido = nombreModelo.includes('muñeca') || nombreModelo.includes('muneca');
+
+    if (esModeloExcluido) {
+        // Asegurar que el material original tenga transparencia configurada
+        model.traverse((child) => {
+            if (!child.isMesh || !child.material) return;
+            const mats = Array.isArray(child.material) ? child.material : [child.material];
+            mats.forEach(mat => {
+                mat.transparent = true;
+                mat.alphaTest = mat.alphaTest > 0 ? mat.alphaTest : 0.5;
+                mat.side = THREE.DoubleSide;
+            });
+        });
+        return;
+    }
+
     model.traverse((child) => {
         if (!child.isMesh || !child.material) return;
 
@@ -128,6 +149,17 @@ function aplicarMaterialPhong(model) {
 
         // No tocar las cajas de colisión
         if (nombreLower.includes('caja_colision')) return;
+
+        // ── EXCLUIR mallas de muñeca por nombre de malla individual ──
+        if (nombreLower.includes('muñeca') || nombreLower.includes('muneca')) {
+            const mats = Array.isArray(child.material) ? child.material : [child.material];
+            mats.forEach(mat => {
+                mat.transparent = true;
+                mat.alphaTest = mat.alphaTest > 0 ? mat.alphaTest : 0.5;
+                mat.side = THREE.DoubleSide;
+            });
+            return;
+        }
 
         // Omitir mallas con materiales emisivos (luz propia, ej. farolas)
         const materialesOriginales = Array.isArray(child.material)
@@ -162,8 +194,8 @@ function tieneSkinnedMesh(model) {
     return encontrado;
 }
 
-export async function cargarEscenario(scene, objetosColision) {
-    const loader = new GLTFLoader();
+export async function cargarEscenario(scene, objetosColision, loadingManager = null) {
+    const loader = loadingManager ? new GLTFLoader(loadingManager) : new GLTFLoader();
 
     try {
         const respuesta = await fetch('assets/mapaObjetos.json');
@@ -174,24 +206,26 @@ export async function cargarEscenario(scene, objetosColision) {
 
         for (const item of configuracion) {
             try {
-                // Cargar el modelo base usando loadAsync
+                // Cargar el modelo base
                 const gltf = await loader.loadAsync(item.archivo);
                 const modeloBase = gltf.scene;
                 modeloBase.name = item.archivo;
 
-                // Detectar si el modelo tiene SkinnedMesh para elegir método de clonación
+                // Detectar si el modelo tiene SkinnedMesh
                 const usarSkeletonUtils = tieneSkinnedMesh(modeloBase);
                 if (usarSkeletonUtils) {
                     console.log(`[SkeletonUtils] Modelo ${item.archivo} contiene SkinnedMesh — se usará SkeletonUtils.clone()`);
                 }
 
                 // Buscar y registrar materiales emisivos en el modelo base antes de clonar
+                let tieneEmisivos = false;
                 modeloBase.traverse((child) => {
                     if (child.isMesh && child.material) {
                         const mats = Array.isArray(child.material) ? child.material : [child.material];
                         mats.forEach(mat => {
                             if (mat.emissive && (mat.emissive.r > 0 || mat.emissive.g > 0 || mat.emissive.b > 0)) {
                                 registrarMaterialEmisivo(mat);
+                                tieneEmisivos = true;
                             }
                         });
                     }
@@ -199,7 +233,7 @@ export async function cargarEscenario(scene, objetosColision) {
 
                 // Iterar cada instancia del modelo
                 for (const instancia of item.instancias) {
-                    // ── CLONACIÓN: SkeletonUtils.clone() para modelos con bones ──
+                    //  Clonación: SkeletonUtils.clone() para modelos con bones
                     // Object3D.clone() NO clona correctamente SkinnedMesh: el clon
                     // mantiene referencia al esqueleto original, rompiendo la animación.
                     // SkeletonUtils.clone() clona esqueleto, bones y bindings correctamente.
@@ -207,7 +241,7 @@ export async function cargarEscenario(scene, objetosColision) {
                         ? SkeletonUtils.clone(modeloBase)
                         : modeloBase.clone();
 
-                    // ── Registrar texturas de agua ANTES de aplicar el shader ──
+                    //  Registrar texturas de agua ANTES de aplicar el shader
                     // aplicarMaterialPhong reemplaza materiales GLTF → las texturas
                     // (normalMap/map) se perderían si se leen después.
                     if (item.tieneAgua) {
@@ -227,7 +261,7 @@ export async function cargarEscenario(scene, objetosColision) {
                         });
                     }
 
-                    // ── Aplicar shader Phong SOLO a mallas estáticas ──
+                    //  Aplicar shader Phong SOLO a mallas estáticas
                     // SkinnedMesh (peces) y agua se excluyen automáticamente
                     // dentro de aplicarMaterialPhong().
                     aplicarMaterialPhong(clon);

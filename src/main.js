@@ -12,7 +12,45 @@ import { crearHitbox, inicializarDebugColisiones, actualizarPlayerBox } from './
 import { inicializarInteracciones, actualizarInteracciones } from './player/interacciones.js';
 import { actualizarAnimaciones } from './world/animaciones.js';
 
-//Configuracion inicial del motor, escena, cámara y renderizador
+// Pantalla de carga
+const pantallaCarga = document.getElementById('pantalla-carga');
+const barraRelleno = document.getElementById('carga-barra');
+const textoPorcentaje = document.getElementById('carga-porcentaje');
+
+const loadingManager = new THREE.LoadingManager();
+
+let porcentajeMaximo = 0;
+let cargaCompletada = false;
+
+loadingManager.onProgress = (_url, cargados, total) => {
+    if (cargaCompletada) return;
+
+    const porcentajeActual = Math.round((cargados / total) * 100);
+    porcentajeMaximo = Math.max(porcentajeMaximo, porcentajeActual);
+
+    barraRelleno.style.width = `${porcentajeMaximo}%`;
+    textoPorcentaje.textContent = `Cargando... ${porcentajeMaximo}%`;
+};
+
+loadingManager.onLoad = () => {
+    if (cargaCompletada) return;
+    cargaCompletada = true;
+
+    barraRelleno.style.width = '100%';
+    textoPorcentaje.textContent = '¡Listo! 100%';
+    setTimeout(() => {
+        pantallaCarga.classList.add('fadeout');
+        pantallaCarga.addEventListener('transitionend', () => {
+            pantallaCarga.remove();
+        }, { once: true });
+    }, 2500);
+};
+
+loadingManager.onError = (url) => {
+    console.error('[LoadingManager] Error cargando:', url);
+};
+
+// Configuración del motor, escena, cámara y renderizador
 const { scene, camara, renderizador } = inicializarMotor();
 const objetosColision = [];
 const reloj = new THREE.Clock();
@@ -22,8 +60,15 @@ const listener = inicializarAudio(camara);
 const Controles = new ControlesPrimeraPersona(camara, document.body, objetosColision, listener);
 configurarControlesAudio(Controles);
 
+// Bloquear pointer lock hasta que la pantalla de carga desaparezca
+document.addEventListener('click', (e) => {
+    if (document.getElementById('pantalla-carga')) {
+        e.stopImmediatePropagation();
+    }
+}, true);
+
 //configuracion de la iluminacion y el skybox
-const skybox = new Skybox(scene, 'assets/texturas/SkyBoxAtardecer/', '.png');
+const skybox = new Skybox(scene, loadingManager);
 inicializarIluminacion(scene);
 configurarControlesIluminacion(skybox);
 
@@ -31,17 +76,17 @@ configurarControlesIluminacion(skybox);
 inicializarDebugColisiones(scene, camara, Controles);
 actualizarPlayerBox(camara.position);
 
-//carga de los modelos y objetos interactivos en el mapa
-cargarEscenario(scene, objetosColision);
+// Carga de los modelos
+cargarEscenario(scene, objetosColision, loadingManager);
 
-// Límites del mapa 
+// Límites del mapa
 crearHitbox(-100, 1, 0, 0.5, 10, 600, scene, objetosColision); // Izquierda
 crearHitbox(100, 1, 0, 0.5, 10, 600, scene, objetosColision);  // Derecha
 crearHitbox(0, 1, -300, 200, 10, 0.5, scene, objetosColision); // Frontal
 crearHitbox(0, 1, 300, 200, 10, 0.5, scene, objetosColision);  // Trasera
 crearHitbox(0, -0.05, 0, 200, 0.1, 600, scene, objetosColision); // Suelo
 
-//configuracion de la UI y las interacciones 
+//configuracion de la UI y las interacciones
 inicializarInteracciones();
 inicializarUI(reproducirClick);
 
@@ -57,7 +102,7 @@ function animar() {
 
     // Object Pooling: reasignar las 3 PointLights a las farolas más cercanas
     actualizarLucesFarolas(camara);
-    
+
     // Sincronizar y actualizar los uniforms de Phong en cada frame
     if (phongUniformsGlobales && ambientLight && directionalLight) {
         phongUniformsGlobales.uAmbientIntensity.value = ambientLight.intensity;
@@ -67,12 +112,12 @@ function animar() {
         phongUniformsGlobales.uLightPosition.value.copy(directionalLight.position).applyMatrix4(camara.matrixWorldInverse);
         phongUniformsGlobales.uCameraPosition.value.set(0, 0, 0); // En espacio de cámara la posición de cámara es origen
     }
-    
+
     // Mantener la esfera de noche centrada en la cámara
     if (skybox && typeof skybox.actualizar === 'function') {
         skybox.actualizar(camara);
     }
     renderizador.render(scene, camara);
 }
-//iniciar el bucle 
+//iniciar el bucle
 animar();

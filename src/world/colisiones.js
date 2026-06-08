@@ -82,13 +82,15 @@ export function inicializarDebugColisiones(scene, camara, controles) {
         }
     }
 
-    // Ejes de referencia (AxesHelper)
+    // Ejes de referencia (AxesHelper) removidos a petición del usuario
+    /*
     const axesHelper = new THREE.AxesHelper(15);
     axesHelper.visible = false;
     scene.add(axesHelper);
 
     debugGui.add(axesHelper, 'visible')
         .name('Mostrar Ejes (X:R, Y:V, Z:A)');
+    */
 }
 
 // Actualizar la visibilidad de los helpers en la escena

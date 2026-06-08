@@ -69,8 +69,13 @@
       {
         "posicion": [-50, 0, 140], 
         "escala": 0.7,
-        "rotacion": [0, 3.141592653589793, 0]
+        "rotacion": [0, 3.141592653589793, 0],
+        "interactivo": {
+          "titulo": "La Gran Ola de Kanagawa",
+          "texto": "Obra del maestro japonés Katsushika Hokusai, simboliza el choque entre el caos de la naturaleza y la inmutabilidad humana. Representa una ola a punto de devorar a tres embarcaciones, mientras que, en el fondo, el Monte Fuji se mantiene sereno",
+          "distancia": 8
         }
+      }
     ]
   },
  
@@ -89,17 +94,27 @@
         }
     ]
   },
-   {
+    {
     "archivo": "assets/modelos/mostrador.glb",
     "instancias": [
       {
         "posicion": [-66, 0, 80], 
-        "escala": 2.25
-        },
-         {
-        "posicion": [-66, 0, 45], 
-        "escala": 2.25
+        "escala": 2.25,
+        "interactivo": {
+          "titulo": "El perro fiel Hachiko",
+          "texto": "Hachiko fue un perro japonés de raza akita, recordado por haber esperado a su dueño, el profesor Hidesaburo Ueno, en la estación Shibuya, cerca de nueve años después de la muerte de este.",
+          "distancia": 8
         }
+      },
+      {
+        "posicion": [-66, 0, 45], 
+        "escala": 2.25,
+        "interactivo": {
+          "titulo": "Sakura o Cerezo Japonés",
+          "texto": "Es un árbol emblemático de Japón, venerado por su belleza efímera. Representa la fragilidad de la vida, la renovación y la esperanza.",
+          "distancia": 8
+        }
+      }
     ]
   },
     {
@@ -160,10 +175,13 @@
       {
         "posicion": [53.5, 0, 175],
         "escala": 6,
-        "rotacion": [0, 3.14, 0]
+        "rotacion": [0, 3.14, 0],
+        "interactivo": {
+          "titulo": "Toro o Farolillo Japones",
+          "texto": "Son típicos de los templos budistas y se extendieron con esta religión a lo largo del periodo Nara. Decoran escaleras, jardines y paseos para guiar el camino de los espíritus y dioses y que no se pierdan.",
+          "distancia": 8
+        }
       },
-
-
 
 
 
@@ -406,7 +424,12 @@
       {
         "posicion": [-105, 1.5, 65.5], 
         "escala": 0.4,
-          "rotacion": [0, 1.52, 0]
+          "rotacion": [0, 1.52, 0],
+          "interactivo": {
+          "titulo": "Muñeca Kokeshi",
+          "texto": "Una muñeca tradicional japonesa hecha de madera. Representa la resiliencia, la protección, la buena fortuna y la conexión espiritual",
+          "distancia": 8
+        }
 
       }
     ]
@@ -428,8 +451,8 @@
         "posicion": [50, 0, 60],
         "rotacion": [0, 3.141592653589793, 0],
         "interactivo": {
-          "titulo": "Letrero de la Plaza",
-          "texto": "¡Bienvenido a KoenSakura! Disfruta de la tranquilidad y la belleza de este pequeño espacio de paz."
+          "titulo": "Monte Fuji",
+          "texto": "Es la montaña más alta de Japón. En el pasado, la ascensión al monte Fuji era considerada una peregrinación religiosa para honrar al espíritu de uno de los picos más bonitos e icónicos del mundo.."
         }
       }
     ]

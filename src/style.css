@@ -2,20 +2,22 @@
 
 body {
     margin: 0;
-    overflow: hidden; 
+    overflow: hidden;
     background-color: #000;
-    font-family: 'Fredoka One', cursive, sans-serif; 
+    font-family: 'Fredoka One', cursive, sans-serif;
     color: #fff;
-    
+
 }
+
 canvas {
     display: block;
     width: 100vw;
     height: 100vh;
 }
+
 #panel-menu-superior h3 {
     margin: -55px auto 10px auto;
-    background-color: #84a547; 
+    background-color: #84a547;
     color: #fff;
     padding: 10px 40px;
     border-radius: 15px;
@@ -23,7 +25,7 @@ canvas {
     text-align: center;
     font-size: 24px;
     letter-spacing: 2px;
-    box-shadow: 0px 5px 0px #637c34; 
+    box-shadow: 0px 5px 0px #637c34;
 }
 
 /*estilos de menu superior*/
@@ -31,10 +33,10 @@ canvas {
     position: absolute;
     top: 20px;
     left: 20px;
-    z-index: 1000; 
-    background: transparent; 
+    z-index: 1000;
+    background: transparent;
     border: none;
-    padding: 0; 
+    padding: 0;
     cursor: pointer;
     transition: transform 0.2s ease;
     height: 45px;
@@ -42,7 +44,7 @@ canvas {
 }
 
 #btn-menu-superior:hover {
-    transform: scale(1.1); 
+    transform: scale(1.1);
 }
 
 .icono-sakura {
@@ -57,9 +59,9 @@ canvas {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%); 
+    transform: translate(-50%, -50%);
     z-index: 100;
-    background: #31021494; 
+    background: #31021494;
     border: 10px solid #ff758c;
     padding: 25px;
     border-radius: 12px;
@@ -67,10 +69,10 @@ canvas {
     height: 350px;
     box-shadow: 0 0 25px rgba(255, 117, 140, 0.3);
     backdrop-filter: blur(10px);
-    display: flex !important; 
+    display: flex !important;
     flex-direction: column;
     gap: 20px;
-    box-shadow: 0px 8px 0px #ad2033; 
+    box-shadow: 0px 8px 0px #ad2033;
 
     /* Animaciones */
     opacity: 1;
@@ -94,12 +96,12 @@ canvas {
 }
 
 .btn-opcion {
-    font-family: 'Fredoka One', cursive, sans-serif; 
+    font-family: 'Fredoka One', cursive, sans-serif;
     letter-spacing: 1px;
     background: #84a547;
     color: white;
     display: block;
-    flex: 1; 
+    flex: 1;
     border: none;
     padding: 8px;
     border-radius: 10px;
@@ -163,7 +165,7 @@ canvas {
 input[type="range"] {
     width: 100%;
     cursor: pointer;
-    accent-color: #ff758c; 
+    accent-color: #ff758c;
 }
 
 /* --- CONTROLES WASD VISUALES --- */
@@ -190,7 +192,7 @@ input[type="range"] {
 
 
 .tecla-3d {
-    background-color: #ff758c; 
+    background-color: #ff758c;
     color: white;
     font-family: 'Fredoka One', cursive;
     font-size: 24px;
@@ -200,8 +202,8 @@ input[type="range"] {
     justify-content: center;
     align-items: center;
     border-radius: 12px;
-    box-shadow: 0px 6px 0px #c24d60, 0px 8px 5px rgba(0,0,0,0.4); 
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    box-shadow: 0px 6px 0px #c24d60, 0px 8px 5px rgba(0, 0, 0, 0.4);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .etiqueta-tecla {
@@ -227,7 +229,7 @@ input[type="range"] {
     flex-direction: column;
     align-items: center;
     width: 100%;
-    animation: fadeIn 0.4s ease; 
+    animation: fadeIn 0.4s ease;
 }
 
 .control-slide.active {
@@ -235,8 +237,15 @@ input[type="range"] {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .titulo-carrusel {
@@ -308,7 +317,9 @@ input[type="range"] {
 }
 
 
-.oculto { display: none !important; }
+.oculto {
+    display: none !important;
+}
 
 /* interacciones y cuadros de dialogo */
 #ui-interaccion {
@@ -324,7 +335,8 @@ input[type="range"] {
     display: flex;
     align-items: center;
     gap: 10px;
-    pointer-events: none; /* Para no bloquear clics */
+    pointer-events: none;
+    /* Para no bloquear clics */
     z-index: 50;
 }
 
@@ -339,13 +351,27 @@ input[type="range"] {
     padding: 30px;
     width: 400px;
     text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(255, 117, 140, 0.4);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 117, 140, 0.4);
     z-index: 200;
 }
 
-.dialogo-contenido h3 { margin-top: 0; color: #84a547; font-size: 28px; }
-.dialogo-texto-container { min-height: 80px; text-align: center; }
-.dialogo-contenido p { font-size: 16px; line-height: 1.5; color: #eee; margin: 0; }
+.dialogo-contenido h3 {
+    margin-top: 0;
+    color: #84a547;
+    font-size: 28px;
+}
+
+.dialogo-texto-container {
+    min-height: 80px;
+    text-align: center;
+}
+
+.dialogo-contenido p {
+    font-size: 16px;
+    line-height: 1.5;
+    color: #eee;
+    margin: 0;
+}
 
 .dialogo-controles {
     display: flex;
@@ -369,4 +395,215 @@ input[type="range"] {
     border-radius: 4px;
     font-size: 12px;
     box-shadow: 0px 3px 0px #c24d60;
+}
+
+/* Pantalla de carga */
+#pantalla-carga {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at 60% 40%, #1a0a12 0%, #0d0508 60%, #050205 100%);
+    transition: opacity 1.4s ease;
+    overflow: hidden;
+    pointer-events: all;
+}
+
+/* Clase que dispara el fade-out */
+#pantalla-carga.fadeout {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Pétalos flotantes */
+.petalo {
+    position: absolute;
+    font-size: 22px;
+    opacity: 0.25;
+    animation: flotar 6s ease-in-out infinite;
+    user-select: none;
+    pointer-events: none;
+}
+
+.p1 {
+    top: 15%;
+    left: 12%;
+    animation-delay: 0s;
+    animation-duration: 7s;
+}
+
+.p2 {
+    top: 25%;
+    right: 10%;
+    animation-delay: 1.5s;
+    animation-duration: 5s;
+}
+
+.p3 {
+    bottom: 20%;
+    left: 8%;
+    animation-delay: 3s;
+    animation-duration: 8s;
+}
+
+.p4 {
+    bottom: 15%;
+    right: 14%;
+    animation-delay: 0.8s;
+    animation-duration: 6s;
+}
+
+@keyframes flotar {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0.2;
+    }
+
+    50% {
+        transform: translateY(-18px) rotate(15deg);
+        opacity: 0.4;
+    }
+}
+
+/* Contenedor central */
+.carga-contenido {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    text-align: center;
+}
+
+/* Logo kanji */
+.carga-logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 117, 140, 0.35);
+    background: rgba(255, 117, 140, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 0 30px rgba(255, 117, 140, 0.2), inset 0 0 15px rgba(255, 117, 140, 0.05);
+    animation: pulsarLogo 3s ease-in-out infinite;
+}
+
+.logo-kanji {
+    font-size: 36px;
+    color: #ff9ab0;
+    font-family: serif;
+    text-shadow: 0 0 12px rgba(255, 117, 140, 0.8);
+}
+
+@keyframes pulsarLogo {
+
+    0%,
+    100% {
+        box-shadow: 0 0 25px rgba(255, 117, 140, 0.2), inset 0 0 10px rgba(255, 117, 140, 0.05);
+    }
+
+    50% {
+        box-shadow: 0 0 45px rgba(255, 117, 140, 0.45), inset 0 0 20px rgba(255, 117, 140, 0.12);
+    }
+}
+
+/* Títulos */
+.carga-titulo {
+    margin: 0;
+    font-family: 'Fredoka One', cursive;
+    font-size: 42px;
+    letter-spacing: 4px;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(255, 117, 140, 0.6), 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.carga-subtitulo {
+    margin: 0;
+    font-family: 'Fredoka One', cursive;
+    font-size: 14px;
+    letter-spacing: 5px;
+    color: rgba(255, 154, 176, 0.65);
+    text-transform: uppercase;
+}
+
+/* Spinner giratorio */
+.carga-spinner {
+    position: relative;
+    width: 64px;
+    height: 64px;
+    margin: 6px 0;
+}
+
+.spinner-anillo {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    border-top-color: #ff758c;
+    border-right-color: rgba(255, 117, 140, 0.4);
+    animation: girar 1.1s linear infinite;
+    box-shadow: 0 0 14px rgba(255, 117, 140, 0.4);
+}
+
+.spinner-nucleo {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    animation: pulsarNucleo 1.1s ease-in-out infinite;
+}
+
+@keyframes girar {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes pulsarNucleo {
+
+    0%,
+    100% {
+        transform: scale(0.9);
+        opacity: 0.7;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+}
+
+/* Barra de progreso */
+.carga-barra-contenedor {
+    width: 260px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 99px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 117, 140, 0.2);
+}
+
+.carga-barra-relleno {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #c24d60, #ff758c, #ffb3c6);
+    border-radius: 99px;
+    transition: width 0.3s ease;
+    box-shadow: 0 0 8px rgba(255, 117, 140, 0.6);
+}
+
+/* Texto de porcentaje */
+.carga-porcentaje {
+    margin: 0;
+    font-family: 'Fredoka One', cursive;
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: rgba(255, 154, 176, 0.7);
 }

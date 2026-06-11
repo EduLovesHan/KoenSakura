@@ -91,7 +91,7 @@ export function actualizarLucesFarolas(camara) {
     }
 
     // De noche: calcular distancias y asignar las 3 más cercanas
-    const camaraPos = camara.position;
+    const { position: camaraPos } = camara;
     const distancias = posicionesFarolasGlobal.map((pos, idx) => ({
         idx,
         dist: camaraPos.distanceToSquared(pos) // squared para evitar sqrt innecesario
@@ -352,8 +352,9 @@ broker.on('modeloCargado', ({ modelo, datosJSON }) => {
     modelo.traverse((child) => {
         if (child.isMesh && child.material) {
             const mats = Array.isArray(child.material) ? child.material : [child.material];
-            mats.forEach(mat => {
-                if (mat.emissive && (mat.emissive.r > 0 || mat.emissive.g > 0 || mat.emissive.b > 0)) {
+            mats.forEach((mat) => {
+                const { emissive } = mat;
+                if (emissive && (emissive.r > 0 || emissive.g > 0 || emissive.b > 0)) {
                     registrarMaterialEmisivo(mat);
                 }
             });

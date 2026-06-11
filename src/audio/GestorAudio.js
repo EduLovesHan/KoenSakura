@@ -8,7 +8,7 @@ let sfxVolume = 1.5;
 let sfxMuted = false;
 let jugadorEstaCaminando = false;
 
-// Carga e inicializacion de audios
+// Carga e inicialización de audios
 export function inicializarAudio(camara) {
     listener = new THREE.AudioListener();
     camara.add(listener);
@@ -57,7 +57,7 @@ export function inicializarAudio(camara) {
     return listener;
 }
 
-// Sonar los botones en el menu
+// Sonar los botones en el menú
 export function reproducirClick() {
     if (listener && listener.context.state === 'suspended') listener.context.resume();
     if (sonidoClick && sonidoClick.isPlaying) sonidoClick.stop();
@@ -74,26 +74,26 @@ export function configurarControlesAudio() {
     let volumenMusicaAnterior = 0.3;
 
     if (musicaSlider && musicaMute) {
-        musicaSlider.addEventListener('input', (e) => {
-            volumenMusicaAnterior = parseFloat(e.target.value);
+        musicaSlider.addEventListener('input', ({ target }) => {
+            volumenMusicaAnterior = parseFloat(target.value);
             if (!musicaMute.checked && sonidoFondo) {
                 sonidoFondo.setVolume(volumenMusicaAnterior);
             }
         });
-        musicaMute.addEventListener('change', (e) => {
-            if(sonidoFondo) {
-                sonidoFondo.setVolume(e.target.checked ? 0 : volumenMusicaAnterior);
+        musicaMute.addEventListener('change', ({ target }) => {
+            if (sonidoFondo) {
+                sonidoFondo.setVolume(target.checked ? 0 : volumenMusicaAnterior);
             }
         });
     }
 
     if (sfxSlider && sfxMute) {
-        sfxSlider.addEventListener('input', (e) => {
-            sfxVolume = parseFloat(e.target.value);
+        sfxSlider.addEventListener('input', ({ target }) => {
+            sfxVolume = parseFloat(target.value);
             actualizarVolumenSFX();
         });
-        sfxMute.addEventListener('change', (e) => {
-            sfxMuted = e.target.checked;
+        sfxMute.addEventListener('change', ({ target }) => {
+            sfxMuted = target.checked;
             actualizarVolumenSFX();
         });
     }

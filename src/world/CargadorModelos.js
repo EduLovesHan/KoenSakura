@@ -11,7 +11,7 @@ export const aguasInstanciadas = [];
 
 // Cargar la textura de normales del agua
 const textureLoader = new THREE.TextureLoader();
-const waterNormals = textureLoader.load('assets/texturas/waternormals3.jpg', (texture) => {
+const waterNormals = textureLoader.load('assets/texturas/waternormals3.jpeg', (texture) => {
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
 });
 
@@ -46,28 +46,34 @@ export const phongUniformsGlobales = {
 
 function crearMaterialPhong(originalMaterial) {
     // ── Extraer textura y color originales del material GLTF ──
-    const texturaOriginal = originalMaterial.map || null;
-    const colorOriginal = originalMaterial.color
-        ? originalMaterial.color.clone()
+    const {
+        map: texturaOriginal = null,
+        color,
+        opacity: opacidadOriginal = 1.0,
+        transparent,
+        alphaTest,
+        depthWrite,
+        blending
+    } = originalMaterial;
+
+    const colorOriginal = color
+        ? color.clone()
         : new THREE.Color(0xffffff);
-    const opacidadOriginal = originalMaterial.opacity !== undefined
-        ? originalMaterial.opacity
-        : 1.0;
 
     // Si la opacidad es < 1 o el material original ya era transparente
-    const esTransparente = originalMaterial.transparent || opacidadOriginal < 1.0;
+    const esTransparente = transparent || opacidadOriginal < 1.0;
 
     // Si el original tiene alphaTest configurado, o usamos un fallback minúsculo si es transparente
-    const alphaTestOriginal = originalMaterial.alphaTest !== undefined && originalMaterial.alphaTest > 0
-        ? originalMaterial.alphaTest
+    const alphaTestOriginal = alphaTest !== undefined && alphaTest > 0
+        ? alphaTest
         : (esTransparente ? 0.05 : 0.0);
 
-    const depthWriteOriginal = originalMaterial.depthWrite !== undefined
-        ? originalMaterial.depthWrite
+    const depthWriteOriginal = depthWrite !== undefined
+        ? depthWrite
         : true;
 
-    const blendingOriginal = originalMaterial.blending !== undefined
-        ? originalMaterial.blending
+    const blendingOriginal = blending !== undefined
+        ? blending
         : THREE.NormalBlending;
 
     // ── Crear una instancia NUEVA de ShaderMaterial (nunca compartida) ──
@@ -283,8 +289,9 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
                             const water = new Water(
                                 hijo.geometry,
                                 {
-                                    textureWidth: 512,
-                                    textureHeight: 512,
+                                    textureWidth: 256,
+                                    textureHeight: 256,
+                                    //clipBias: 0.003,
                                     waterNormals: waterNormals,
                                     sunDirection: new THREE.Vector3(10, 20, 10).normalize(),
                                     sunColor: 0xffffff,
@@ -315,24 +322,26 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
                     //  Aplicar shader Phong SOLO a mallas estáticas
                     aplicarMaterialPhong(clon);
 
+                    const { posicion, rotacion, rotacionY, escala } = instancia;
+
                     // Posición
-                    if (instancia.posicion) {
-                        clon.position.set(instancia.posicion[0], instancia.posicion[1], instancia.posicion[2]);
+                    if (posicion) {
+                        clon.position.set(posicion[0], posicion[1], posicion[2]);
                     }
 
                     // Rotación
-                    if (instancia.rotacion) {
-                        clon.rotation.set(instancia.rotacion[0], instancia.rotacion[1], instancia.rotacion[2]);
-                    } else if (instancia.rotacionY !== undefined) {
-                        clon.rotation.y = instancia.rotacionY;
+                    if (rotacion) {
+                        clon.rotation.set(rotacion[0], rotacion[1], rotacion[2]);
+                    } else if (rotacionY !== undefined) {
+                        clon.rotation.y = rotacionY;
                     }
 
                     // Escala
-                    if (instancia.escala) {
-                        if (Array.isArray(instancia.escala)) {
-                            clon.scale.set(instancia.escala[0], instancia.escala[1], instancia.escala[2]);
+                    if (escala) {
+                        if (Array.isArray(escala)) {
+                            clon.scale.set(escala[0], escala[1], escala[2]);
                         } else {
-                            clon.scale.setScalar(instancia.escala);
+                            clon.scale.setScalar(escala);
                         }
                     }
 

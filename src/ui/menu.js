@@ -70,7 +70,7 @@ export function inicializarUI(onInteraccion) {
         });
     }
 
-    // Creacion e inicializacion de carruseles
+    // Creación e inicialización de carruseles
     function inicializarCarrusel(selectorContenedor, idBtnNext, idBtnPrev) {
         let indiceActual = 0;
         const contenedor = document.querySelector(selectorContenedor);
@@ -110,11 +110,11 @@ export function inicializarUI(onInteraccion) {
     const resetCarruselControles = inicializarCarrusel('#tab-controles', 'next-control', 'prev-control');
     const resetCarruselAjustes = inicializarCarrusel('#tab-ajustes', 'next-ajustes', 'prev-ajustes');
 
-    // Logica de pestañas del menu superior
-    const botonesPestañas = document.querySelectorAll('.btn-opcion');
-    const contenidosPestañas = document.querySelectorAll('.tab-contenido');
+    // Lógica de pestañas del menú superior
+    const botonesPestanas = document.querySelectorAll('.btn-opcion');
+    const contenidosPestanas = document.querySelectorAll('.tab-contenido');
 
-    botonesPestañas.forEach(boton => {
+    botonesPestanas.forEach(boton => {
         // Efecto de hover dinámico en los botones de pestañas del menú
         boton.addEventListener('mouseenter', () => {
             animacionesUI.pulsoBoton(boton);
@@ -123,9 +123,9 @@ export function inicializarUI(onInteraccion) {
         boton.addEventListener('click', () => {
             onInteraccion();
             
-            const tabDestino = boton.getAttribute('data-tab');
+            const { tab: tabDestino } = boton.dataset;
 
-            contenidosPestañas.forEach(contenido => {
+            contenidosPestanas.forEach(contenido => {
                 contenido.classList.add('oculto');
             });
 

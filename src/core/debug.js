@@ -25,7 +25,7 @@ export function obtenerDebugGUI() {
 }
 
 function hacerDraggable(guiInstance) {
-    const el = guiInstance.domElement;
+    const { domElement: el } = guiInstance;
     const titleEl = el.querySelector('.title');
     if (!titleEl) return;
 
@@ -57,40 +57,42 @@ function hacerDraggable(guiInstance) {
     }, true);
 
     function dragStart(e) {
-        const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
-        const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+        const { type, touches, clientX, clientY, target } = e;
+        const currentX = type === 'touchstart' ? touches[0].clientX : clientX;
+        const currentY = type === 'touchstart' ? touches[0].clientY : clientY;
         
         const rect = el.getBoundingClientRect();
         
-        shiftX = clientX - rect.left;
-        shiftY = clientY - rect.top;
+        shiftX = currentX - rect.left;
+        shiftY = currentY - rect.top;
 
-        startX = clientX;
-        startY = clientY;
+        startX = currentX;
+        startY = currentY;
         hasMoved = false;
 
-        if (e.target === titleEl || titleEl.contains(e.target)) {
+        if (target === titleEl || titleEl.contains(target)) {
             active = true;
         }
     }
 
-    function dragEnd(e) {
+    function dragEnd() {
         active = false;
     }
 
     function drag(e) {
         if (active) {
-            const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
-            const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+            const { type, touches, clientX, clientY } = e;
+            const currentX = type === 'touchmove' ? touches[0].clientX : clientX;
+            const currentY = type === 'touchmove' ? touches[0].clientY : clientY;
 
-            if (Math.abs(clientX - startX) > 5 || Math.abs(clientY - startY) > 5) {
+            if (Math.abs(currentX - startX) > 5 || Math.abs(currentY - startY) > 5) {
                 hasMoved = true;
             }
 
             if (e.cancelable) e.preventDefault();
 
-            el.style.left = (clientX - shiftX) + 'px';
-            el.style.top = (clientY - shiftY) + 'px';
+            el.style.left = (currentX - shiftX) + 'px';
+            el.style.top = (currentY - shiftY) + 'px';
             el.style.right = 'auto';
             el.style.bottom = 'auto';
         }

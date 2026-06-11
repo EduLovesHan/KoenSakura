@@ -11,13 +11,14 @@ export function inicializarInteracciones() {
     dialogoTitulo = document.getElementById('dialogo-titulo');
     dialogoTexto = document.getElementById('dialogo-texto');
 
-    document.addEventListener('keydown', (e) => {
-        if (e.key.toLowerCase() === 'e' && objetoCercanoActual) {
+    document.addEventListener('keydown', ({ key }) => {
+        if (key.toLowerCase() === 'e' && objetoCercanoActual) {
             if (modalDialogo && uiInteraccion) {
                 const estaOculto = modalDialogo.classList.contains('oculto');
                 if (estaOculto) {
-                    dialogoTitulo.innerText = objetoCercanoActual.titulo;
-                    dialogoTexto.innerText = objetoCercanoActual.texto;
+                    const { titulo, texto } = objetoCercanoActual;
+                    dialogoTitulo.innerText = titulo;
+                    dialogoTexto.innerText = texto;
                     modalDialogo.classList.remove('oculto');
                 } else {
                     modalDialogo.classList.add('oculto');
@@ -36,9 +37,10 @@ export function registrarObjetoInteractivo(malla, distancia, titulo, texto) {
 export function actualizarInteracciones(camara, isLocked) {
     if (isLocked) {
         let objetoEncontrado = null;
+        const { position } = camara;
         
         for (const obj of objetosInteractivos) {
-            const dist = camara.position.distanceTo(obj.malla.position);
+            const dist = position.distanceTo(obj.malla.position);
             if (dist <= obj.distancia) {
                 objetoEncontrado = obj;
                 break; 
@@ -61,14 +63,14 @@ export function actualizarInteracciones(camara, isLocked) {
 }
 
 // Suscribirse al bus de eventos para registrar interactivos autónomamente
-broker.on('modeloCargado', ({ modelo, datosJSON }) => {
-    const interactivo = datosJSON.interactivo;
+broker.on('modeloCargado', ({ modelo, datosJSON: { interactivo } }) => {
     if (interactivo) {
+        const { distancia = 8, titulo = "Interactuable", texto = "" } = interactivo;
         registrarObjetoInteractivo(
             modelo,
-            interactivo.distancia || 8,
-            interactivo.titulo || "Interactuable",
-            interactivo.texto || ""
+            distancia,
+            titulo,
+            texto
         );
     }
 });

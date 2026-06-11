@@ -13,7 +13,6 @@ const velAgua1 = { u: 0.0002, v: 0.000 };
 //Registrar el AnimationMixer y arrancar todos los clips del modelo
 export function registrarAnimaciones(modelo, clips) {
     if (!clips || clips.length === 0) return;
-
     const mixer = new THREE.AnimationMixer(modelo);
     clips.forEach((clip) => mixer.clipAction(clip).play());
     // Guardar en el array para que todos se actualicen cada frame

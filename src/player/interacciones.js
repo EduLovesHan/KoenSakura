@@ -1,3 +1,5 @@
+import { broker } from '../world/EventBroker.js';
+
 const objetosInteractivos = [];
 let objetoCercanoActual = null;
 let uiInteraccion, modalDialogo, dialogoTitulo, dialogoTexto;
@@ -57,3 +59,16 @@ export function actualizarInteracciones(camara, isLocked) {
         }
     }
 }
+
+// Suscribirse al bus de eventos para registrar interactivos autónomamente
+broker.on('modeloCargado', ({ modelo, datosJSON }) => {
+    const interactivo = datosJSON.interactivo;
+    if (interactivo) {
+        registrarObjetoInteractivo(
+            modelo,
+            interactivo.distancia || 8,
+            interactivo.titulo || "Interactuable",
+            interactivo.texto || ""
+        );
+    }
+});

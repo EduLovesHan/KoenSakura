@@ -7,7 +7,7 @@ import { Skybox } from './world/skybox.js';
 import { inicializarUI } from './ui/menu.js';
 import { inicializarAudio, reproducirClick, configurarControlesAudio } from './audio/GestorAudio.js';
 import { inicializarIluminacion, configurarControlesIluminacion, ambientLight, directionalLight, actualizarLucesFarolas } from './world/iluminacion.js';
-import { cargarEscenario, phongUniformsGlobales } from './world/CargadorModelos.js';
+import { cargarEscenario, phongUniformsGlobales, aguasInstanciadas } from './world/CargadorModelos.js';
 import { crearHitbox, inicializarDebugColisiones, actualizarPlayerBox } from './world/colisiones.js';
 import { inicializarInteracciones, actualizarInteracciones } from './player/interacciones.js';
 import { actualizarAnimaciones } from './world/animaciones.js';
@@ -58,8 +58,8 @@ const reloj = new THREE.Clock();
 
 //configuracion del audio y controles de movimiento
 const listener = inicializarAudio(camara);
-const Controles = new ControlesPrimeraPersona(camara, document.body, objetosColision, listener);
-configurarControlesAudio(Controles);
+const Controles = new ControlesPrimeraPersona(camara, document.body, objetosColision);
+configurarControlesAudio();
 
 // Bloquear pointer lock hasta que la pantalla de carga desaparezca
 document.addEventListener('click', (e) => {
@@ -98,6 +98,13 @@ function animar() {
 
     // Actualizar logica
     actualizarAnimaciones(delta);
+
+    // Actualizar shader del agua realista (THREE.Water)
+    if (aguasInstanciadas) {
+        aguasInstanciadas.forEach(agua => {
+            agua.material.uniforms['time'].value += delta;
+        });
+    }
     actualizarInteracciones(camara, Controles.isLocked);
     Controles.actualizar();
 

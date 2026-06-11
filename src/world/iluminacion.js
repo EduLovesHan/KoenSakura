@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { gsap } from 'gsap';
+import { broker } from './EventBroker.js';
 import { cerrarMenuSuperior } from '../ui/menu.js';
 import { obtenerDebugGUI } from '../core/debug.js';
 import { phongUniformsGlobales } from './CargadorModelos.js';
@@ -338,3 +339,24 @@ export function configurarControlesIluminacion(skybox) {
         });
     }
 }
+
+// Suscribirse al bus de eventos para procesar iluminación autónomamente
+broker.on('modeloCargado', ({ modelo, datosJSON }) => {
+    // Si es farola, registrar su posición para el pool de iluminación por proximidad
+    if (datosJSON.esFarola) {
+        const posFarola = modelo.position.clone();
+        registrarPosicionFarola(posFarola);
+    }
+
+    // Buscar y registrar materiales emisivos en el modelo cargado
+    modelo.traverse((child) => {
+        if (child.isMesh && child.material) {
+            const mats = Array.isArray(child.material) ? child.material : [child.material];
+            mats.forEach(mat => {
+                if (mat.emissive && (mat.emissive.r > 0 || mat.emissive.g > 0 || mat.emissive.b > 0)) {
+                    registrarMaterialEmisivo(mat);
+                }
+            });
+        }
+    });
+});

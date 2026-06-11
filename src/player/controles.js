@@ -1,11 +1,12 @@
-import { Vector3, MathUtils, Audio, AudioLoader } from 'three';
+import { Vector3, MathUtils } from 'three';
 import { resolverMovimientoJugador } from '../world/colisiones.js';
+import { broker } from '../world/EventBroker.js';
 
 //Clase para controlar la camara en primera persona
 
 class ControlesPrimeraPersona {
 
-    constructor(camara, domElement, objetosColision = [], audioListener) {
+    constructor(camara, domElement, objetosColision = []) {
         this.camara = camara;
         this.domElement = domElement;
         this.objetosColision = objetosColision;
@@ -33,24 +34,11 @@ class ControlesPrimeraPersona {
         this._onKeyUp = this.onKeyUp.bind(this);
         this._onPointerlockChange = this.onPointerlockChange.bind(this);
 
-        // Configuración volumen SFX
-        this.sfxVolume = 1.5;
-        this.sfxMuted = false;
+        // Estado del jugador
+        this.isWalking = false;
 
         // Conectar eventos automaticamente
         this.conectar();
-
-        // Configurar Audio para los pasos
-        this.pasosAudio = null;
-        if (audioListener) {
-            this.pasosAudio = new Audio(audioListener);
-            const audioLoader = new AudioLoader();
-            audioLoader.load('assets/audio/Footsteps.mp3', (buffer) => {
-                this.pasosAudio.setBuffer(buffer);
-                this.pasosAudio.setLoop(true); // Repetir mientras caminamos
-                this.pasosAudio.setVolume(this.sfxMuted ? 0 : this.sfxVolume); 
-            });
-        }
     }
 
     conectar() {
@@ -102,19 +90,17 @@ class ControlesPrimeraPersona {
             case 'd': this.teclas.d = false; break;
         }
     }
-    setSfxVolume(volumen) {
-        this.sfxVolume = volumen;
-        if (this.pasosAudio) this.pasosAudio.setVolume(this.sfxMuted ? 0 : this.sfxVolume);
-    }
-
-    setSfxMute(isMuted) {
-        this.sfxMuted = isMuted;
-        if (this.pasosAudio) this.pasosAudio.setVolume(this.sfxMuted ? 0 : this.sfxVolume);
-    }
+    // (La gestión de volumen SFX y pisadas se ha delegado al módulo GestorAudio)
 
     //movimiento
     actualizar() {
-        if (!this.isLocked) return;
+        if (!this.isLocked) {
+            if (this.isWalking) {
+                this.isWalking = false;
+                broker.emit('jugadorCaminando', false);
+            }
+            return;
+        }
 
         // Calcular hacia donde va la camara (movimiento plano en el eje XZ)
         this._vectorAdelante.set(-Math.sin(this.yaw), 0, -Math.cos(this.yaw)).normalize();
@@ -146,13 +132,10 @@ class ControlesPrimeraPersona {
             }
         }
 
-        // Controlar la reproducción del sonido de los pasos
-        if (this.pasosAudio && this.pasosAudio.buffer) {
-            if (enMovimiento) {
-                if (!this.pasosAudio.isPlaying) this.pasosAudio.play();
-            } else {
-                if (this.pasosAudio.isPlaying) this.pasosAudio.pause();
-            }
+        // Controlar el estado de caminata y emitir evento si cambia
+        if (this.isWalking !== enMovimiento) {
+            this.isWalking = enMovimiento;
+            broker.emit('jugadorCaminando', this.isWalking);
         }
     }
 }

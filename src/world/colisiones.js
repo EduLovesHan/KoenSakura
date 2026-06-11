@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { obtenerDebugGUI } from '../core/debug.js';
+import { broker } from './EventBroker.js';
 
 // Array global de cajas de colisión AABB
 export const collidableBoxes = [];
@@ -431,3 +432,7 @@ function actualizarBoxTemporal(posCamara, targetBox, skin = 0) {
     );
 }
 
+// Suscribirse al bus de eventos para procesar colisiones autónomamente
+broker.on('modeloCargado', ({ modelo, datosJSON, scene, objetosColision }) => {
+    procesarColisiones(modelo, scene, objetosColision, datosJSON);
+});

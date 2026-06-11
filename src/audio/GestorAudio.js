@@ -1,7 +1,12 @@
 import * as THREE from 'three';
+import { broker } from '../world/EventBroker.js';
 
 let listener;
-let sonidoFondo, sonidoClick;
+let sonidoFondo, sonidoClick, sonidoPasos;
+
+let sfxVolume = 1.5;
+let sfxMuted = false;
+let jugadorEstaCaminando = false;
 
 // Carga e inicializacion de audios
 export function inicializarAudio(camara) {
@@ -23,19 +28,33 @@ export function inicializarAudio(camara) {
     audioLoader.load('assets/audio/click-boton.mp3', (buffer) => {
         sonidoClick.setBuffer(buffer);
         sonidoClick.setLoop(false);
-        sonidoClick.setVolume(1.5);
+        sonidoClick.setVolume(sfxMuted ? 0 : sfxVolume);
     });
 
-    // Reproducir música al hacer clic y ocultar menú 
+    // Sonido de pisadas
+    sonidoPasos = new THREE.Audio(listener);
+    audioLoader.load('assets/audio/Footsteps.mp3', (buffer) => {
+        sonidoPasos.setBuffer(buffer);
+        sonidoPasos.setLoop(true);
+        sonidoPasos.setVolume(sfxMuted ? 0 : sfxVolume);
+        if (jugadorEstaCaminando) {
+            sonidoPasos.play();
+        }
+    });
+
+    // Reproducir música y sonidos al hacer clic y ocultar menú
     document.body.addEventListener('click', () => {
         if (listener.context.state === 'suspended') listener.context.resume();
         if (!sonidoFondo.isPlaying && sonidoFondo.buffer) sonidoFondo.play();
+        if (jugadorEstaCaminando && sonidoPasos && sonidoPasos.buffer && !sonidoPasos.isPlaying) {
+            sonidoPasos.play();
+        }
         
         const panelMenuSuperior = document.getElementById('panel-menu-superior');
         if (panelMenuSuperior) panelMenuSuperior.classList.add('oculto');
     });
 
-    return listener; 
+    return listener;
 }
 
 // Sonar los botones en el menu
@@ -46,7 +65,7 @@ export function reproducirClick() {
 }
 
 // Conectar sliders con el motor de audio
-export function configurarControlesAudio(Controles) {
+export function configurarControlesAudio() {
     const musicaSlider = document.getElementById('musica-slider');
     const musicaMute = document.getElementById('musica-mute');
     const sfxSlider = document.getElementById('sfx-slider');
@@ -70,14 +89,35 @@ export function configurarControlesAudio(Controles) {
 
     if (sfxSlider && sfxMute) {
         sfxSlider.addEventListener('input', (e) => {
-            const volumen = parseFloat(e.target.value);
-            Controles.setSfxVolume(volumen);
-            if (sonidoClick) sonidoClick.setVolume(volumen);
+            sfxVolume = parseFloat(e.target.value);
+            actualizarVolumenSFX();
         });
         sfxMute.addEventListener('change', (e) => {
-            const isMuted = e.target.checked;
-            Controles.setSfxMute(isMuted);
-            if (sonidoClick) sonidoClick.setVolume(isMuted ? 0 : parseFloat(sfxSlider.value));
+            sfxMuted = e.target.checked;
+            actualizarVolumenSFX();
         });
     }
 }
+
+function actualizarVolumenSFX() {
+    const volumenEfectivo = sfxMuted ? 0 : sfxVolume;
+    if (sonidoPasos) sonidoPasos.setVolume(volumenEfectivo);
+    if (sonidoClick) sonidoClick.setVolume(volumenEfectivo);
+}
+
+export function actualizarAudioPasos(isWalking) {
+    jugadorEstaCaminando = isWalking;
+    if (sonidoPasos && sonidoPasos.buffer) {
+        if (isWalking) {
+            if (!sonidoPasos.isPlaying) sonidoPasos.play();
+        } else {
+            if (sonidoPasos.isPlaying) sonidoPasos.pause();
+        }
+    }
+}
+
+// Suscribirse a los cambios de estado del jugador (pisadas)
+broker.on('jugadorCaminando', (isWalking) => {
+    actualizarAudioPasos(isWalking);
+});
+

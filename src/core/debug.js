@@ -13,6 +13,11 @@ export function obtenerDebugGUI() {
         // Por defecto, hacer que el panel aparezca minimizado
         gui.close();
 
+        // Si es móvil o pantalla táctil pequeña, ocultar el panel de depuración completamente para liberar espacio
+        if (window.esMovil) {
+            gui.hide();
+        }
+
         // Hacer que se pueda arrastrar (mover)
         hacerDraggable(gui);
     }

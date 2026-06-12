@@ -1,9 +1,11 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 import { Water } from 'three/addons/objects/Water.js';
 import { broker } from './EventBroker.js';
 import { registrarAnimaciones, registrarTexturaAgua } from './animaciones.js';
+import { mallasSuelo, registrarBoxColision } from './colisiones.js';
 import vertexShader from '../shaders/phong.vert?raw';
 import fragmentShader from '../shaders/phong.frag?raw';
 
@@ -11,7 +13,7 @@ export const aguasInstanciadas = [];
 
 // Cargar la textura de normales del agua
 const textureLoader = new THREE.TextureLoader();
-const waterNormals = textureLoader.load('assets/texturas/waternormals3.jpeg', (texture) => {
+const waterNormals = textureLoader.load('assets/texturas/waternormals3.webp', (texture) => {
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
 });
 
@@ -221,6 +223,8 @@ const esperarSiguienteTick = () => {
 export async function cargarEscenario(scene, objetosColision, loadingManager = null) {
     const loader = loadingManager ? new GLTFLoader(loadingManager) : new GLTFLoader();
 
+    loader.setMeshoptDecoder(MeshoptDecoder);
+
     // Resetear aguas instanciadas
     aguasInstanciadas.length = 0;
 
@@ -267,6 +271,56 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
                     const clon = usarSkeletonUtils
                         ? SkeletonUtils.clone(modeloBase)
                         : modeloBase.clone();
+
+                    // Detectar si se procesa el modelo de colisiones
+                    const esModeloColisiones = item.archivo.toLowerCase().includes('colisiones');
+
+                    if (esModeloColisiones) {
+                        // Lógica para modelos de colisiones
+                        const { posicion, rotacion, rotacionY, escala } = instancia;
+
+                        if (posicion) clon.position.set(posicion[0], posicion[1], posicion[2]);
+                        if (rotacion) clon.rotation.set(rotacion[0], rotacion[1], rotacion[2]);
+                        else if (rotacionY !== undefined) clon.rotation.y = rotacionY;
+
+                        if (escala) {
+                            if (Array.isArray(escala)) clon.scale.set(escala[0], escala[1], escala[2]);
+                            else clon.scale.setScalar(escala);
+                        }
+
+                        scene.add(clon);
+
+                        // Actualizar matrices del mundo para calcular el Box3 correctamente
+                        clon.updateMatrixWorld(true);
+
+                        clon.traverse((hijo) => {
+                            if (hijo.isMesh) {
+                                const nombreLower = hijo.name.toLowerCase();
+                                if (nombreLower.includes('colision')) {
+                                    if (hijo.material) {
+                                        hijo.material.visible = false;
+                                    }
+
+                                    objetosColision.push(hijo);
+
+                                    if (nombreLower.includes('suelo') || nombreLower.includes('rampa') || nombreLower.includes('escalera') || nombreLower.includes('piso')) {
+                                        mallasSuelo.push(hijo);
+                                    } else {
+                                        const box = new THREE.Box3().setFromObject(hijo);
+                                        registrarBoxColision(box);
+                                    }
+                                }
+                            }
+                        });
+                        contadorInstancias++;
+                        if (loadingManager) {
+                            loadingManager.itemEnd(`instancia_${contadorInstancias}`);
+                        }
+                        if (contadorInstancias % BATCH_SIZE === 0) {
+                            await esperarSiguienteTick();
+                        }
+                        continue;
+                    }
 
                     //  Registrar texturas de agua ANTES de aplicar el shader
                     //  Registrar y reemplazar mallas de agua por THREE.Water

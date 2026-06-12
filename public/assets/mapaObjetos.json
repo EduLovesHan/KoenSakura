@@ -858,9 +858,21 @@
     ]
   },
   {
-    "archivo": "assets/modelos/plazaPrincipal.glb",
+    "archivo": "assets/modelos/plazaPrincipal_optimizado.glb",
     "tieneAgua": true,
     "tieneAnimaciones": true,
+    "instancias": [
+      {
+        "posicion": [
+          0,
+          0,
+          0
+        ]
+      }
+    ]
+  },
+  {
+    "archivo": "assets/modelos/plazaPrincipal_colisiones.glb",
     "instancias": [
       {
         "posicion": [

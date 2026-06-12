@@ -12,9 +12,9 @@ class Skybox {
             : new THREE.CubeTextureLoader();
 
         const texturas = [
-            'right.png', 'left.png',
-            'top.png', 'bottom.png',
-            'front.png', 'back.png'
+            'right.webp', 'left.webp',
+            'top.webp', 'bottom.webp',
+            'front.webp', 'back.webp'
         ];
 
         // Skybox de Día

@@ -32,7 +32,14 @@ loadingManager.onProgress = (_url, cargados, total) => {
     textoPorcentaje.textContent = `Cargando... ${porcentajeMaximo}%`;
 };
 
-loadingManager.onLoad = () => {
+loadingManager.onLoad = async () => {
+    textoPorcentaje.textContent = 'Compilando gráficos...';
+    try {
+        await renderizador.compileAsync(scene, camara);
+    } catch (err) {
+        console.warn('Error en la pre-compilación', err);
+    }
+
     timeoutCierre = setTimeout(() => {
         barraRelleno.style.width = '100%';
         textoPorcentaje.textContent = '¡Listo! 100%';
@@ -97,6 +104,9 @@ function animar() {
 
     // Actualizar lógica
     actualizarAnimaciones(delta);
+
+
+    actualizarPlayerBox(camara.position);
 
     // Actualizar shader del agua realista (THREE.Water)
     if (aguasInstanciadas) {

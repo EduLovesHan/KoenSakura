@@ -113,7 +113,7 @@ function actualizarHelpersVisibilidad(scene) {
 }
 
 // Registrar un Box3 en la lista y crear su helper si está activo el modo debug
-function registrarBoxColision(box) {
+export function registrarBoxColision(box) {
     collidableBoxes.push(box);
     if (escenaGlobal) {
         const helper = new THREE.Box3Helper(box, 0x00ff00); // Líneas verdes

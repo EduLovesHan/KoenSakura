@@ -36,7 +36,7 @@ export function inicializarUI(onInteraccion) {
             const icono = btnMenuSuperior.querySelector('.icono-sakura');
 
             if (estaOculto) {
-                // Abrir
+                // Abrir menu
                 panelMenuSuperior.classList.remove('oculto');
                 animacionesUI.aparecerMenu(panelMenuSuperior);
                 
@@ -48,7 +48,7 @@ export function inicializarUI(onInteraccion) {
                     });
                 }
             } else {
-                // Cerrar
+                // Cerrar menu
                 animacionesUI.desaparecerMenu(panelMenuSuperior, () => {
                     panelMenuSuperior.classList.add('oculto');
                 });

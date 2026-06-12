@@ -110,8 +110,30 @@ function crearMaterialPhong(originalMaterial) {
  *   - Mallas cuyo nombre contiene 'agua' → conservan material para transparencia/UV
  *   - Mallas con materiales emisivos → tienen luz propia
  *   - Cajas de colisión
+ *   - Modelo 'muñeca' → conserva material GLTF original para transparencias alpha
  */
+
 function aplicarMaterialPhong(model) {
+    // ── EXCLUIR modelo completo si es la muñeca ──
+    // Conserva su MeshStandardMaterial original para que las texturas
+    // con canal alpha (pelo, ropa, accesorios) se rendericen correctamente.
+    const nombreModelo = (model.name || '').toLowerCase();
+    const esModeloExcluido = nombreModelo.includes('muñeca') || nombreModelo.includes('muneca');
+
+    if (esModeloExcluido) {
+        // Asegurar que el material original tenga transparencia configurada
+        model.traverse((child) => {
+            if (!child.isMesh || !child.material) return;
+            const mats = Array.isArray(child.material) ? child.material : [child.material];
+            mats.forEach(mat => {
+                mat.transparent = true;
+                mat.alphaTest = mat.alphaTest > 0 ? mat.alphaTest : 0.5;
+                mat.side = THREE.DoubleSide;
+            });
+        });
+        return;
+    }
+
     model.traverse((child) => {
         if (!child.isMesh || !child.material) return;
 
@@ -128,6 +150,17 @@ function aplicarMaterialPhong(model) {
 
         // No tocar las cajas de colisión
         if (nombreLower.includes('caja_colision')) return;
+
+        // ── EXCLUIR mallas de muñeca por nombre de malla individual ──
+        if (nombreLower.includes('muñeca') || nombreLower.includes('muneca')) {
+            const mats = Array.isArray(child.material) ? child.material : [child.material];
+            mats.forEach(mat => {
+                mat.transparent = true;
+                mat.alphaTest = mat.alphaTest > 0 ? mat.alphaTest : 0.5;
+                mat.side = THREE.DoubleSide;
+            });
+            return;
+        }
 
         // Omitir mallas con materiales emisivos (luz propia, ej. farolas)
         const materialesOriginales = Array.isArray(child.material)
@@ -186,12 +219,14 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
                 }
 
                 // Buscar y registrar materiales emisivos en el modelo base antes de clonar
+                let tieneEmisivos = false;
                 modeloBase.traverse((child) => {
                     if (child.isMesh && child.material) {
                         const mats = Array.isArray(child.material) ? child.material : [child.material];
                         mats.forEach(mat => {
                             if (mat.emissive && (mat.emissive.r > 0 || mat.emissive.g > 0 || mat.emissive.b > 0)) {
                                 registrarMaterialEmisivo(mat);
+                                tieneEmisivos = true;
                             }
                         });
                     }

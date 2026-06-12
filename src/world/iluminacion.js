@@ -26,7 +26,7 @@ export function registrarMaterialEmisivo(material) {
 // Instanciar las luces en la escena
 export function inicializarIluminacion(scene) {
     // Luz ambiental inicial (Día) con componentes RGB exactos para sRGB (con offset para evitar redondeo)
-    ambientLight = new THREE.AmbientLight(); 
+    ambientLight = new THREE.AmbientLight();
     ambientLight.color.setRGB((0xd8 + 0.001) / 255, (0xe2 + 0.001) / 255, (0xf0 + 0.001) / 255);
     ambientLight.intensity = 0.6;
     scene.add(ambientLight);
@@ -60,8 +60,8 @@ function refrescarGUI() {
                 });
             }
             if (guiInstance.folders) {
-                const folders = Array.isArray(guiInstance.folders) 
-                    ? guiInstance.folders 
+                const folders = Array.isArray(guiInstance.folders)
+                    ? guiInstance.folders
                     : Object.values(guiInstance.folders);
                 folders.forEach(folder => {
                     actualizarControladores(folder);
@@ -89,7 +89,7 @@ export function actualizarLucesFarolas(camara) {
         return;
     }
 
-    // De noche: calcular distancias y asignar las más cercanas
+    // De noche: calcular distancias y asignar las 3 más cercanas
     const camaraPos = camara.position;
     const distancias = posicionesFarolasGlobal.map((pos, idx) => ({
         idx,
@@ -119,7 +119,7 @@ export function actualizarLucesFarolas(camara) {
             tempVec.applyMatrix4(camara.matrixWorldInverse);
             uniformPos[i].value.copy(tempVec);
 
-            // También mover la PointLight real (para SkinnedMesh/agua que usan material nativo)
+            // También mover la PointLight real (por si se usa para otros efectos)
             lucesPool[i].position.set(posFarola.x, posFarola.y + ALTURA_LUZ_FAROLA, posFarola.z);
             lucesPool[i].intensity = 2.0;
         } else {
@@ -330,7 +330,7 @@ export function configurarControlesIluminacion(skybox) {
             .name('Intensidad Especular')
             .listen();
     }
-    
+
     if (modoNocheCheckbox) {
         modoNocheCheckbox.addEventListener('change', () => {
             alternarDiaNoche(skybox);

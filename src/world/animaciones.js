@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 // ── Estado interno del módulo ──
-// Array de mixers: soporta múltiples modelos animados (peces, agua, etc.)
+// Para múltiples modelos animados (peces, agua, etc.)
 const mixers = [];
 
 // Texturas de agua registradas para animación UV

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { gsap } from 'gsap';
+import { broker } from './EventBroker.js';
 import { cerrarMenuSuperior } from '../ui/menu.js';
 import { obtenerDebugGUI } from '../core/debug.js';
 import { phongUniformsGlobales } from './CargadorModelos.js';
@@ -90,7 +91,7 @@ export function actualizarLucesFarolas(camara) {
     }
 
     // De noche: calcular distancias y asignar las 3 más cercanas
-    const camaraPos = camara.position;
+    const { position: camaraPos } = camara;
     const distancias = posicionesFarolasGlobal.map((pos, idx) => ({
         idx,
         dist: camaraPos.distanceToSquared(pos) // squared para evitar sqrt innecesario
@@ -338,3 +339,25 @@ export function configurarControlesIluminacion(skybox) {
         });
     }
 }
+
+// Suscribirse al bus de eventos para procesar iluminación autónomamente
+broker.on('modeloCargado', ({ modelo, datosJSON }) => {
+    // Si es farola, registrar su posición para el pool de iluminación por proximidad
+    if (datosJSON.esFarola) {
+        const posFarola = modelo.position.clone();
+        registrarPosicionFarola(posFarola);
+    }
+
+    // Buscar y registrar materiales emisivos en el modelo cargado
+    modelo.traverse((child) => {
+        if (child.isMesh && child.material) {
+            const mats = Array.isArray(child.material) ? child.material : [child.material];
+            mats.forEach((mat) => {
+                const { emissive } = mat;
+                if (emissive && (emissive.r > 0 || emissive.g > 0 || emissive.b > 0)) {
+                    registrarMaterialEmisivo(mat);
+                }
+            });
+        }
+    });
+});

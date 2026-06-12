@@ -1,12 +1,19 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
-import { procesarColisiones } from './colisiones.js';
-import { registrarObjetoInteractivo } from '../player/interacciones.js';
+import { Water } from 'three/addons/objects/Water.js';
+import { broker } from './EventBroker.js';
 import { registrarAnimaciones, registrarTexturaAgua } from './animaciones.js';
-import { registrarMaterialEmisivo, registrarPosicionFarola } from './iluminacion.js';
 import vertexShader from '../shaders/phong.vert?raw';
 import fragmentShader from '../shaders/phong.frag?raw';
+
+export const aguasInstanciadas = [];
+
+// Cargar la textura de normales del agua
+const textureLoader = new THREE.TextureLoader();
+const waterNormals = textureLoader.load('assets/texturas/waternormals3.jpeg', (texture) => {
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+});
 
 // ══════════════════════════════════════════════════════════════════
 // Uniforms globales para el shader Phong custom.
@@ -39,28 +46,34 @@ export const phongUniformsGlobales = {
 
 function crearMaterialPhong(originalMaterial) {
     // ── Extraer textura y color originales del material GLTF ──
-    const texturaOriginal = originalMaterial.map || null;
-    const colorOriginal = originalMaterial.color
-        ? originalMaterial.color.clone()
+    const {
+        map: texturaOriginal = null,
+        color,
+        opacity: opacidadOriginal = 1.0,
+        transparent,
+        alphaTest,
+        depthWrite,
+        blending
+    } = originalMaterial;
+
+    const colorOriginal = color
+        ? color.clone()
         : new THREE.Color(0xffffff);
-    const opacidadOriginal = originalMaterial.opacity !== undefined
-        ? originalMaterial.opacity
-        : 1.0;
 
     // Si la opacidad es < 1 o el material original ya era transparente
-    const esTransparente = originalMaterial.transparent || opacidadOriginal < 1.0;
+    const esTransparente = transparent || opacidadOriginal < 1.0;
 
     // Si el original tiene alphaTest configurado, o usamos un fallback minúsculo si es transparente
-    const alphaTestOriginal = originalMaterial.alphaTest !== undefined && originalMaterial.alphaTest > 0
-        ? originalMaterial.alphaTest
+    const alphaTestOriginal = alphaTest !== undefined && alphaTest > 0
+        ? alphaTest
         : (esTransparente ? 0.05 : 0.0);
 
-    const depthWriteOriginal = originalMaterial.depthWrite !== undefined
-        ? originalMaterial.depthWrite
+    const depthWriteOriginal = depthWrite !== undefined
+        ? depthWrite
         : true;
 
-    const blendingOriginal = originalMaterial.blending !== undefined
-        ? originalMaterial.blending
+    const blendingOriginal = blending !== undefined
+        ? blending
         : THREE.NormalBlending;
 
     // ── Crear una instancia NUEVA de ShaderMaterial (nunca compartida) ──
@@ -195,8 +208,21 @@ function tieneSkinnedMesh(model) {
     return encontrado;
 }
 
+const BATCH_SIZE = 5;
+
+const esperarSiguienteTick = () => {
+    if (typeof requestIdleCallback === 'function') {
+        return new Promise((resolve) => requestIdleCallback(() => resolve()));
+    } else {
+        return new Promise((resolve) => setTimeout(resolve, 0));
+    }
+};
+
 export async function cargarEscenario(scene, objetosColision, loadingManager = null) {
     const loader = loadingManager ? new GLTFLoader(loadingManager) : new GLTFLoader();
+
+    // Resetear aguas instanciadas
+    aguasInstanciadas.length = 0;
 
     try {
         const respuesta = await fetch('assets/mapaObjetos.json');
@@ -204,6 +230,21 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
             throw new Error(`No se pudo cargar el archivo de configuración. Status: ${respuesta.status}`);
         }
         const configuracion = await respuesta.json();
+
+        // Contar el total de instancias de todos los modelos
+        let totalInstancias = 0;
+        for (const item of configuracion) {
+            totalInstancias += item.instancias.length;
+        }
+
+        // Registrar anticipadamente todas las instancias en el LoadingManager
+        if (loadingManager) {
+            for (let i = 1; i <= totalInstancias; i++) {
+                loadingManager.itemStart(`instancia_${i}`);
+            }
+        }
+
+        let contadorInstancias = 0;
 
         for (const item of configuracion) {
             try {
@@ -218,73 +259,90 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
                     console.log(`[SkeletonUtils] Modelo ${item.archivo} contiene SkinnedMesh — se usará SkeletonUtils.clone()`);
                 }
 
-                // Buscar y registrar materiales emisivos en el modelo base antes de clonar
-                let tieneEmisivos = false;
-                modeloBase.traverse((child) => {
-                    if (child.isMesh && child.material) {
-                        const mats = Array.isArray(child.material) ? child.material : [child.material];
-                        mats.forEach(mat => {
-                            if (mat.emissive && (mat.emissive.r > 0 || mat.emissive.g > 0 || mat.emissive.b > 0)) {
-                                registrarMaterialEmisivo(mat);
-                                tieneEmisivos = true;
-                            }
-                        });
-                    }
-                });
+                // (La búsqueda de materiales emisivos se ha delegado a la suscripción del módulo de iluminación)
 
                 // Iterar cada instancia del modelo
                 for (const instancia of item.instancias) {
                     //  Clonación: SkeletonUtils.clone() para modelos con bones
-                    // Object3D.clone() NO clona correctamente SkinnedMesh: el clon
-                    // mantiene referencia al esqueleto original, rompiendo la animación.
-                    // SkeletonUtils.clone() clona esqueleto, bones y bindings correctamente.
                     const clon = usarSkeletonUtils
                         ? SkeletonUtils.clone(modeloBase)
                         : modeloBase.clone();
 
                     //  Registrar texturas de agua ANTES de aplicar el shader
-                    // aplicarMaterialPhong reemplaza materiales GLTF → las texturas
-                    // (normalMap/map) se perderían si se leen después.
+                    //  Registrar y reemplazar mallas de agua por THREE.Water
                     if (item.tieneAgua) {
+                        const mallasAguaParaReemplazar = [];
                         clon.traverse((hijo) => {
                             const nombre = hijo.name.toLowerCase();
                             if (hijo.isMesh && nombre.includes('agua')) {
-                                const textura = hijo.material.normalMap || hijo.material.map;
-                                if (textura) {
-                                    registrarTexturaAgua(textura);
-                                    console.log('[Agua] Textura registrada desde:', hijo.name);
-                                }
-                                // Configurar transparencia del agua sobre el material GLTF original
-                                hijo.material.transparent = true;
-                                hijo.material.opacity = 0.6;
-                                hijo.material.depthWrite = false;
+                                mallasAguaParaReemplazar.push(hijo);
                             }
+                        });
+
+                        mallasAguaParaReemplazar.forEach((hijo) => {
+                            const textura = hijo.material.normalMap || hijo.material.map;
+                            if (textura) {
+                                registrarTexturaAgua(textura);
+                                console.log('[Agua] Textura registrada desde:', hijo.name);
+                            }
+
+                            // Instanciar THREE.Water con la geometría original
+                            const water = new Water(
+                                hijo.geometry,
+                                {
+                                    textureWidth: 256,
+                                    textureHeight: 256,
+                                    //clipBias: 0.003,
+                                    waterNormals: waterNormals,
+                                    sunDirection: new THREE.Vector3(10, 20, 10).normalize(),
+                                    sunColor: 0xffffff,
+                                    waterColor: 0x001e0f,
+                                    distortionScale: 3.7,
+                                    fog: scene.fog !== undefined
+                                }
+                            );
+
+                            // Copiar transformaciones locales
+                            water.position.copy(hijo.position);
+                            water.rotation.copy(hijo.rotation);
+                            water.scale.copy(hijo.scale);
+                            water.name = hijo.name;
+
+                            // Reemplazar la malla original en la jerarquía del clon
+                            const parent = hijo.parent;
+                            if (parent) {
+                                parent.remove(hijo);
+                                parent.add(water);
+                            }
+
+                            // Guardar en array global para animar
+                            aguasInstanciadas.push(water);
                         });
                     }
 
                     //  Aplicar shader Phong SOLO a mallas estáticas
-                    // SkinnedMesh (peces) y agua se excluyen automáticamente
-                    // dentro de aplicarMaterialPhong().
                     aplicarMaterialPhong(clon);
 
+                    const { posicion, rotacion, rotacionY, escala } = instancia;
+
                     // Posición
-                    if (instancia.posicion) {
-                        clon.position.set(instancia.posicion[0], instancia.posicion[1], instancia.posicion[2]);
+                    if (posicion) {
+                        clon.position.set(posicion[0], posicion[1], posicion[2]);
                     }
 
                     // Rotación
-                    if (instancia.rotacion) {
-                        clon.rotation.set(instancia.rotacion[0], instancia.rotacion[1], instancia.rotacion[2]);
-                    } else if (instancia.rotacionY !== undefined) {
-                        clon.rotation.y = instancia.rotacionY;
+                    if (rotacion) {
+                        clon.rotation.set(rotacion[0], rotacion[1], rotacion[2]);
+                    } else if (rotacionY !== undefined) {
+                        clon.rotation.y = rotacionY;
                     }
 
                     // Escala
-                    if (instancia.escala) {
-                        if (Array.isArray(instancia.escala)) {
-                            clon.scale.set(instancia.escala[0], instancia.escala[1], instancia.escala[2]);
+                    if (escala) {
+                        if (Array.isArray(escala)) {
+                            clon.scale.set(escala[0], escala[1], escala[2]);
                         } else {
-                            clon.scale.setScalar(instancia.escala);
+                            clon.scale.setScalar(escala);
                         }
                     }
 
@@ -296,34 +354,44 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
                         clon.userData.generarHitboxAutomata = true;
                     }
 
-                    // Colisiones (caja exacta, con soporte de hitboxManual y shrinkFactor del JSON)
-                    procesarColisiones(clon, scene, objetosColision, item);
+                    // Emitir evento para desacoplar colisiones, iluminación por farolas e interacciones
+                    const datosJSON = { ...item, ...instancia };
+                    delete datosJSON.instancias;
 
-                    // Si es farola, registrar su posición para el pool de iluminación por proximidad
-                    if (item.esFarola) {
-                        const posFarola = clon.position.clone();
-                        registrarPosicionFarola(posFarola);
-                    }
+                    broker.emit('modeloCargado', {
+                        modelo: clon,
+                        datosJSON,
+                        scene,
+                        objetosColision
+                    });
 
                     // Si tiene animaciones, arrancar el AnimationMixer
                     if (item.tieneAnimaciones && gltf.animations && gltf.animations.length > 0) {
                         registrarAnimaciones(clon, gltf.animations);
                     }
 
-                    // Si es interactivo
-                    if (instancia.interactivo) {
-                        registrarObjetoInteractivo(
-                            clon,
-                            instancia.interactivo.distancia || 8,
-                            instancia.interactivo.titulo || "Interactuable",
-                            instancia.interactivo.texto || ""
-                        );
+                    // Incrementar el contador e informar al LoadingManager de la tarea completada
+                    contadorInstancias++;
+                    if (loadingManager) {
+                        loadingManager.itemEnd(`instancia_${contadorInstancias}`);
+                    }
+
+                    // Ceder control al navegador de forma diferida (Lotes/Batching)
+                    if (contadorInstancias % BATCH_SIZE === 0) {
+                        await esperarSiguienteTick();
                     }
                 }
 
                 console.log(`Modelo ${item.archivo} cargado y configurado con éxito (${item.instancias.length} instancias)`);
             } catch (err) {
                 console.error(`Error al procesar el modelo ${item.archivo}:`, err);
+                // En caso de error, liberar las tareas del LoadingManager para este lote de instancias pendientes
+                if (loadingManager) {
+                    for (let i = 0; i < item.instancias.length; i++) {
+                        contadorInstancias++;
+                        loadingManager.itemEnd(`instancia_${contadorInstancias}`);
+                    }
+                }
             }
         }
     } catch (error) {

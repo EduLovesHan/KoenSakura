@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { obtenerDebugGUI } from '../core/debug.js';
+import { broker } from './EventBroker.js';
 
 // Array global de cajas de colisión AABB
 export const collidableBoxes = [];
@@ -125,19 +126,6 @@ function registrarBoxColision(box) {
 // Crear cajas de colisión invisibles manuales (boundboxing)
 export function crearHitbox(x, y, z, ancho, alto, profundo, scene, objetosColision) {
     escenaGlobal = scene;
-    const geometry = new THREE.BoxGeometry(ancho, alto, profundo);
-    const material = new THREE.MeshBasicMaterial({ visible: false });
-    const hitbox = new THREE.Mesh(geometry, material);
-    hitbox.position.set(x, y, z);
-
-    // cod cambiado
-    // scene.add(hitbox);
-    // objetosColision.push(hitbox);
-
-    // Generar Box3 y registrarlo en collidableBoxes
-    const box = new THREE.Box3().setFromObject(hitbox);
-    // cod cambiado
-    // registrarBoxColision(box);
 }
 
 // Colisiones para los modelos 3D
@@ -181,14 +169,13 @@ export function procesarColisiones(modelo, scene, objetosColision, configItem = 
 
         const nombreHijo = hijo.name.toLowerCase();
 
-        if (hijo.isMesh && (hijo.name.toLowerCase().includes('colision_escalera') || hijo.name.toLowerCase().includes('colision_suelo'))) {
+        if (nombreHijo.includes('colision_escalera') || nombreHijo.includes('colision_suelo')) {
             hijo.material.visible = false;
-            // hijo.material.visible = true;
             mallasSuelo.push(hijo);
             tieneCajaBlender = true;
         }
 
-        if (hijo.isMesh && hijo.name.toLowerCase().includes('caja_colision_i')) {
+        if (nombreHijo.includes('caja_colision_i')) {
             hijo.material.visible = false;
             objetosColision.push(hijo);
             tieneCajaBlender = true;
@@ -196,7 +183,7 @@ export function procesarColisiones(modelo, scene, objetosColision, configItem = 
             const box = new THREE.Box3().setFromObject(hijo);
             registrarBoxColision(box);
         }
-        if (hijo.isMesh && hijo.name.toLowerCase().includes('caja_colision_v')) {
+        if (nombreHijo.includes('caja_colision_v')) {
             hijo.material.visible = false; // Ocultar por ahora
             objetosColision.push(hijo);
             tieneCajaBlender = true;
@@ -431,3 +418,7 @@ function actualizarBoxTemporal(posCamara, targetBox, skin = 0) {
     );
 }
 
+// Suscribirse al bus de eventos para procesar colisiones autónomamente
+broker.on('modeloCargado', ({ modelo, datosJSON, scene, objetosColision }) => {
+    procesarColisiones(modelo, scene, objetosColision, datosJSON);
+});

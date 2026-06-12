@@ -1,21 +1,21 @@
-import { Vector3, MathUtils, Audio, AudioLoader } from 'three';
+import { Vector3, MathUtils } from 'three';
 import { resolverMovimientoJugador } from '../world/colisiones.js';
+import { broker } from '../world/EventBroker.js';
 
-//Clase para controlar la camara en primera persona
+// Clase para controlar la cámara en primera persona
 
 class ControlesPrimeraPersona {
 
-    constructor(camara, domElement, objetosColision = [], audioListener) {
+    constructor(camara, domElement, objetosColision = []) {
         this.camara = camara;
         this.domElement = domElement;
-        this.objetosColision = objetosColision;
 
         // Propiedades de la camara
         this.isLocked = false;
         this.velocidad = 0.5;
         this.sensibilidad = 0.002;
 
-        // teclas para movimiento
+        // Teclas para movimiento
         this.teclas = { w: false, a: false, s: false, d: false };
 
         // Ángulos de Euler para la cámara
@@ -33,24 +33,11 @@ class ControlesPrimeraPersona {
         this._onKeyUp = this.onKeyUp.bind(this);
         this._onPointerlockChange = this.onPointerlockChange.bind(this);
 
-        // Configuración volumen SFX
-        this.sfxVolume = 1.5;
-        this.sfxMuted = false;
+        // Estado del jugador
+        this.isWalking = false;
 
-        // Conectar eventos automaticamente
+        // Conectar eventos automáticamente
         this.conectar();
-
-        // Configurar Audio para los pasos
-        this.pasosAudio = null;
-        if (audioListener) {
-            this.pasosAudio = new Audio(audioListener);
-            const audioLoader = new AudioLoader();
-            audioLoader.load('assets/audio/Footsteps.mp3', (buffer) => {
-                this.pasosAudio.setBuffer(buffer);
-                this.pasosAudio.setLoop(true); // Repetir mientras caminamos
-                this.pasosAudio.setVolume(this.sfxMuted ? 0 : this.sfxVolume); 
-            });
-        }
     }
 
     conectar() {
@@ -67,7 +54,7 @@ class ControlesPrimeraPersona {
         document.addEventListener('keyup', this._onKeyUp);
     }
 
-    // eventos
+    // Eventos
 
     onPointerlockChange() {
         this.isLocked = document.pointerLockElement === this.domElement;
@@ -102,19 +89,20 @@ class ControlesPrimeraPersona {
             case 'd': this.teclas.d = false; break;
         }
     }
-    setSfxVolume(volumen) {
-        this.sfxVolume = volumen;
-        if (this.pasosAudio) this.pasosAudio.setVolume(this.sfxMuted ? 0 : this.sfxVolume);
-    }
+    // (La gestión de volumen SFX y pisadas se ha delegado al módulo GestorAudio)
 
-    setSfxMute(isMuted) {
-        this.sfxMuted = isMuted;
-        if (this.pasosAudio) this.pasosAudio.setVolume(this.sfxMuted ? 0 : this.sfxVolume);
-    }
-
-    //movimiento
+    // Movimiento
     actualizar() {
-        if (!this.isLocked) return;
+        if (!this.isLocked) {
+            if (this.isWalking) {
+                this.isWalking = false;
+                broker.emit('jugadorCaminando', false);
+            }
+            return;
+        }
+
+        const { w, a, s, d } = this.teclas;
+        const { position } = this.camara;
 
         // Calcular hacia donde va la camara (movimiento plano en el eje XZ)
         this._vectorAdelante.set(-Math.sin(this.yaw), 0, -Math.cos(this.yaw)).normalize();
@@ -125,10 +113,10 @@ class ControlesPrimeraPersona {
         // Calcular desplazamiento deseado combinando todas las teclas presionadas
         const desplazamiento = new Vector3(0, 0, 0);
 
-        if (this.teclas.w) desplazamiento.add(this._vectorAdelante);
-        if (this.teclas.s) desplazamiento.addScaledVector(this._vectorAdelante, -1);
-        if (this.teclas.a) desplazamiento.addScaledVector(this._vectorDerecha, -1);
-        if (this.teclas.d) desplazamiento.add(this._vectorDerecha);
+        if (w) desplazamiento.add(this._vectorAdelante);
+        if (s) desplazamiento.addScaledVector(this._vectorAdelante, -1);
+        if (a) desplazamiento.addScaledVector(this._vectorDerecha, -1);
+        if (d) desplazamiento.add(this._vectorDerecha);
 
         let enMovimiento = false;
 
@@ -137,22 +125,19 @@ class ControlesPrimeraPersona {
             desplazamiento.normalize().multiplyScalar(this.velocidad);
 
             // Resolver colisión por deslizamiento (AABB)
-            const nuevaPosicion = resolverMovimientoJugador(this.camara.position, desplazamiento);
+            const nuevaPosicion = resolverMovimientoJugador(position, desplazamiento);
 
             // Verificar si hubo un desplazamiento real para considerarlo en movimiento
-            if (this.camara.position.distanceToSquared(nuevaPosicion) > 0.0001) {
-                this.camara.position.copy(nuevaPosicion);
+            if (position.distanceToSquared(nuevaPosicion) > 0.0001) {
+                position.copy(nuevaPosicion);
                 enMovimiento = true;
             }
         }
 
-        // Controlar la reproducción del sonido de los pasos
-        if (this.pasosAudio && this.pasosAudio.buffer) {
-            if (enMovimiento) {
-                if (!this.pasosAudio.isPlaying) this.pasosAudio.play();
-            } else {
-                if (this.pasosAudio.isPlaying) this.pasosAudio.pause();
-            }
+        // Controlar el estado de caminata y emitir evento si cambia
+        if (this.isWalking !== enMovimiento) {
+            this.isWalking = enMovimiento;
+            broker.emit('jugadorCaminando', this.isWalking);
         }
     }
 }

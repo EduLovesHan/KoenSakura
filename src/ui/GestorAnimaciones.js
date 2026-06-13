@@ -11,8 +11,8 @@ export const animacionesUI = {
     gsap.killTweensOf(elementoHtml);
     
     return gsap.fromTo(elementoHtml, 
-      { opacity: 0, y: 50 }, 
-      { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' }
+      { opacity: 0, xPercent: -50, yPercent: -50, y: 50 }, 
+      { opacity: 1, xPercent: -50, yPercent: -50, y: 0, duration: 0.4, ease: 'power2.out' }
     );
   },
 
@@ -26,6 +26,8 @@ export const animacionesUI = {
     
     return gsap.to(elementoHtml, {
       opacity: 0,
+      xPercent: -50,
+      yPercent: -50,
       y: 50,
       duration: 0.35,
       ease: 'power2.in',

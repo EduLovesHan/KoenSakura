@@ -45,10 +45,27 @@ function abrirMenuSuperior(panelMenuSuperior, iconoBoton) {
     }
 }
 
+function resetearEstadoMenu() {
+    // Ocultar contenidos de pestañas
+    document.querySelectorAll('.tab-contenido').forEach(tab => tab.classList.add('oculto'));
+    // Mostrar botones principales
+    const contenedorBotones = document.querySelector('.contenedor-botones-grid');
+    if (contenedorBotones) contenedorBotones.classList.remove('oculto');
+    // Restaurar título
+    const tituloMenu = document.querySelector('#panel-menu-superior h3');
+    if (tituloMenu) tituloMenu.textContent = 'Menú';
+    // Ocultar botón volver
+    const btnVolver = document.getElementById('btn-volver-menu');
+    if (btnVolver) btnVolver.classList.add('oculto');
+}
+
 // Cierra el menú superior con animación y restablece la rotación del icono de sakura
 function cerrarMenuSuperiorConIcono(panelMenuSuperior, iconoBoton) {
     animacionesUI.desaparecerMenu(panelMenuSuperior, () => {
         panelMenuSuperior.classList.add('oculto');
+        setTimeout(() => {
+            resetearEstadoMenu();
+        }, 400);
     });
     
     if (iconoBoton) {
@@ -127,8 +144,33 @@ export function inicializarUI(onInteraccion) {
     const restablecerCarruselAjustes = inicializarCarrusel('#tab-ajustes', 'next-ajustes', 'prev-ajustes');
 
     // Configuración de pestañas del menú superior
-    const botonesPestanas = document.querySelectorAll('.btn-opcion');
+    const botonesPestanas = document.querySelectorAll('.contenedor-botones-grid .btn-opcion');
     const contenidosPestanas = document.querySelectorAll('.tab-contenido');
+    const gridBotones = document.querySelector('.contenedor-botones-grid');
+    const btnVolver = document.getElementById('btn-volver-menu');
+    const tituloMenu = document.getElementById('titulo-menu');
+
+    // Manejador de clic para el botón volver
+    if (btnVolver) {
+        btnVolver.addEventListener('click', (eventoClick) => {
+            eventoClick.stopPropagation();
+            onInteraccion();
+
+            // Ocultar pestañas y botón volver
+            contenidosPestanas.forEach(contenidoTab => {
+                contenidoTab.classList.add('oculto');
+            });
+            btnVolver.classList.add('oculto');
+
+            // Mostrar cuadrícula de botones y restaurar el título
+            if (gridBotones) {
+                gridBotones.classList.remove('oculto');
+            }
+            if (tituloMenu) {
+                tituloMenu.textContent = 'Menú';
+            }
+        });
+    }
 
     botonesPestanas.forEach(botonPestana => {
         // Efecto de hover dinámico en los botones de pestañas
@@ -140,6 +182,33 @@ export function inicializarUI(onInteraccion) {
             onInteraccion();
             
             const tabDestino = botonPestana.dataset.tab;
+            
+            // Detectar si la vista corresponde a móvil (ancho <= 1024px, alto <= 600px o flag esMovil del motor)
+            const isMobileLayout = window.innerWidth <= 1024 || window.innerHeight <= 600 || window.esMovil;
+
+            if (isMobileLayout) {
+                // Comportamiento móvil: ocultar cuadrícula y mostrar botón volver con título cambiado
+                if (gridBotones) {
+                    gridBotones.classList.add('oculto');
+                }
+                if (btnVolver) {
+                    btnVolver.classList.remove('oculto');
+                }
+                if (tituloMenu) {
+                    tituloMenu.textContent = botonPestana.innerText || botonPestana.textContent;
+                }
+            } else {
+                // Comportamiento PC: mantener cuadrícula, ocultar botón volver y título estático "Menú"
+                if (gridBotones) {
+                    gridBotones.classList.remove('oculto');
+                }
+                if (btnVolver) {
+                    btnVolver.classList.add('oculto');
+                }
+                if (tituloMenu) {
+                    tituloMenu.textContent = 'Menú';
+                }
+            }
 
             contenidosPestanas.forEach(contenidoTab => {
                 contenidoTab.classList.add('oculto');

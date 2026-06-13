@@ -14,7 +14,7 @@ export function inicializarMotor() {
 
     // Crear Renderizador
     const renderizador = new THREE.WebGLRenderer({
-        antialias: !esMovil, // Apagado en móviles para mejorar fill rate, encendido en PC
+        antialias: !esMovil, // Apagado en móviles para mejorar fill rate, encendido en PC (corregido)
         powerPreference: "high-performance" // Fuerza el uso de la GPU dedicada si existe
     });
     

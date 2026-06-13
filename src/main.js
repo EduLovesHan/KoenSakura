@@ -15,6 +15,8 @@ import { inicializarUI } from './ui/menu.js';
 const pantallaCarga = document.getElementById('pantalla-carga');
 const barraRelleno = document.getElementById('carga-barra');
 const textoPorcentaje = document.getElementById('carga-porcentaje');
+const spinnerCarga = document.querySelector('.carga-spinner');
+const btnEntrar = document.getElementById('btn-entrar');
 
 const loadingManager = new THREE.LoadingManager();
 
@@ -37,18 +39,55 @@ loadingManager.onLoad = () => {
         barraRelleno.style.width = '100%';
         textoPorcentaje.textContent = '¡Listo! 100%';
 
+        // Al finalizar la carga, ocultamos los progresos y mostramos el botón grande de entrada
         setTimeout(() => {
-            pantallaCarga.classList.add('fadeout');
-            pantallaCarga.addEventListener('transitionend', () => {
-                pantallaCarga.remove();
-            }, { once: true });
-        }, 2500);
+            if (spinnerCarga) spinnerCarga.style.display = 'none';
+            const barraContenedor = document.querySelector('.carga-barra-contenedor');
+            if (barraContenedor) barraContenedor.style.display = 'none';
+            if (textoPorcentaje) textoPorcentaje.style.display = 'none';
+
+            if (btnEntrar) {
+                btnEntrar.style.display = 'inline-block';
+            }
+        }, 800);
     }, 600);
 };
 
 loadingManager.onError = (url) => {
     console.error('[LoadingManager] Error cargando:', url);
 };
+
+// Event listener del botón de entrada
+if (btnEntrar) {
+    btnEntrar.addEventListener('click', async () => {
+        const elemento = document.documentElement;
+        try {
+            // 1. Solicitar pantalla completa estricta (ocultar barra de búsqueda de Chrome)
+            if (elemento.requestFullscreen) {
+                await elemento.requestFullscreen();
+            } else if (elemento.webkitRequestFullscreen) {
+                await elemento.webkitRequestFullscreen();
+            }
+
+            // 2. Intentar bloquear rotación (solo soportado en algunos navegadores móviles)
+            if (screen.orientation && screen.orientation.lock) {
+                await screen.orientation.lock('landscape').catch(e => {
+                    console.log("Bloqueo de rotación no soportado:", e);
+                });
+            }
+        } catch (err) {
+            console.log("Error Fullscreen:", err);
+        }
+
+        // 3. Quitar pantalla de carga e iniciar el paseo
+        if (pantallaCarga) {
+            pantallaCarga.classList.add('fadeout');
+            pantallaCarga.addEventListener('transitionend', () => {
+                pantallaCarga.remove();
+            }, { once: true });
+        }
+    });
+}
 
 // Configuración del motor, escena, cámara y renderizador
 const { scene, camara, renderizador } = inicializarMotor();
@@ -60,9 +99,12 @@ inicializarAudio(camara);
 const controles = new ControlesPrimeraPersona(camara, document.body, objetosColision);
 configurarControlesAudio();
 
-// Bloquear pointer lock hasta que la pantalla de carga desaparezca
+// Bloquear click en canvas/pointer lock hasta que la pantalla de carga desaparezca, excepto para el botón de entrar
 document.addEventListener('click', (e) => {
     if (document.getElementById('pantalla-carga')) {
+        if (e.target && e.target.id === 'btn-entrar') {
+            return; // Permitir el clic en el botón para entrar
+        }
         e.stopImmediatePropagation();
     }
 }, true);

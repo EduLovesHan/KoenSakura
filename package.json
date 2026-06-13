@@ -14,6 +14,7 @@
   "dependencies": {
     "gsap": "^3.15.0",
     "lil-gui": "^0.21.0",
+    "nipplejs": "^1.0.4",
     "three": "^0.184.0",
     "typeit": "^8.8.7"
   }

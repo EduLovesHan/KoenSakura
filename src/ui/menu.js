@@ -1,142 +1,158 @@
 import { animacionesUI } from './GestorAnimaciones.js';
 import { gsap } from 'gsap';
 
+// Cierra el menú superior animando el icono y ocultando el contenedor
 export function cerrarMenuSuperior() {
     const panelMenuSuperior = document.getElementById('panel-menu-superior');
+    const botonMenuSuperior = document.getElementById('btn-menu-superior');
+    
     if (panelMenuSuperior && !panelMenuSuperior.classList.contains('oculto')) {
-        animacionesUI.desaparecerMenu(panelMenuSuperior, () => {
-            panelMenuSuperior.classList.add('oculto');
-        });
-        
-        const btnMenuSuperior = document.getElementById('btn-menu-superior');
-        if (btnMenuSuperior) {
-            const icono = btnMenuSuperior.querySelector('.icono-sakura');
-            if (icono) {
-                gsap.to(icono, {
-                    rotation: 0,
-                    duration: 0.5,
-                    ease: 'power2.inOut'
-                });
-            }
-        }
+        const iconoBoton = botonMenuSuperior ? botonMenuSuperior.querySelector('.icono-sakura') : null;
+        cerrarMenuSuperiorConIcono(panelMenuSuperior, iconoBoton);
     }
 }
 
+// Alterna la visibilidad del menú principal superior
+export function alternarMenuPrincipal(onInteraccion) {
+    const panelMenuSuperior = document.getElementById('panel-menu-superior');
+    const botonMenuSuperior = document.getElementById('btn-menu-superior');
+    
+    if (!panelMenuSuperior || !botonMenuSuperior) return;
+
+    onInteraccion();
+
+    const estaOculto = panelMenuSuperior.classList.contains('oculto');
+    const iconoBoton = botonMenuSuperior.querySelector('.icono-sakura');
+
+    if (estaOculto) {
+        abrirMenuSuperior(panelMenuSuperior, iconoBoton);
+    } else {
+        cerrarMenuSuperiorConIcono(panelMenuSuperior, iconoBoton);
+    }
+}
+
+// Abre el menú superior y rota el icono de sakura
+function abrirMenuSuperior(panelMenuSuperior, iconoBoton) {
+    panelMenuSuperior.classList.remove('oculto');
+    animacionesUI.aparecerMenu(panelMenuSuperior);
+    
+    if (iconoBoton) {
+        gsap.to(iconoBoton, {
+            rotation: 180,
+            duration: 0.5,
+            ease: 'power2.inOut'
+        });
+    }
+}
+
+// Cierra el menú superior con animación y restablece la rotación del icono de sakura
+function cerrarMenuSuperiorConIcono(panelMenuSuperior, iconoBoton) {
+    animacionesUI.desaparecerMenu(panelMenuSuperior, () => {
+        panelMenuSuperior.classList.add('oculto');
+    });
+    
+    if (iconoBoton) {
+        gsap.to(iconoBoton, {
+            rotation: 0,
+            duration: 0.5,
+            ease: 'power2.inOut'
+        });
+    }
+}
+
+// Inicializa toda la interfaz de usuario del menú y carruseles
 export function inicializarUI(onInteraccion) {
-    // Lógica del menú superior
-    const btnMenuSuperior = document.getElementById('btn-menu-superior');
+    const botonMenuSuperior = document.getElementById('btn-menu-superior');
     const panelMenuSuperior = document.getElementById('panel-menu-superior');
 
-    if (btnMenuSuperior) {
-        btnMenuSuperior.addEventListener('click', (evento) => {
-            evento.stopPropagation(); 
-            onInteraccion(); 
-            
-            const estaOculto = panelMenuSuperior.classList.contains('oculto');
-            const icono = btnMenuSuperior.querySelector('.icono-sakura');
-
-            if (estaOculto) {
-                // Abrir
-                panelMenuSuperior.classList.remove('oculto');
-                animacionesUI.aparecerMenu(panelMenuSuperior);
-                
-                if (icono) {
-                    gsap.to(icono, {
-                        rotation: 180,
-                        duration: 0.5,
-                        ease: 'power2.inOut'
-                    });
-                }
-            } else {
-                // Cerrar
-                animacionesUI.desaparecerMenu(panelMenuSuperior, () => {
-                    panelMenuSuperior.classList.add('oculto');
-                });
-                
-                if (icono) {
-                    gsap.to(icono, {
-                        rotation: 0,
-                        duration: 0.5,
-                        ease: 'power2.inOut'
-                    });
-                }
-            }
+    if (botonMenuSuperior) {
+        botonMenuSuperior.addEventListener('click', (eventoClick) => {
+            eventoClick.stopPropagation(); 
+            alternarMenuPrincipal(onInteraccion);
         });
     }
 
     if (panelMenuSuperior) {
-        panelMenuSuperior.addEventListener('click', (evento) => {
-            evento.stopPropagation();
+        panelMenuSuperior.addEventListener('click', (eventoClick) => {
+            eventoClick.stopPropagation();
         });
     }
 
-    // Creación e inicialización de carruseles
-    function inicializarCarrusel(selectorContenedor, idBtnNext, idBtnPrev) {
-        let indiceActual = 0;
-        const contenedor = document.querySelector(selectorContenedor);
-        if (!contenedor) return () => {}; // si el contenedor no existe
+    // Inicialización del carrusel de pestañas
+    function inicializarCarrusel(selectorContenedor, idBotonSiguiente, idBotonAnterior) {
+        let indicePaginaActual = 0;
+        const contenedorCarrusel = document.querySelector(selectorContenedor);
+        if (!contenedorCarrusel) return () => {}; // Retorna función vacía si no existe
 
-        const paginas = contenedor.querySelectorAll('.control-slide');
-        const puntos = contenedor.querySelectorAll('.punto');
-        const btnNext = document.getElementById(idBtnNext);
-        const btnPrev = document.getElementById(idBtnPrev);
+        const paginasCarrusel = contenedorCarrusel.querySelectorAll('.control-slide');
+        const puntosNavegacion = contenedorCarrusel.querySelectorAll('.punto');
+        const botonSiguiente = document.getElementById(idBotonSiguiente);
+        const botonAnterior = document.getElementById(idBotonAnterior);
 
-        function mostrarPagina(index) {
-            if (index >= paginas.length) indiceActual = 0;
-            else if (index < 0) indiceActual = paginas.length - 1;
-            else indiceActual = index;
+        function mostrarPagina(indicePaginaDeseado) {
+            if (indicePaginaDeseado >= paginasCarrusel.length) {
+                indicePaginaActual = 0;
+            } else if (indicePaginaDeseado < 0) {
+                indicePaginaActual = paginasCarrusel.length - 1;
+            } else {
+                indicePaginaActual = indicePaginaDeseado;
+            }
 
-            paginas.forEach((pag, i) => {
-                pag.classList.toggle('active', i === indiceActual);
-                if (puntos[i]) puntos[i].classList.toggle('active', i === indiceActual);
+            paginasCarrusel.forEach((paginaElemento, indiceElemento) => {
+                const esPaginaActiva = indiceElemento === indicePaginaActual;
+                paginaElemento.classList.toggle('active', esPaginaActiva);
+                
+                if (puntosNavegacion[indiceElemento]) {
+                    puntosNavegacion[indiceElemento].classList.toggle('active', esPaginaActiva);
+                }
             });
         }
 
-        if (btnNext && btnPrev) {
-            btnNext.addEventListener('click', (e) => {
-                e.stopPropagation();
+        if (botonSiguiente && botonAnterior) {
+            botonSiguiente.addEventListener('click', (eventoClick) => {
+                eventoClick.stopPropagation();
                 onInteraccion();
-                mostrarPagina(indiceActual + 1);
+                mostrarPagina(indicePaginaActual + 1);
             });
-            btnPrev.addEventListener('click', (e) => {
-                e.stopPropagation();
+            botonAnterior.addEventListener('click', (eventoClick) => {
+                eventoClick.stopPropagation();
                 onInteraccion();
-                mostrarPagina(indiceActual - 1);
+                mostrarPagina(indicePaginaActual - 1);
             });
         }
         return mostrarPagina; 
     }
 
-    const resetCarruselControles = inicializarCarrusel('#tab-controles', 'next-control', 'prev-control');
-    const resetCarruselAjustes = inicializarCarrusel('#tab-ajustes', 'next-ajustes', 'prev-ajustes');
+    const restablecerCarruselControles = inicializarCarrusel('#tab-controles', 'next-control', 'prev-control');
+    const restablecerCarruselAjustes = inicializarCarrusel('#tab-ajustes', 'next-ajustes', 'prev-ajustes');
 
-    // Lógica de pestañas del menú superior
+    // Configuración de pestañas del menú superior
     const botonesPestanas = document.querySelectorAll('.btn-opcion');
     const contenidosPestanas = document.querySelectorAll('.tab-contenido');
 
-    botonesPestanas.forEach(boton => {
-        // Efecto de hover dinámico en los botones de pestañas del menú
-        boton.addEventListener('mouseenter', () => {
-            animacionesUI.pulsoBoton(boton);
+    botonesPestanas.forEach(botonPestana => {
+        // Efecto de hover dinámico en los botones de pestañas
+        botonPestana.addEventListener('mouseenter', () => {
+            animacionesUI.pulsoBoton(botonPestana);
         });
 
-        boton.addEventListener('click', () => {
+        botonPestana.addEventListener('click', () => {
             onInteraccion();
             
-            const { tab: tabDestino } = boton.dataset;
+            const tabDestino = botonPestana.dataset.tab;
 
-            contenidosPestanas.forEach(contenido => {
-                contenido.classList.add('oculto');
+            contenidosPestanas.forEach(contenidoTab => {
+                contenidoTab.classList.add('oculto');
             });
 
-            const tabAMostrar = document.getElementById(`tab-${tabDestino}`);
-            if (tabAMostrar) {
-                tabAMostrar.classList.remove('oculto');
+            const pestañaAMostrar = document.getElementById(`tab-${tabDestino}`);
+            if (pestañaAMostrar) {
+                pestañaAMostrar.classList.remove('oculto');
                 
                 if (tabDestino === 'controles') {
-                    resetCarruselControles(0); 
+                    restablecerCarruselControles(0); 
                 } else if (tabDestino === 'ajustes') {
-                    resetCarruselAjustes(0); 
+                    restablecerCarruselAjustes(0); 
                 }
             }
         });

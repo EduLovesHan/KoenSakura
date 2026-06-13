@@ -267,6 +267,50 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
                         ? SkeletonUtils.clone(modeloBase)
                         : modeloBase.clone();
 
+                    // Forzar Culling y sombras de manera óptima y recomputar límites geométricos
+                    clon.traverse((child) => {
+                        if (child.isMesh) {
+                            // 1. Recomputar límites geométricos para asegurar culling correcto
+                            if (child.geometry) {
+                                child.geometry.computeBoundingBox();
+                                child.geometry.computeBoundingSphere();
+                            }
+                            child.frustumCulled = true;
+
+                            // 2. Optimización de Back-Face Culling (Side = FrontSide excepto follaje/sakura/muñeca/agua)
+                            const nombreHijo = child.name.toLowerCase();
+                            const esPlanoSinGrosor = nombreHijo.includes('sakura') || 
+                                                     nombreHijo.includes('hoja') || 
+                                                     nombreHijo.includes('leaf') || 
+                                                     nombreHijo.includes('leaves') || 
+                                                     nombreHijo.includes('follaje') || 
+                                                     nombreHijo.includes('muñeca') || 
+                                                     nombreHijo.includes('muneca') ||
+                                                     nombreHijo.includes('flor') ||
+                                                     nombreHijo.includes('petalo') ||
+                                                     nombreHijo.includes('agua');
+
+                            if (child.material) {
+                                const subMateriales = Array.isArray(child.material) ? child.material : [child.material];
+                                subMateriales.forEach(mat => {
+                                    if (mat) {
+                                        mat.side = esPlanoSinGrosor ? THREE.DoubleSide : THREE.FrontSide;
+                                    }
+                                });
+                            }
+
+                            // 3. Configurar sombras óptimas
+                            const esCriticoParaSombras = nombreHijo.includes('jugador') || 
+                                                         nombreHijo.includes('player') || 
+                                                         nombreHijo.includes('estatua') || 
+                                                         nombreHijo.includes('torii') || 
+                                                         nombreHijo.includes('puente');
+                                                         
+                            child.castShadow = esCriticoParaSombras;
+                            child.receiveShadow = !esCriticoParaSombras; // Suelo, farolas lejanas y paredes solo reciben o no proyectan
+                        }
+                    });
+
                     //  Registrar texturas de agua ANTES de aplicar el shader
                     //  Registrar y reemplazar mallas de agua por THREE.Water
                     if (item.tieneAgua) {
@@ -285,12 +329,12 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
                                 console.log('[Agua] Textura registrada desde:', hijo.name);
                             }
 
-                            // Instanciar THREE.Water con la geometría original
+                            // Instanciar THREE.Water con la geometría original y target de reflejos optimizado
                             const water = new Water(
                                 hijo.geometry,
                                 {
-                                    textureWidth: 256,
-                                    textureHeight: 256,
+                                    textureWidth: window.esMovil ? 64 : 128,
+                                    textureHeight: window.esMovil ? 64 : 128,
                                     //clipBias: 0.003,
                                     waterNormals: waterNormals,
                                     sunDirection: new THREE.Vector3(10, 20, 10).normalize(),

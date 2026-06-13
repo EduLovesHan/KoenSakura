@@ -37,6 +37,12 @@ export function inicializarIluminacion(scene) {
     directionalLight.color.setRGB(1.0, (0xf5 + 0.001) / 255, (0xe6 + 0.001) / 255);
     directionalLight.intensity = 1.5;
     directionalLight.position.set(10, 20, 10);
+
+    // Limitar resolución de sombras en móviles de forma defensiva
+    const esMovil = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || ('ontouchstart' in window);
+    directionalLight.shadow.mapSize.width = esMovil ? 512 : 1024;
+    directionalLight.shadow.mapSize.height = esMovil ? 512 : 1024;
+
     scene.add(directionalLight);
 
     // Inicializar pool de 3 PointLights para farolas (apagadas por defecto)

@@ -8,6 +8,7 @@ export const collidableBoxes = [];
 // Array para mallas inclinadas y suelos reales
 export const mallasSuelo = [];
 const raycasterSuelo = new THREE.Raycaster();
+raycasterSuelo.far = 15.0; // Evitar evaluar infinitamente hacia el abismo (ahorro CPU/GPU)
 const vectorAbajo = new THREE.Vector3(0, -1, 0);
 
 // Box3 global que representa la hitbox del jugador

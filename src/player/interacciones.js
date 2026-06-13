@@ -4,7 +4,7 @@ const objetosInteractivos = [];
 let objetoCercanoActual = null;
 let uiInteraccion, modalDialogo, dialogoTitulo, dialogoTexto;
 
-// Enlazar los elementos HTML y escuchar el teclado
+// Enlazar elementos HTML y escuchar el teclado
 export function inicializarInteracciones() {
     uiInteraccion = document.getElementById('ui-interaccion');
     modalDialogo = document.getElementById('modal-dialogo');

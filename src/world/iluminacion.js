@@ -27,7 +27,7 @@ export function registrarMaterialEmisivo(material) {
 // Instanciar las luces en la escena
 export function inicializarIluminacion(scene) {
     // Luz ambiental inicial (Día) con componentes RGB exactos para sRGB (con offset para evitar redondeo)
-    ambientLight = new THREE.AmbientLight(); 
+    ambientLight = new THREE.AmbientLight();
     ambientLight.color.setRGB((0xd8 + 0.001) / 255, (0xe2 + 0.001) / 255, (0xf0 + 0.001) / 255);
     ambientLight.intensity = 0.6;
     scene.add(ambientLight);
@@ -67,8 +67,8 @@ function refrescarGUI() {
                 });
             }
             if (guiInstance.folders) {
-                const folders = Array.isArray(guiInstance.folders) 
-                    ? guiInstance.folders 
+                const folders = Array.isArray(guiInstance.folders)
+                    ? guiInstance.folders
                     : Object.values(guiInstance.folders);
                 folders.forEach(folder => {
                     actualizarControladores(folder);
@@ -337,7 +337,7 @@ export function configurarControlesIluminacion(skybox) {
             .name('Intensidad Especular')
             .listen();
     }
-    
+
     if (modoNocheCheckbox) {
         modoNocheCheckbox.addEventListener('change', () => {
             alternarDiaNoche(skybox);

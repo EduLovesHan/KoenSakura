@@ -54,19 +54,19 @@ void main() {
     // Dirección de la vista (desde el fragmento hacia la cámara)
     vec3 V = normalize(uCameraPosition - vPosition);
     
-    // 1. Componente Ambiental
+    // Componente Ambiental
     vec3 ambient = uAmbientColor * uAmbientIntensity;
     
-    // 2. Componente Difusa (Lambertian) — Luz direccional
+    // Componente Difusa (Lambertian) —> Luz direccional
     float diff = max(dot(N, L), 0.0);
     vec3 diffuse = uLightColor * uLightIntensity * diff;
     
-    // 3. Componente Especular (Phong)
+    // Componente Especular (Phong)
     vec3 R = reflect(-L, N); // Vector de reflexión
     float spec = pow(max(dot(R, V), 0.0), uShininess);
     vec3 specular = uSpecularColor * uSpecularIntensity * spec;
     
-    // 4. Contribución de las 6 Point Lights (farolas)
+    // Contribución de las 6 Point Lights (farolas)
     vec3 pointDiffuse = vec3(0.0);
     pointDiffuse += calcPointLight(uPointLightPos0, N);
     pointDiffuse += calcPointLight(uPointLightPos1, N);

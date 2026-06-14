@@ -1,4 +1,4 @@
-import { animacionesUI } from './GestorAnimaciones.js';
+import { animationsUI } from './AnimationManager.js';
 import { gsap } from 'gsap';
 
 // Cierra el menú superior animando el icono y ocultando el contenedor
@@ -34,7 +34,7 @@ export function alternarMenuPrincipal(onInteraccion) {
 // Abre el menú superior y rota el icono de sakura
 function abrirMenuSuperior(panelMenuSuperior, iconoBoton) {
     panelMenuSuperior.classList.remove('oculto');
-    animacionesUI.aparecerMenu(panelMenuSuperior);
+    animationsUI.aparecerMenu(panelMenuSuperior);
     
     if (iconoBoton) {
         gsap.to(iconoBoton, {
@@ -61,7 +61,7 @@ function resetearEstadoMenu() {
 
 // Cierra el menú superior con animación y restablece la rotación del icono de sakura
 function cerrarMenuSuperiorConIcono(panelMenuSuperior, iconoBoton) {
-    animacionesUI.desaparecerMenu(panelMenuSuperior, () => {
+    animationsUI.desaparecerMenu(panelMenuSuperior, () => {
         panelMenuSuperior.classList.add('oculto');
         setTimeout(() => {
             resetearEstadoMenu();
@@ -140,7 +140,7 @@ export function inicializarUI(onInteraccion) {
         return mostrarPagina; 
     }
 
-    const restablecerCarruselControles = inicializarCarrusel('#tab-controles', 'next-control', 'prev-control');
+    const restablecerCarruselcontrols = inicializarCarrusel('#tab-controls', 'next-control', 'prev-control');
     const restablecerCarruselAjustes = inicializarCarrusel('#tab-ajustes', 'next-ajustes', 'prev-ajustes');
 
     // Configuración de pestañas del menú superior
@@ -175,7 +175,7 @@ export function inicializarUI(onInteraccion) {
     botonesPestanas.forEach(botonPestana => {
         // Efecto de hover dinámico en los botones de pestañas
         botonPestana.addEventListener('mouseenter', () => {
-            animacionesUI.pulsoBoton(botonPestana);
+            animationsUI.pulsoBoton(botonPestana);
         });
 
         botonPestana.addEventListener('click', () => {
@@ -183,7 +183,7 @@ export function inicializarUI(onInteraccion) {
             
             const tabDestino = botonPestana.dataset.tab;
             
-            // Detectar si la vista corresponde a móvil (ancho <= 1024px, alto <= 600px o flag esMovil del motor)
+            // Detectar si la vista corresponde a móvil (ancho <= 1024px, alto <= 600px o flag esMovil del engine)
             const isMobileLayout = window.innerWidth <= 1024 || window.innerHeight <= 600 || window.esMovil;
 
             if (isMobileLayout) {
@@ -218,8 +218,8 @@ export function inicializarUI(onInteraccion) {
             if (pestañaAMostrar) {
                 pestañaAMostrar.classList.remove('oculto');
                 
-                if (tabDestino === 'controles') {
-                    restablecerCarruselControles(0); 
+                if (tabDestino === 'controls') {
+                    restablecerCarruselcontrols(0); 
                 } else if (tabDestino === 'ajustes') {
                     restablecerCarruselAjustes(0); 
                 }

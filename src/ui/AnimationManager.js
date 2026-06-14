@@ -1,7 +1,7 @@
 import { gsap } from 'gsap';
 
-// Animaciones para elementos de la Interfaz 
-export const animacionesUI = {
+// animations para elementos de la Interfaz 
+export const animationsUI = {
   // Slide-up y fade-in para el menú superior o modales al mostrarse
   aparecerMenu: (elementoHtml) => {
     if (!elementoHtml) return null;

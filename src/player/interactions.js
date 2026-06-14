@@ -5,7 +5,7 @@ let objetoCercanoActual = null;
 let uiInteraccion, modalDialogo, dialogoTitulo, dialogoTexto;
 
 // Enlazar elementos HTML y escuchar el teclado
-export function inicializarInteracciones() {
+export function inicializarinteractions() {
     uiInteraccion = document.getElementById('ui-interaccion');
     modalDialogo = document.getElementById('modal-dialogo');
     dialogoTitulo = document.getElementById('dialogo-titulo');
@@ -34,7 +34,7 @@ export function registrarObjetoInteractivo(malla, distancia, titulo, texto) {
 }
 
 // Funcion para cada frame de animación
-export function actualizarInteracciones(camara, isLocked) {
+export function actualizarinteractions(camara, isLocked) {
     if (isLocked) {
         let objetoEncontrado = null;
         const { position } = camara;
@@ -62,7 +62,7 @@ export function actualizarInteracciones(camara, isLocked) {
     }
 }
 
-// Suscribirse al bus de eventos para registrar interactivos autónomamente
+// bus de eventos para registrar interacciones
 broker.on('modeloCargado', ({ modelo, datosJSON: { interactivo } }) => {
     if (interactivo) {
         const { distancia = 8, titulo = "Interactuable", texto = "" } = interactivo;

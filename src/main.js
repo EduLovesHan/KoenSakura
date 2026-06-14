@@ -1,14 +1,14 @@
 import './style.css';
 import * as THREE from 'three';
-import { inicializarMotor } from './core/motor.js';
-import { ControlesPrimeraPersona } from './player/controles.js';
-import { inicializarInteracciones, actualizarInteracciones } from './player/interacciones.js';
+import { inicializarengine } from './core/engine.js';
+import { controlsPrimeraPersona } from './player/controls.js';
+import { inicializarinteractions, actualizarinteractions } from './player/interactions.js';
 import { Skybox } from './world/skybox.js';
-import { cargarEscenario, phongUniformsGlobales, aguasInstanciadas } from './world/CargadorModelos.js';
-import { crearHitbox, inicializarDebugColisiones, actualizarPlayerBox } from './world/colisiones.js';
-import { inicializarIluminacion, configurarControlesIluminacion, ambientLight, directionalLight, actualizarLucesFarolas } from './world/iluminacion.js';
-import { actualizarAnimaciones } from './world/animaciones.js';
-import { inicializarAudio, reproducirClick, configurarControlesAudio } from './audio/GestorAudio.js';
+import { cargarEscenario, phongUniformsGlobales, aguasInstanciadas } from './world/ModelLoader.js';
+import { inicializarDebugCollisions, actualizarPlayerBox } from './world/collisions.js';
+import { inicializarLighting, configurarcontrolsLighting, ambientLight, directionalLight, actualizarLucesFarolas } from './world/lighting.js';
+import { actualizaranimations } from './world/animations.js';
+import { inicializarAudio, reproducirClick, configurarcontrolsAudio } from './audio/AudioManager.js';
 import { inicializarUI } from './ui/menu.js';
 
 // Pantalla de carga
@@ -46,7 +46,7 @@ loadingManager.onLoad = async () => {
         barraRelleno.style.width = '100%';
         textoPorcentaje.textContent = '¡Listo! 100%';
 
-        // Al finalizar la carga, ocultamos los progresos y mostramos el botón grande de entrada
+        // Mostrar el botón de entrar al finalizar la carga
         setTimeout(() => {
             if (spinnerCarga) spinnerCarga.style.display = 'none';
             const barraContenedor = document.querySelector('.carga-barra-contenedor');
@@ -64,19 +64,20 @@ loadingManager.onError = (url) => {
     console.error('[LoadingManager] Error cargando:', url);
 };
 
-// Event listener del botón de entrada
+// Event listener botón de entrada
 if (btnEntrar) {
     btnEntrar.addEventListener('click', async () => {
         const elemento = document.documentElement;
         try {
-            // 1. Solicitar pantalla completa estricta (ocultar barra de búsqueda de Chrome)
+            
+            //Entra con el paseo en pantalla completa
             if (elemento.requestFullscreen) {
                 await elemento.requestFullscreen();
             } else if (elemento.webkitRequestFullscreen) {
                 await elemento.webkitRequestFullscreen();
             }
 
-            // 2. Intentar bloquear rotación (solo soportado en algunos navegadores móviles)
+            //Bloquear rotación en ciertos navegadores
             if (screen.orientation && screen.orientation.lock) {
                 await screen.orientation.lock('landscape').catch(e => {
                     console.log("Bloqueo de rotación no soportado:", e);
@@ -86,7 +87,7 @@ if (btnEntrar) {
             console.log("Error Fullscreen:", err);
         }
 
-        // 3. Quitar pantalla de carga e iniciar el paseo
+        // Pasar directo al paseo
         if (pantallaCarga) {
             pantallaCarga.classList.add('fadeout');
             pantallaCarga.addEventListener('transitionend', () => {
@@ -97,16 +98,16 @@ if (btnEntrar) {
 }
 
 // Configuración del motor, escena, cámara y renderizador
-const { scene, camara, renderizador } = inicializarMotor();
+const { scene, camara, renderizador } = inicializarengine();
 const objetosColision = [];
-const reloj = new THREE.Clock();
+const timer = new THREE.Timer();
 
 // Configuración del audio y controles de movimiento
 inicializarAudio(camara);
-const controles = new ControlesPrimeraPersona(camara, document.body, objetosColision);
-configurarControlesAudio();
+const controls = new controlsPrimeraPersona(camara, document.body, objetosColision);
+configurarcontrolsAudio();
 
-// Bloquear click en canvas/pointer lock hasta que la pantalla de carga desaparezca, excepto para el botón de entrar
+// Bloquear clicks hasta que la pantalla de carga desaparezca, excepto para el botón de entrar
 document.addEventListener('click', (e) => {
     if (document.getElementById('pantalla-carga')) {
         if (e.target && e.target.id === 'btn-entrar') {
@@ -118,48 +119,40 @@ document.addEventListener('click', (e) => {
 
 // Configuración de la iluminación y el skybox
 const skybox = new Skybox(scene, loadingManager);
-inicializarIluminacion(scene);
-configurarControlesIluminacion(skybox);
+inicializarLighting(scene);
+configurarcontrolsLighting(skybox);
 
-// Inicializar depuración de colisiones e hitbox del jugador
-inicializarDebugColisiones(scene, camara, controles);
+// Inicializar depuración de colisiones y hitbox del jugador
+inicializarDebugCollisions(scene, camara, controls);
 actualizarPlayerBox(camara.position);
 
-// Carga de los modelos
+// Carga de los models
 cargarEscenario(scene, objetosColision, loadingManager);
 
-// Límites del mapa
-crearHitbox(-100, 1, 0, 0.5, 10, 600, scene, objetosColision); // Izquierda
-crearHitbox(100, 1, 0, 0.5, 10, 600, scene, objetosColision);  // Derecha
-crearHitbox(0, 1, -300, 200, 10, 0.5, scene, objetosColision); // Frontal
-crearHitbox(0, 1, 300, 200, 10, 0.5, scene, objetosColision);  // Trasera
-crearHitbox(0, -0.05, 0, 200, 0.1, 600, scene, objetosColision); // Suelo
-
 // Configuración de la UI y las interacciones
-inicializarInteracciones();
+inicializarinteractions();
 inicializarUI(reproducirClick);
 
 // Bucle de renderizado
-function animar() {
+function animar(timestamp) {
     requestAnimationFrame(animar);
-    const delta = reloj.getDelta();
+    timer.update(timestamp);
+    const delta = timer.getDelta();
 
     // Actualizar lógica
-    actualizarAnimaciones(delta);
-
-
+    actualizaranimations(delta);
     actualizarPlayerBox(camara.position);
 
-    // Actualizar shader del agua realista (THREE.Water)
+    // Actualizar shader del agua implementado con THREE.Water
     if (aguasInstanciadas) {
         aguasInstanciadas.forEach(agua => {
-            agua.material.uniforms['time'].value += delta * 0.3; // Modifica este factor (ej. 0.3) para controlar la velocidad del oleaje
+            agua.material.uniforms['time'].value += delta * 0.3; // velocidad del efecto de oleaje
         });
     }
-    actualizarInteracciones(camara, controles.isLocked);
-    controles.actualizar();
+    actualizarinteractions(camara, controls.isLocked);
+    controls.actualizar();
 
-    // Object Pooling: reasignar las 3 PointLights a las farolas más cercanas
+    // Asigna las 6 PointLights a las farolas más cercanas
     actualizarLucesFarolas(camara);
 
     // Sincronizar y actualizar los uniforms de Phong en cada frame

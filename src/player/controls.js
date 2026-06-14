@@ -1,10 +1,10 @@
 import { Vector3, MathUtils } from 'three';
-import { resolverMovimientoJugador } from '../world/colisiones.js';
+import { resolverMovimientoJugador } from '../world/collisions.js';
 import { broker } from '../world/EventBroker.js';
 import nipplejs from 'nipplejs';
 
-// Clase para controlar la cámara en primera persona y movimiento en KoenSakura
-class ControlesPrimeraPersona {
+// Controles en primera persona
+class controlsPrimeraPersona {
 
     constructor(camara, domElement, objetosColision = []) {
         this.camara = camara;
@@ -19,17 +19,15 @@ class ControlesPrimeraPersona {
         this.configurarCompatibilidadTeclas();
         this.inicializarPropiedadesCamara();
         this.vincularEventosEntrada();
-        this.verificarInicializacionControlesMoviles();
+        this.verificarInicializacioncontrolsMoviles();
     }
 
     inicializarDeteccionDispositivo() {
-        // Detección de móvil robusta (userAgent, touch points, window flag)
         this.isMobile = 'ontouchstart' in window || 
                         (navigator.maxTouchPoints && navigator.maxTouchPoints > 0) || 
                         window.esMovil === true ||
                         /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-        // En móvil no hay PointerLock nativo de pantalla completa, por lo que simulamos estar bloqueados por defecto
         this.isLocked = this.isMobile; 
     }
 
@@ -108,13 +106,12 @@ class ControlesPrimeraPersona {
     }
 
     vincularSeguridadMovilTouch() {
-        // Listener de seguridad para forzar detección móvil ante cualquier interacción touch real
+        // Listener de seguridad para forzar detección móvil ante cualquier interacción touch 
         const forzarMovil = () => {
             if (!this.isMobile) {
                 this.isMobile = true;
                 this.isLocked = true;
-                // this.crearPanelDebug(); // Ocultado por solicitud
-                this.inicializarControlesMoviles();
+                this.inicializarcontrolsMoviles();
             }
         };
         window.addEventListener('touchstart', forzarMovil, { once: true });
@@ -138,42 +135,18 @@ class ControlesPrimeraPersona {
         }
     }
 
-    verificarInicializacionControlesMoviles() {
+    verificarInicializacioncontrolsMoviles() {
         if (this.isMobile) {
-            // this.crearPanelDebug(); // Ocultado por solicitud
-            this.inicializarControlesMoviles();
+            this.inicializarcontrolsMoviles();
         }
     }
 
-    crearPanelDebug() {
-        const panelDebugExistente = document.getElementById('debug-tactil');
-        if (panelDebugExistente) return;
 
-        const panelContenedorDebug = document.createElement('div');
-        panelContenedorDebug.id = 'debug-tactil';
-        panelContenedorDebug.style.position = 'absolute';
-        panelContenedorDebug.style.top = '80px';
-        panelContenedorDebug.style.right = '10px';
-        panelContenedorDebug.style.zIndex = '999999';
-        panelContenedorDebug.style.background = 'rgba(0, 0, 0, 0.85)';
-        panelContenedorDebug.style.color = '#00ff00';
-        panelContenedorDebug.style.padding = '12px';
-        panelContenedorDebug.style.fontFamily = 'monospace';
-        panelContenedorDebug.style.fontSize = '12px';
-        panelContenedorDebug.style.borderRadius = '8px';
-        panelContenedorDebug.style.border = '2px solid #00ff00';
-        panelContenedorDebug.style.pointerEvents = 'none';
-        panelContenedorDebug.style.width = '260px';
-        panelContenedorDebug.style.boxShadow = '0 0 15px rgba(0, 255, 0, 0.3)';
-        panelContenedorDebug.innerHTML = 'Inicializando Debug...';
-        document.body.appendChild(panelContenedorDebug);
-    }
-
-    inicializarControlesMoviles() {
+    inicializarcontrolsMoviles() {
         this.mostrarContenedorJoystick();
         this.configurarJoystick();
         this.configurarRotacionCamaraTactil();
-        this.configurarInteraccionesTactiles();
+        this.configurarinteractionsTactiles();
     }
 
     mostrarContenedorJoystick() {
@@ -187,7 +160,7 @@ class ControlesPrimeraPersona {
         const contenedorJoystick = document.getElementById('zona-joystick');
         if (!contenedorJoystick) return;
 
-        // Instanciar joystick estático atado al contenedor
+        // Instanciar joystick al contenedor
         this.joystick = nipplejs.create({
             zone: contenedorJoystick,
             mode: 'static',
@@ -211,7 +184,7 @@ class ControlesPrimeraPersona {
     actualizarVectoresMovimiento(eventoJoystick, datosNipple) {
         this._joystickEventLog = 'Moviendo';
 
-        // Extraer los datos válidos con tolerancia de firma de NippleJS
+        // Extraer los datos válidos 
         const datosValidos = this.extraerDatosValidosNipple(eventoJoystick, datosNipple);
         if (!datosValidos) {
             const nombresLlavesEvento = eventoJoystick ? Object.keys(eventoJoystick).join(',') : 'nulo';
@@ -219,26 +192,13 @@ class ControlesPrimeraPersona {
             return;
         }
 
-        // Detectar si el dispositivo está en vertical (Falso Horizontal activo)
-        const isPortrait = window.innerHeight > window.innerWidth;
-
         // Si tiene vector directo, mapearlo
         if (datosValidos.vector) {
-            let vector = datosValidos.vector;
-            if (isPortrait) {
-                // Rotar vector -90 grados para falso landscape
-                vector = { x: -datosValidos.vector.y, y: datosValidos.vector.x };
-            }
-            this.procesarMovimientoDesdeVector(vector);
+            this.procesarMovimientoDesdeVector(datosValidos.vector);
         } 
         // Fallback por si la versión expone angle/distance pero no vector directamente
         else if (datosValidos.angle) {
-            let angle = datosValidos.angle;
-            if (isPortrait) {
-                // Rotar el ángulo radian -90 grados
-                angle = { ...datosValidos.angle, radian: datosValidos.angle.radian - Math.PI / 2 };
-            }
-            this.procesarMovimientoDesdeAnguloYDistancia(angle, datosValidos.distance);
+            this.procesarMovimientoDesdeAnguloYDistancia(datosValidos.angle, datosValidos.distance);
         } else {
             this._joystickVectorLog = 'Data sin vector ni angle';
         }
@@ -330,19 +290,12 @@ class ControlesPrimeraPersona {
         }
 
         const toquesModificados = eventoTouch.changedTouches;
-        const isPortrait = window.innerHeight > window.innerWidth;
 
         for (let indiceToque = 0; indiceToque < toquesModificados.length; indiceToque++) {
             const toqueIndividual = toquesModificados[indiceToque];
             
-            let esLadoDerecho = false;
-            if (isPortrait) {
-                // En portrait (rotado), el lado derecho de la pantalla landscape corresponde a la mitad inferior física
-                esLadoDerecho = toqueIndividual.clientY > window.innerHeight / 2;
-            } else {
-                // En landscape normal, la mitad derecha es clientX > width / 2
-                esLadoDerecho = toqueIndividual.clientX > window.innerWidth / 2;
-            }
+            // La mitad derecha es clientX > width / 2
+            const esLadoDerecho = toqueIndividual.clientX > window.innerWidth / 2;
 
             if (esLadoDerecho) {
                 this._activeRotationTouchId = toqueIndividual.identifier;
@@ -373,10 +326,8 @@ class ControlesPrimeraPersona {
         // Evitar el scroll o zoom de página nativo en dispositivos móviles al arrastrar
         eventoTouch.preventDefault();
 
-        // En falso landscape (Portrait), rotar las coordenadas del delta del toque para que se alineen al arrastre virtual
-        const isPortrait = window.innerHeight > window.innerWidth;
-        const deltaTouchX = isPortrait ? (toqueActivo.clientY - this._lastTouchY) : (toqueActivo.clientX - this._lastTouchX);
-        const deltaTouchY = isPortrait ? -(toqueActivo.clientX - this._lastTouchX) : (toqueActivo.clientY - this._lastTouchY);
+        const deltaTouchX = toqueActivo.clientX - this._lastTouchX;
+        const deltaTouchY = toqueActivo.clientY - this._lastTouchY;
 
         this._lastTouchX = toqueActivo.clientX;
         this._lastTouchY = toqueActivo.clientY;
@@ -411,7 +362,7 @@ class ControlesPrimeraPersona {
         this.camara.rotation.set(this.pitch, this.yaw, 0);
     }
 
-    configurarInteraccionesTactiles() {
+    configurarinteractionsTactiles() {
         const uiInteraccion = document.getElementById('ui-interaccion');
         if (uiInteraccion) {
             this.vincularElementoInteractivo(uiInteraccion);
@@ -433,13 +384,12 @@ class ControlesPrimeraPersona {
     }
 
     simularPulsacionTeclaE() {
-        // Simular pulsación de tecla E para continuar diálogos/interacciones
+        // Simular pulsación de tecla E para continuar diálogos
         const eventoTeclaE = new KeyboardEvent('keydown', { key: 'e', bubbles: true });
         document.dispatchEvent(eventoTeclaE);
     }
 
-    // Handlers de eventos de PointerLock y Teclado estándar PC
-
+    // Handlers de eventos de PointerLock y Teclado PC
     onPointerlockChange() {
         this.isLocked = document.pointerLockElement === this.domElement;
     }
@@ -484,10 +434,7 @@ class ControlesPrimeraPersona {
         // Controlar la visibilidad del joystick según si el menú está visible
         this.actualizarVisibilidadJoystick(menuAbierto);
 
-        // Actualizar panel de debug visual de telemetría táctil
-        // this.actualizarPanelTelemetria(menuAbierto); // Ocultado por solicitud
-
-        // Bypass de PointerLock: En móvil el movimiento se procesa sin PointerLock (isLocked)
+        // En móvil el movimiento se procesa sin PointerLock 
         if ((!this.isLocked && !this.isMobile) || menuAbierto) {
             this.detenerCaminata(menuAbierto);
             return;
@@ -503,26 +450,6 @@ class ControlesPrimeraPersona {
         }
     }
 
-    actualizarPanelTelemetria(menuAbierto) {
-        const panelDebug = document.getElementById('debug-tactil');
-        if (panelDebug) {
-            panelDebug.innerHTML = `
-<div style="text-align: center; font-weight: bold; border-bottom: 1px solid #00ff00; margin-bottom: 6px; padding-bottom: 4px;">TELEMETRÍA TÁCTIL</div>
-<b>Detección Móvil:</b> ${this.isMobile}<br>
-<b>PointerLock Activo:</b> ${this.isLocked}<br>
-<b>Menú Abierto:</b> ${menuAbierto}<br>
-<b>Joystick Inicializado:</b> ${!!this.joystick}<br>
-<b>Estado Joystick:</b> ${this._joystickEventLog || 'Ninguno'}<br>
-<b>Vector Joystick:</b> ${this._joystickVectorLog || 'Sin datos'}<br>
-<b style="color: #ff9900;">Banderas WASD:</b><br>
-- Adelante (W): ${this.moverAdelante}<br>
-- Atrás (S): ${this.moverAtras}<br>
-- Izquierda (A): ${this.moverIzquierda}<br>
-- Derecha (D): ${this.moverDerecha}<br>
-<b>Cámara Pos:</b> ${this.camara.position.x.toFixed(2)}, ${this.camara.position.y.toFixed(2)}, ${this.camara.position.z.toFixed(2)}
-            `;
-        }
-    }
 
     detenerCaminata(menuAbierto) {
         if (this.isWalking) {
@@ -590,4 +517,4 @@ class ControlesPrimeraPersona {
     }
 }
 
-export { ControlesPrimeraPersona };
+export { controlsPrimeraPersona };

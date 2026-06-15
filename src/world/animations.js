@@ -1,17 +1,16 @@
 import * as THREE from 'three';
 
-// ── Estado interno del módulo ──
-// Para múltiples modelos animados (peces, agua, etc.)
+//controla las animaciones de multiples modelos
 const mixers = [];
 
-// Texturas de agua registradas para animación UV
-const texturasAgua1 = [];
+// texturas de agua para animación UV
+const texturesAgua1 = [];
 
-// Velocidad de desplazamiento UV para agua 
+// velocidad de desplazamiento UV para agua
 const velAgua1 = { u: 0.0002, v: 0.000 };
 
 //Registrar el AnimationMixer y arrancar todos los clips del modelo
-export function registrarAnimaciones(modelo, clips) {
+export function registraranimations(modelo, clips) {
     if (!clips || clips.length === 0) return;
     const mixer = new THREE.AnimationMixer(modelo);
     clips.forEach((clip) => mixer.clipAction(clip).play());
@@ -23,18 +22,18 @@ export function registrarAnimaciones(modelo, clips) {
 export function registrarTexturaAgua(textura) {
     textura.wrapS = THREE.RepeatWrapping;
     textura.wrapT = THREE.RepeatWrapping;
-    texturasAgua1.push(textura);
+    texturesAgua1.push(textura);
 }
 
-//Llamar por frame desde main.js con el delta del reloj 
-export function actualizarAnimaciones(delta) {
-    // Actualizar todos los AnimationMixers registrados (peces, otros clips GLB)
+//Llamar por frame desde main.js con reloj 
+export function actualizaranimations(delta) {
+    // Actualizar todos los AnimationMixers registrados (peces, others clips GLB)
     for (const mixer of mixers) {
         mixer.update(delta);
     }
 
-    // Desplazar UV de las texturas de agua
-    texturasAgua1.forEach((tex) => {
+    // Desplazar UV de las textures de agua
+    texturesAgua1.forEach((tex) => {
         tex.offset.x += velAgua1.u;
         tex.offset.y += velAgua1.v;
     });

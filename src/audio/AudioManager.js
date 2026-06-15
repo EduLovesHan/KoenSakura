@@ -3,7 +3,6 @@ import { broker } from '../world/EventBroker.js';
 
 let listener;
 let sonidoFondo, sonidoClick, sonidoPasos;
-
 let sfxVolume = 1.5;
 let sfxMuted = false;
 let jugadorEstaCaminando = false;
@@ -64,8 +63,8 @@ export function reproducirClick() {
     if (sonidoClick && sonidoClick.buffer) sonidoClick.play();
 }
 
-// Conectar sliders con el motor de audio
-export function configurarControlesAudio() {
+// Conectar sliders con el engine de audio
+export function configurarcontrolsAudio() {
     const musicaSlider = document.getElementById('musica-slider');
     const musicaMute = document.getElementById('musica-mute');
     const sfxSlider = document.getElementById('sfx-slider');
@@ -116,8 +115,7 @@ export function actualizarAudioPasos(isWalking) {
     }
 }
 
-// Suscribirse a los cambios de estado del jugador (pisadas)
+// cambios de estado del jugador (pisadas)
 broker.on('jugadorCaminando', (isWalking) => {
     actualizarAudioPasos(isWalking);
 });
-

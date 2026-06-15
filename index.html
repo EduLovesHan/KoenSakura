@@ -3,197 +3,195 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Paseo Virtual KoenSakura</title>
 </head>
 
 <body>
-    <!-- Pantalla de carga -->
-    <div id="pantalla-carga">
-        <div class="carga-contenido">
-            <!-- Pétalos -->
-            <div class="petalo p1">🌸</div>
-            <div class="petalo p2">🌸</div>
-            <div class="petalo p3">🌸</div>
-            <div class="petalo p4">🌸</div>
-
-            <!-- Logo / Título -->
-            <div class="carga-logo">
-                <span class="logo-kanji">桜</span>
-            </div>
-            <h1 class="carga-titulo">KoenSakura</h1>
-            <p class="carga-subtitulo">Paseo Virtual · 3D</p>
-
-            <!-- Spinner -->
-            <div class="carga-spinner">
-                <div class="spinner-anillo"></div>
-                <div class="spinner-nucleo">🌸</div>
-            </div>
-
-            <!-- Barra de progreso -->
-            <div class="carga-barra-contenedor">
-                <div class="carga-barra-relleno" id="carga-barra"></div>
-            </div>
-
-            <!-- Porcentaje -->
-            <p class="carga-porcentaje" id="carga-porcentaje">Cargando... 0%</p>
-        </div>
-    </div>
-    <button id="btn-menu-superior">
-        <img src="assets/texturas/otros/sakura.png" class="icono-sakura" alt="Abrir menú">
-    </button>
-
-
-    <!-- Mensaje que muestra la posible interaccion -->
-    <div id="ui-interaccion" class="oculto">
-        Presiona <span class="tecla-3d extra">E</span> para interactuar
-    </div>
-
-    <!-- cuadro de diálogo -->
-    <div id="modal-dialogo" class="oculto">
-        <div class="dialogo-contenido">
-            <h3 id="dialogo-titulo">Letrero</h3>
-            <p id="dialogo-texto">Aquí va la información del modelo...</p>
-            <p class="dialogo-cerrar">Presiona E para cerrar</p>
+    <div id="cortina-orientacion">
+        <div class="cortina-contenido">
+            <div class="cortina-icono">🌸</div>
+            <p class="cortina-texto">Por favor, gira tu dispositivo a horizontal</p>
         </div>
     </div>
 
+    <div id="juego-contenedor">
+        <div id="zona-joystick"></div>
 
-    <div id="panel-menu-superior" class="oculto">
-        <h3>Menú</h3>
+        <div id="pantalla-carga">
+            <div class="carga-contenido">
+                <div class="petalo p1">🌸</div>
+                <div class="petalo p2">🌸</div>
+                <div class="petalo p3">🌸</div>
+                <div class="petalo p4">🌸</div>
 
-        <div class="botones-fila">
-            <button class="btn-opcion" data-tab="general">General</button>
-            <button class="btn-opcion" data-tab="ayuda">Ayuda</button>
-            <button class="btn-opcion" data-tab="controles">Controles</button>
-        </div>
-        <div class="botones-fila">
-            <button class="btn-opcion" data-tab="ajustes">Ajustes</button>
-            <button class="btn-opcion" data-tab="creditos">Créditos</button>
-        </div>
+                <div class="carga-logo">
+                    <span class="logo-kanji">桜</span>
+                </div>
+                <h1 class="carga-titulo">KoenSakura</h1>
+                <p class="carga-subtitulo">Paseo Virtual · 3D</p>
 
-        <div id="tab-general" class="tab-contenido oculto">
-            <p>Una experiencia web interactiva en 3D desarrollada como proyecto final de Programación Gráfica. Consiste
-                en un recorrido virtual inmersivo en primera persona a través de una plaza con estética japonesa al
-                estilo low-poly.</p>
-        </div>
-
-        <div id="tab-ayuda" class="tab-contenido oculto">
-            <p>
-                En construccion
-            </p>
-        </div>
-
-        <div id="tab-controles" class="tab-contenido oculto">
-            <div class="control-carousel">
-
-                <div class="control-slide active" data-index="0">
-                    <div class="teclado-wasd">
-                        <div class="fila-teclas">
-                            <div class="tecla-grupo">
-                                <span class="tecla-3d">W</span>
-                                <span class="etiqueta-tecla">Adelante</span>
-                            </div>
-                        </div>
-                        <div class="fila-teclas">
-                            <div class="tecla-grupo">
-                                <span class="tecla-3d">A</span>
-                                <span class="etiqueta-tecla">Izquierda</span>
-                            </div>
-                            <div class="tecla-grupo">
-                                <span class="tecla-3d">S</span>
-                                <span class="etiqueta-tecla">Atrás</span>
-                            </div>
-                            <div class="tecla-grupo">
-                                <span class="tecla-3d">D</span>
-                                <span class="etiqueta-tecla">Derecha</span>
-                            </div>
-                        </div>
-                    </div>
+                <div class="carga-spinner">
+                    <div class="spinner-anillo"></div>
+                    <div class="spinner-nucleo">🌸</div>
                 </div>
 
-                <div class="control-slide" data-index="1">
-                    <div class="fila-teclas">
-                        <div class="tecla-grupo">
-                            <span class="tecla-3d">E</span>
-                            <span class="etiqueta-tecla">Interactuar</span>
-                        </div>
-                        <div class="tecla-grupo">
-                            <span class="tecla-3d" style="font-size: 16px;">ESC</span>
-                            <span class="etiqueta-tecla">Mostrar cursor</span>
-                        </div>
-                    </div>
+                <div class="carga-barra-contenedor">
+                    <div class="carga-barra-relleno" id="carga-barra"></div>
                 </div>
 
-                <div class="control-slide" data-index="2">
-                    <div class="tecla-grupo">
-                        <span class="tecla-3d">🖱️</span>
-                        <span class="etiqueta-tecla">Mover la cámara</span>
-                    </div>
-                </div>
+                <p class="carga-porcentaje" id="carga-porcentaje">Cargando... 0%</p>
 
-            </div>
-
-            <div class="carrusel-nav">
-                <button class="btn-nav" id="prev-control">◀</button>
-                <div class="indicador-puntos">
-                    <span class="punto active"></span>
-                    <span class="punto"></span>
-                    <span class="punto"></span>
-                </div>
-                <button class="btn-nav" id="next-control">▶</button>
+                <button id="btn-entrar" style="display: none;">Entrar al Paseo</button>
             </div>
         </div>
 
-        <div id="tab-ajustes" class="tab-contenido oculto">
-            <div class="control-carousel">
+        <button id="btn-menu-superior">
+            <img src="assets/textures/others/sakura.png" class="icono-sakura" alt="Abrir menú">
+        </button>
 
-                <!-- Pestaña 1: Sonido -->
-                <div class="control-slide active" data-index="0">
-                    <h4 class="titulo-carrusel">Sonido</h4>
-                    <div class="control-grupo" style="width: 100%;">
-                        <label>Música</label>
-                        <div class="slider-con-mute">
-                            <input type="range" id="musica-slider" min="0" max="1" step="0.01" value="0.3">
-                            <label><input type="checkbox" id="musica-mute"> Mute</label>
-                        </div>
-                    </div>
-                    <div class="control-grupo" style="width: 100%;">
-                        <label>SFX</label>
-                        <div class="slider-con-mute">
-                            <input type="range" id="sfx-slider" min="0" max="2" step="0.01" value="1.5">
-                            <label><input type="checkbox" id="sfx-mute"> Mute</label>
-                        </div>
-                    </div>
-                </div>
+        <div id="ui-interaccion" class="oculto">
+            Interactuar
+        </div>
 
-                <!-- Pestaña 2: Iluminación -->
-                <div class="control-slide" data-index="1">
-                    <h4 class="titulo-carrusel">Iluminación</h4>
-                    <div class="control-grupo" style="width: 100%;">
-                        <label>Modo Noche</label>
-                        <div class="slider-con-mute">
-                            <label><input type="checkbox" id="modo-noche-checkbox"> Activar</label>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="carrusel-nav">
-                <button class="btn-nav" id="prev-ajustes">◀</button>
-                <div class="indicador-puntos">
-                    <span class="punto active"></span>
-                    <span class="punto"></span>
-                </div>
-                <button class="btn-nav" id="next-ajustes">▶</button>
+        <div id="modal-dialogo" class="oculto">
+            <div class="dialogo-contenido">
+                <h3 id="dialogo-titulo">Letrero</h3>
+                <p id="dialogo-texto">Aquí va la información del modelo...</p>
             </div>
         </div>
 
-        <div id="tab-creditos" class="tab-contenido oculto">
-            <p><strong>Desarrollado por:</strong> ...</p>
-        </div>
+        <div id="panel-menu-superior" class="oculto">
+            <h3 id="titulo-menu">Menú</h3>
+            
+            <button id="btn-volver-menu" class="btn-volver oculto">
+                <span class="flecha-volver">◀</span> 
+            </button>
 
+            <div class="menu-scroll-container">
+                <div class="contenedor-botones-grid">
+                    <button class="btn-opcion" data-tab="general">General</button>
+                    <button class="btn-opcion" data-tab="ayuda">Ayuda</button>
+                    <button class="btn-opcion" data-tab="controls">Controles</button>
+                    
+                    <button class="btn-opcion" data-tab="ajustes">Ajustes</button>
+                    <button class="btn-opcion" data-tab="creditos">Créditos</button>
+                </div>
+                <div id="tab-general" class="tab-contenido oculto">
+                    <p>Una experiencia web interactiva en 3D desarrollada como proyecto final de Programación Gráfica. Consiste
+                        en un recorrido virtual inmersivo en primera persona a través de una plaza con estética japonesa al
+                        estilo low-poly.</p>
+                </div>
+
+                <div id="tab-ayuda" class="tab-contenido oculto">
+                    <p>En construccion</p>
+                </div>
+
+                <div id="tab-controls" class="tab-contenido oculto">
+                    <div class="control-carousel">
+                        <div class="control-slide active" data-index="0">
+                            <div class="teclado-wasd">
+                                <div class="fila-teclas">
+                                    <div class="tecla-grupo">
+                                        <span class="tecla-3d">W</span>
+                                        <span class="etiqueta-tecla">Adelante</span>
+                                    </div>
+                                </div>
+                                <div class="fila-teclas">
+                                    <div class="tecla-grupo">
+                                        <span class="tecla-3d">A</span>
+                                        <span class="etiqueta-tecla">Izquierda</span>
+                                    </div>
+                                    <div class="tecla-grupo">
+                                        <span class="tecla-3d">S</span>
+                                        <span class="etiqueta-tecla">Atrás</span>
+                                    </div>
+                                    <div class="tecla-grupo">
+                                        <span class="tecla-3d">D</span>
+                                        <span class="etiqueta-tecla">Derecha</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="control-slide" data-index="1">
+                            <div class="fila-teclas">
+                                <div class="tecla-grupo">
+                                    <span class="tecla-3d">E</span>
+                                    <span class="etiqueta-tecla">Interactuar</span>
+                                </div>
+                                <div class="tecla-grupo">
+                                    <span class="tecla-3d" style="font-size: 16px;">ESC</span>
+                                    <span class="etiqueta-tecla">Mostrar cursor</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="control-slide" data-index="2">
+                            <div class="tecla-grupo">
+                                <span class="tecla-3d">🖱️</span>
+                                <span class="etiqueta-tecla">Mover la cámara</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="carrusel-nav">
+                        <button class="btn-nav" id="prev-control">◀</button>
+                        <div class="indicador-puntos">
+                            <span class="punto active"></span>
+                            <span class="punto"></span>
+                            <span class="punto"></span>
+                        </div>
+                        <button class="btn-nav" id="next-control">▶</button>
+                    </div>
+                </div>
+
+                <div id="tab-ajustes" class="tab-contenido oculto">
+                    <div class="control-carousel">
+                        <div class="control-slide active" data-index="0">
+                            <h4 class="titulo-carrusel">Sonido</h4>
+                            <div class="control-grupo" style="width: 100%;">
+                                <label>Música</label>
+                                <div class="slider-con-mute">
+                                    <input type="range" id="musica-slider" min="0" max="1" step="0.01" value="0.3">
+                                    <label><input type="checkbox" id="musica-mute"> Mute</label>
+                                </div>
+                            </div>
+                            <div class="control-grupo" style="width: 100%;">
+                                <label>SFX</label>
+                                <div class="slider-con-mute">
+                                    <input type="range" id="sfx-slider" min="0" max="2" step="0.01" value="1.5">
+                                    <label><input type="checkbox" id="sfx-mute"> Mute</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="control-slide" data-index="1">
+                            <h4 class="titulo-carrusel">Iluminación</h4>
+                            <div class="control-grupo" style="width: 100%;">
+                                <label>Modo Noche</label>
+                                <div class="slider-con-mute">
+                                    <label><input type="checkbox" id="modo-noche-checkbox"> Activar</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="carrusel-nav">
+                        <button class="btn-nav" id="prev-ajustes">◀</button>
+                        <div class="indicador-puntos">
+                            <span class="punto active"></span>
+                            <span class="punto"></span>
+                        </div>
+                        <button class="btn-nav" id="next-ajustes">▶</button>
+                    </div>
+                </div>
+
+                <div id="tab-creditos" class="tab-contenido oculto">
+                    <p><strong>Desarrollado por:</strong> ...</p>
+                </div>
+            </div>
+        </div>
     </div>
     <script type="module" src="/src/main.js"></script>
 </body>

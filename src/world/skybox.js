@@ -11,25 +11,25 @@ class Skybox {
             ? new THREE.CubeTextureLoader(loadingManager)
             : new THREE.CubeTextureLoader();
 
-        const texturas = [
+        const textures = [
             'right.webp', 'left.webp',
             'top.webp', 'bottom.webp',
             'front.webp', 'back.webp'
         ];
 
         // Skybox de Día
-        this.loader.setPath('assets/texturas/SkyBoxAtardecer/');
+        this.loader.setPath('assets/textures/SkyBox1/');
         this.texturaDia = this.loader.load(
-            texturas,
+            textures,
             undefined,
             undefined,
             (error) => console.error("Error al precargar Skybox de Día:", error)
         );
 
         // Skybox de Noche
-        this.loader.setPath('assets/texturas/SkyBoxNoche/');
+        this.loader.setPath('assets/textures/SkyBox2/');
         this.texturaNoche = this.loader.load(
-            texturas,
+            textures,
             undefined,
             undefined,
             (error) => console.error("Error al precargar Skybox de Noche:", error)

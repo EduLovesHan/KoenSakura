@@ -1,0 +1,286 @@
+[
+  {
+    "archivo": "assets/models/arbol1.glb",
+    "instancias": [
+      { "posicion": [10,0,30], "escala": 1.5 },
+      { "posicion": [-10,0,30], "escala": 1.5 },
+      { "posicion": [60,0,135], "escala": 2 },
+      { "posicion": [-20,0,190], "escala": 2 },
+      { "posicion": [-70,0,190], "escala": 2 }
+    ]
+  },
+  {
+    "archivo": "assets/models/banca.glb",
+    "instancias": [
+      { "posicion": [-25,0,95], "escala": 2, "rotacion": [0,1.52,0] },
+      { "posicion": [-27,0,37], "escala": 2, "rotacion": [0,-1.52,0] },
+      { "posicion": [26,0,35], "escala": 2, "rotacion": [0,-1.52,0] },
+      { "posicion": [35,0,95], "escala": 2, "rotacion": [0,1.52,0] }
+    ]
+  },
+  {
+    "archivo": "assets/models/estatuaHachiko.glb",
+    "instancias": [
+      { "posicion": [-65,-0.25,80], "escala": 1.5, "rotacion": [0,3.141592653589793,0] }
+    ]
+  },
+  {
+    "archivo": "assets/models/pinturaMar.glb",
+    "instancias": [
+      {
+        "posicion": [-50,0,140],
+        "escala": 0.7,
+        "rotacion": [0,3.141592653589793,0],
+        "interactivo": {
+          "titulo": "La Gran Ola de Kanagawa",
+          "texto": "Obra del maestro japonés Katsushika Hokusai, simboliza el choque entre el caos de la naturaleza y la inmutabilidad humana. Representa una ola a punto de devorar a tres embarcaciones, mientras que, en el fondo, el Monte Fuji se mantiene sereno",
+          "distancia": 8
+        }
+      }
+    ]
+  },
+  {
+    "archivo": "assets/models/plantaSakura.glb",
+    "instancias": [
+      { "posicion": [-65,0.7,44], "escala": 1.5, "rotacion": [0,1.52,0] },
+      { "posicion": [-65,0.1,46], "escala": 2.2, "rotacion": [0,1.52,0] }
+    ]
+  },
+  {
+    "archivo": "assets/models/mostrador.glb",
+    "instancias": [
+      {
+        "posicion": [-66,0,80],
+        "escala": 2.25,
+        "interactivo": {
+          "titulo": "El perro fiel Hachiko",
+          "texto": "Hachiko fue un perro japonés de raza akita, recordado por haber esperado a su dueño, el profesor Hidesaburo Ueno, en la estación Shibuya, cerca de nueve años después de la muerte de este.",
+          "distancia": 8
+        }
+      },
+      {
+        "posicion": [-66,0,45],
+        "escala": 2.25,
+        "interactivo": {
+          "titulo": "Sakura o Cerezo Japonés",
+          "texto": "Es un árbol emblemático de Japón, venerado por su belleza efímera. Representa la fragilidad de la vida, la renovación y la esperanza.",
+          "distancia": 8
+        }
+      }
+    ]
+  },
+  {
+    "archivo": "assets/models/cerezo.glb",
+    "instancias": [
+      { "posicion": [88,0.2,180], "escala": 5, "rotacion": [0,3.141592653589793,0] },
+      { "posicion": [18,0.2,125], "escala": 5, "rotacion": [0,-3.141592653589793,0] },
+      { "posicion": [18,0.2,95], "escala": 5 },
+      { "posicion": [-18,0.2,125], "escala": 5 },
+      { "posicion": [-18,0.2,95], "escala": 5, "rotacion": [0,-3.141592653589793,0] }
+    ]
+  },
+  {
+    "archivo": "assets/models/bonsai.glb",
+    "instancias": [
+      { "posicion": [-115,0,125], "escala": 3.5, "rotacion": [0,1.52,0] },
+      { "posicion": [-115,0,180], "escala": 3.5, "rotacion": [0,1.52,0] }
+    ]
+  },
+  {
+    "archivo": "assets/models/toroStone.glb",
+    "instancias": [
+      { "posicion": [53.5,0,185], "escala": 6, "rotacion": [0,3.14,0] },
+      {
+        "posicion": [53.5,0,175],
+        "escala": 6,
+        "rotacion": [0,3.14,0],
+        "interactivo": {
+          "titulo": "Toro o Farolillo Japones",
+          "texto": "Son típicos de los templos budistas y se extendieron con esta religión a lo largo del periodo Nara. Decoran escaleras, jardines y paseos para guiar el camino de los espíritus y dioses y que no se pierdan.",
+          "distancia": 8
+        }
+      },
+      { "posicion": [13,0,95], "escala": 6, "rotacion": [0,1.52,0] },
+      { "posicion": [-13,0,95], "escala": 6, "rotacion": [0,1.52,0] },
+      { "posicion": [-15,0,125], "escala": 6, "rotacion": [0,1.52,0] },
+      { "posicion": [15,0,125], "escala": 6, "rotacion": [0,1.52,0] }
+    ]
+  },
+  {
+    "archivo": "assets/models/vegetacion.glb",
+    "instancias": [
+      { "posicion": [52,0,190], "escala": 4, "rotacion": [0,1.52,0] },
+      { "posicion": [52,1,150], "escala": 4, "rotacion": [0,-1.52,0] }
+    ]
+  },
+  {
+    "archivo": "assets/models/toro.glb",
+    "instancias": [
+      { "posicion": [-65,0,85], "escala": 1, "rotacion": [0,1.52,0] },
+      { "posicion": [-65,0,75], "escala": 1, "rotacion": [0,1.52,0] },
+      { "posicion": [-105,0,68], "escala": 1, "rotacion": [0,1.52,0] },
+      { "posicion": [-105,0,63], "escala": 1, "rotacion": [0,1.52,0] }
+    ]
+  },
+  {
+    "archivo": "assets/models/linterna.glb",
+    "instancias": [
+      { "posicion": [-81,1.5,75], "escala": 0.75, "rotacion": [0,3.14,0] },
+      { "posicion": [-105,1.5,75], "escala": 0.75, "rotacion": [0,3.14,0] }
+    ]
+  },
+  {
+    "archivo": "assets/models/arbol2.glb",
+    "instancias": [
+      { "posicion": [-65,0,35], "escala": 3, "rotacion": [0,-1.52,0] }
+    ]
+  },
+  {
+    "archivo": "assets/models/lampara.glb",
+    "instancias": [
+      { "posicion": [50,0,95], "escala": 3.5, "rotacion": [0,3.14,0] },
+      { "posicion": [-90,0,165], "escala": 3.5, "rotacion": [0,3.14,0] },
+      { "posicion": [-30,0,165], "escala": 3.5, "rotacion": [0,3.14,0] }
+    ]
+  },
+  {
+    "archivo": "assets/models/cerezo2.glb",
+    "instancias": [
+      { "posicion": [-45,0,35], "escala": 3, "rotacion": [0,3.14,0] },
+      { "posicion": [-20,0,35], "escala": 3, "rotacion": [0,3.14,0] },
+      { "posicion": [18,0,35], "escala": 3, "rotacion": [0,3.14,0] },
+      { "posicion": [45,0,35], "escala": 3, "rotacion": [0,3.14,0] },
+      { "posicion": [75,0,35], "escala": 3, "rotacion": [0,3.14,0] },
+      { "posicion": [100,0,35], "escala": 3, "rotacion": [0,3.14,0] },
+      { "posicion": [-65,0,95], "escala": 3, "rotacion": [0,3.14,0] },
+      { "posicion": [115,0,60], "escala": 3, "rotacion": [0,3.14,0] },
+      { "posicion": [115,0,85], "escala": 3, "rotacion": [0,3.14,0] },
+      { "posicion": [115,0,135], "escala": 3, "rotacion": [0,3.14,0] },
+      { "posicion": [80,0,135], "escala": 3, "rotacion": [0,3.14,0] },
+      { "posicion": [-115,0,150], "escala": 3, "rotacion": [0,1.52,0] },
+      { "posicion": [20,0,190], "escala": 3, "rotacion": [0,1.52,0] },
+      { "posicion": [40,0,150], "escala": 3, "rotacion": [0,1.52,0] },
+      { "posicion": [-45,0,190], "escala": 3, "rotacion": [0,1.52,0] }
+    ]
+  },
+  {
+    "archivo": "assets/models/bamboo.glb",
+    "instancias": [
+      { "posicion": [4,-0.7,103], "escala": 1, "rotacion": [0,3.14,0] },
+      { "posicion": [4,-0.7,115], "escala": 1, "rotacion": [0,3.14,0] },
+      { "posicion": [-4,-0.7,115], "escala": 1, "rotacion": [0,3.14,0] },
+      { "posicion": [-4,-0.7,103], "escala": 1, "rotacion": [0,3.14,0] }
+    ]
+  },
+  {
+    "archivo": "assets/models/pedestal.glb",
+    "instancias": [
+      { "posicion": [-105,0,65.5], "escala": 1 }
+    ]
+  },
+  {
+    "archivo": "assets/models/muñeca.glb",
+    "instancias": [
+      {
+        "posicion": [-105,1.5,65.5],
+        "escala": 0.4,
+        "rotacion": [0,1.52,0],
+        "interactivo": {
+          "titulo": "Muñeca Kokeshi",
+          "texto": "Una muñeca tradicional japonesa hecha de madera. Representa la resiliencia, la protección, la buena fortuna y la conexión espiritual",
+          "distancia": 8
+        }
+      }
+    ]
+  },
+  {
+    "archivo": "assets/models/plazaPrincipal_optimizado.glb",
+    "tieneAgua": true,
+    "tieneanimations": true,
+    "instancias": [
+      { "posicion": [0,0,0] }
+    ]
+  },
+  {
+    "archivo": "assets/models/plazaPrincipal_colisiones.glb",
+    "instancias": [
+      { "posicion": [0,0,0] }
+    ]
+  },
+  {
+    "archivo": "assets/models/letreroBasico.glb",
+    "instancias": [
+      {
+        "posicion": [50,0,60],
+        "rotacion": [0,3.141592653589793,0],
+        "interactivo": {
+          "titulo": "Monte Fuji",
+          "texto": "Es la montaña más alta de Japón. En el pasado, la ascensión al monte Fuji era considerada una peregrinación religiosa para honrar al espíritu de uno de los picos más bonitos e icónicos del mundo.."
+        }
+      }
+    ]
+  },
+  {
+    "archivo": "assets/models/farolaPrueba.glb",
+    "esFarola": true,
+    "colisionPadding": [1.5,1.5],
+    "instancias": [
+      { "posicion": [8,-1,35] },
+      { "posicion": [-8,-1,35] },
+      { "posicion": [-35,-1,35] },
+      { "posicion": [-60,-1,35] },
+      { "posicion": [35,-1,35] },
+      { "posicion": [60,-1,35] },
+      { "posicion": [85,-1,35] },
+      { "posicion": [110,-1,35] },
+      { "posicion": [116,-1,75] },
+      { "posicion": [116,-1,100] },
+      { "posicion": [116,-1,125] },
+      { "posicion": [95,-1,134] },
+      { "posicion": [70,-1,134] },
+      { "posicion": [45,-1,134] },
+      { "posicion": [42,-1,160] },
+      { "posicion": [35,-1,190] },
+      { "posicion": [7,-1,190] },
+      { "posicion": [-7,-1,190] },
+      { "posicion": [-30,-1,190] },
+      { "posicion": [-55,-1,190] },
+      { "posicion": [-105,-1,190] },
+      { "posicion": [-117,-1,165] },
+      { "posicion": [-117,-1,140] },
+      { "posicion": [-117,-1,115] },
+      { "posicion": [-45,-1,100] },
+      { "posicion": [-80,-1,190] }
+    ]
+  },
+  {
+    "archivo": "assets/models/monje.glb",
+    "instancias": [
+      {
+        "posicion": [-102.5,3.4,42.5],
+        "escala": 2.8,
+        "rotacion": [0,1.52,0],
+        "interactivo": {
+          "titulo": "Monje",
+          "texto": "Un practicante de una religión que ha decidido renunciar a los placeres del mundo para dedicarse por completo a la meditación y al servicio de los demás.",
+          "distancia": 5
+        }
+      }
+    ]
+  },
+  {
+    "archivo": "assets/models/samurai.glb",
+    "instancias": [
+      {
+        "posicion": [-102.5,5,46],
+        "escala": 0.1,
+        "rotacion": [0,1.52,0],
+        "interactivo": {
+          "titulo": "Samurai",
+          "texto": "Un guerrero japonés que servía a un señor feudal, conocido por su honor, valentía y habilidad con la espada.",
+          "distancia": 5
+        }
+      }
+    ]
+  }
+]

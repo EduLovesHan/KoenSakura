@@ -1,142 +1,227 @@
-import { animacionesUI } from './GestorAnimaciones.js';
+import { animationsUI } from './AnimationManager.js';
 import { gsap } from 'gsap';
 
+// Cierra el menú superior animando el icono y ocultando el contenedor
 export function cerrarMenuSuperior() {
     const panelMenuSuperior = document.getElementById('panel-menu-superior');
+    const botonMenuSuperior = document.getElementById('btn-menu-superior');
+    
     if (panelMenuSuperior && !panelMenuSuperior.classList.contains('oculto')) {
-        animacionesUI.desaparecerMenu(panelMenuSuperior, () => {
-            panelMenuSuperior.classList.add('oculto');
-        });
-        
-        const btnMenuSuperior = document.getElementById('btn-menu-superior');
-        if (btnMenuSuperior) {
-            const icono = btnMenuSuperior.querySelector('.icono-sakura');
-            if (icono) {
-                gsap.to(icono, {
-                    rotation: 0,
-                    duration: 0.5,
-                    ease: 'power2.inOut'
-                });
-            }
-        }
+        const iconoBoton = botonMenuSuperior ? botonMenuSuperior.querySelector('.icono-sakura') : null;
+        cerrarMenuSuperiorConIcono(panelMenuSuperior, iconoBoton);
     }
 }
 
+// Alterna la visibilidad del menú principal superior
+export function alternarMenuPrincipal(onInteraccion) {
+    const panelMenuSuperior = document.getElementById('panel-menu-superior');
+    const botonMenuSuperior = document.getElementById('btn-menu-superior');
+    
+    if (!panelMenuSuperior || !botonMenuSuperior) return;
+
+    onInteraccion();
+
+    const estaOculto = panelMenuSuperior.classList.contains('oculto');
+    const iconoBoton = botonMenuSuperior.querySelector('.icono-sakura');
+
+    if (estaOculto) {
+        abrirMenuSuperior(panelMenuSuperior, iconoBoton);
+    } else {
+        cerrarMenuSuperiorConIcono(panelMenuSuperior, iconoBoton);
+    }
+}
+
+// Abre el menú superior y rota el icono de sakura
+function abrirMenuSuperior(panelMenuSuperior, iconoBoton) {
+    panelMenuSuperior.classList.remove('oculto');
+    animationsUI.aparecerMenu(panelMenuSuperior);
+    
+    if (iconoBoton) {
+        gsap.to(iconoBoton, {
+            rotation: 180,
+            duration: 0.5,
+            ease: 'power2.inOut'
+        });
+    }
+}
+
+function resetearEstadoMenu() {
+    // Ocultar contenidos de pestañas
+    document.querySelectorAll('.tab-contenido').forEach(tab => tab.classList.add('oculto'));
+    // Mostrar botones principales
+    const contenedorBotones = document.querySelector('.contenedor-botones-grid');
+    if (contenedorBotones) contenedorBotones.classList.remove('oculto');
+    // Restaurar título
+    const tituloMenu = document.querySelector('#panel-menu-superior h3');
+    if (tituloMenu) tituloMenu.textContent = 'Menú';
+    // Ocultar botón volver
+    const btnVolver = document.getElementById('btn-volver-menu');
+    if (btnVolver) btnVolver.classList.add('oculto');
+}
+
+// Cierra el menú superior con animación y restablece la rotación del icono de sakura
+function cerrarMenuSuperiorConIcono(panelMenuSuperior, iconoBoton) {
+    animationsUI.desaparecerMenu(panelMenuSuperior, () => {
+        panelMenuSuperior.classList.add('oculto');
+        setTimeout(() => {
+            resetearEstadoMenu();
+        }, 400);
+    });
+    
+    if (iconoBoton) {
+        gsap.to(iconoBoton, {
+            rotation: 0,
+            duration: 0.5,
+            ease: 'power2.inOut'
+        });
+    }
+}
+
+// Inicializa toda la interfaz de usuario del menú y carruseles
 export function inicializarUI(onInteraccion) {
-    // Lógica del menú superior
-    const btnMenuSuperior = document.getElementById('btn-menu-superior');
+    const botonMenuSuperior = document.getElementById('btn-menu-superior');
     const panelMenuSuperior = document.getElementById('panel-menu-superior');
 
-    if (btnMenuSuperior) {
-        btnMenuSuperior.addEventListener('click', (evento) => {
-            evento.stopPropagation(); 
-            onInteraccion(); 
-            
-            const estaOculto = panelMenuSuperior.classList.contains('oculto');
-            const icono = btnMenuSuperior.querySelector('.icono-sakura');
-
-            if (estaOculto) {
-                // Abrir menu
-                panelMenuSuperior.classList.remove('oculto');
-                animacionesUI.aparecerMenu(panelMenuSuperior);
-                
-                if (icono) {
-                    gsap.to(icono, {
-                        rotation: 180,
-                        duration: 0.5,
-                        ease: 'power2.inOut'
-                    });
-                }
-            } else {
-                // Cerrar menu
-                animacionesUI.desaparecerMenu(panelMenuSuperior, () => {
-                    panelMenuSuperior.classList.add('oculto');
-                });
-                
-                if (icono) {
-                    gsap.to(icono, {
-                        rotation: 0,
-                        duration: 0.5,
-                        ease: 'power2.inOut'
-                    });
-                }
-            }
+    if (botonMenuSuperior) {
+        botonMenuSuperior.addEventListener('click', (eventoClick) => {
+            eventoClick.stopPropagation(); 
+            alternarMenuPrincipal(onInteraccion);
         });
     }
 
     if (panelMenuSuperior) {
-        panelMenuSuperior.addEventListener('click', (evento) => {
-            evento.stopPropagation();
+        panelMenuSuperior.addEventListener('click', (eventoClick) => {
+            eventoClick.stopPropagation();
         });
     }
 
-    // Creación e inicialización de carruseles
-    function inicializarCarrusel(selectorContenedor, idBtnNext, idBtnPrev) {
-        let indiceActual = 0;
-        const contenedor = document.querySelector(selectorContenedor);
-        if (!contenedor) return () => {}; // si el contenedor no existe
+    // Inicialización del carrusel de pestañas
+    function inicializarCarrusel(selectorContenedor, idBotonSiguiente, idBotonAnterior) {
+        let indicePaginaActual = 0;
+        const contenedorCarrusel = document.querySelector(selectorContenedor);
+        if (!contenedorCarrusel) return () => {}; // Retorna función vacía si no existe
 
-        const paginas = contenedor.querySelectorAll('.control-slide');
-        const puntos = contenedor.querySelectorAll('.punto');
-        const btnNext = document.getElementById(idBtnNext);
-        const btnPrev = document.getElementById(idBtnPrev);
+        const paginasCarrusel = contenedorCarrusel.querySelectorAll('.control-slide');
+        const puntosNavegacion = contenedorCarrusel.querySelectorAll('.punto');
+        const botonSiguiente = document.getElementById(idBotonSiguiente);
+        const botonAnterior = document.getElementById(idBotonAnterior);
 
-        function mostrarPagina(index) {
-            if (index >= paginas.length) indiceActual = 0;
-            else if (index < 0) indiceActual = paginas.length - 1;
-            else indiceActual = index;
+        function mostrarPagina(indicePaginaDeseado) {
+            if (indicePaginaDeseado >= paginasCarrusel.length) {
+                indicePaginaActual = 0;
+            } else if (indicePaginaDeseado < 0) {
+                indicePaginaActual = paginasCarrusel.length - 1;
+            } else {
+                indicePaginaActual = indicePaginaDeseado;
+            }
 
-            paginas.forEach((pag, i) => {
-                pag.classList.toggle('active', i === indiceActual);
-                if (puntos[i]) puntos[i].classList.toggle('active', i === indiceActual);
+            paginasCarrusel.forEach((paginaElemento, indiceElemento) => {
+                const esPaginaActiva = indiceElemento === indicePaginaActual;
+                paginaElemento.classList.toggle('active', esPaginaActiva);
+                
+                if (puntosNavegacion[indiceElemento]) {
+                    puntosNavegacion[indiceElemento].classList.toggle('active', esPaginaActiva);
+                }
             });
         }
 
-        if (btnNext && btnPrev) {
-            btnNext.addEventListener('click', (e) => {
-                e.stopPropagation();
+        if (botonSiguiente && botonAnterior) {
+            botonSiguiente.addEventListener('click', (eventoClick) => {
+                eventoClick.stopPropagation();
                 onInteraccion();
-                mostrarPagina(indiceActual + 1);
+                mostrarPagina(indicePaginaActual + 1);
             });
-            btnPrev.addEventListener('click', (e) => {
-                e.stopPropagation();
+            botonAnterior.addEventListener('click', (eventoClick) => {
+                eventoClick.stopPropagation();
                 onInteraccion();
-                mostrarPagina(indiceActual - 1);
+                mostrarPagina(indicePaginaActual - 1);
             });
         }
         return mostrarPagina; 
     }
 
-    const resetCarruselControles = inicializarCarrusel('#tab-controles', 'next-control', 'prev-control');
-    const resetCarruselAjustes = inicializarCarrusel('#tab-ajustes', 'next-ajustes', 'prev-ajustes');
+    const restablecerCarruselcontrols = inicializarCarrusel('#tab-controls', 'next-control', 'prev-control');
+    const restablecerCarruselAjustes = inicializarCarrusel('#tab-ajustes', 'next-ajustes', 'prev-ajustes');
 
-    // Lógica de pestañas del menú superior
-    const botonesPestanas = document.querySelectorAll('.btn-opcion');
+    // Configuración de pestañas del menú superior
+    const botonesPestanas = document.querySelectorAll('.contenedor-botones-grid .btn-opcion');
     const contenidosPestanas = document.querySelectorAll('.tab-contenido');
+    const gridBotones = document.querySelector('.contenedor-botones-grid');
+    const btnVolver = document.getElementById('btn-volver-menu');
+    const tituloMenu = document.getElementById('titulo-menu');
 
-    botonesPestanas.forEach(boton => {
-        // Efecto de hover dinámico en los botones de pestañas del menú
-        boton.addEventListener('mouseenter', () => {
-            animacionesUI.pulsoBoton(boton);
+    // Manejador de clic para el botón volver
+    if (btnVolver) {
+        btnVolver.addEventListener('click', (eventoClick) => {
+            eventoClick.stopPropagation();
+            onInteraccion();
+
+            // Ocultar pestañas y botón volver
+            contenidosPestanas.forEach(contenidoTab => {
+                contenidoTab.classList.add('oculto');
+            });
+            btnVolver.classList.add('oculto');
+
+            // Mostrar cuadrícula de botones y restaurar el título
+            if (gridBotones) {
+                gridBotones.classList.remove('oculto');
+            }
+            if (tituloMenu) {
+                tituloMenu.textContent = 'Menú';
+            }
+        });
+    }
+
+    botonesPestanas.forEach(botonPestana => {
+        // Efecto de hover dinámico en los botones de pestañas
+        botonPestana.addEventListener('mouseenter', () => {
+            animationsUI.pulsoBoton(botonPestana);
         });
 
-        boton.addEventListener('click', () => {
+        botonPestana.addEventListener('click', () => {
             onInteraccion();
             
-            const { tab: tabDestino } = boton.dataset;
+            const tabDestino = botonPestana.dataset.tab;
+            
+            // Detectar si la vista corresponde a móvil (ancho <= 1024px, alto <= 600px o flag esMovil del engine)
+            const isMobileLayout = window.innerWidth <= 1024 || window.innerHeight <= 600 || window.esMovil;
 
-            contenidosPestanas.forEach(contenido => {
-                contenido.classList.add('oculto');
+            if (isMobileLayout) {
+                // Comportamiento móvil: ocultar cuadrícula y mostrar botón volver con título cambiado
+                if (gridBotones) {
+                    gridBotones.classList.add('oculto');
+                }
+                if (btnVolver) {
+                    btnVolver.classList.remove('oculto');
+                }
+                if (tituloMenu) {
+                    tituloMenu.textContent = botonPestana.innerText || botonPestana.textContent;
+                }
+            } else {
+                // Comportamiento PC: mantener cuadrícula, ocultar botón volver y título estático "Menú"
+                if (gridBotones) {
+                    gridBotones.classList.remove('oculto');
+                }
+                if (btnVolver) {
+                    btnVolver.classList.add('oculto');
+                }
+                if (tituloMenu) {
+                    tituloMenu.textContent = 'Menú';
+                }
+            }
+
+            contenidosPestanas.forEach(contenidoTab => {
+                contenidoTab.classList.add('oculto');
             });
 
-            const tabAMostrar = document.getElementById(`tab-${tabDestino}`);
-            if (tabAMostrar) {
-                tabAMostrar.classList.remove('oculto');
+            const pestañaAMostrar = document.getElementById(`tab-${tabDestino}`);
+            if (pestañaAMostrar) {
+                pestañaAMostrar.classList.remove('oculto');
                 
-                if (tabDestino === 'controles') {
-                    resetCarruselControles(0); 
+                if (tabDestino === 'controls') {
+                    restablecerCarruselcontrols(0); 
                 } else if (tabDestino === 'ajustes') {
-                    resetCarruselAjustes(0); 
+                    restablecerCarruselAjustes(0); 
                 }
             }
         });

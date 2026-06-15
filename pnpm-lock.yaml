@@ -14,6 +14,9 @@ importers:
       lil-gui:
         specifier: ^0.21.0
         version: 0.21.0
+      nipplejs:
+        specifier: ^1.0.4
+        version: 1.0.4
       three:
         specifier: ^0.184.0
         version: 0.184.0
@@ -460,6 +463,9 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
+  nipplejs@1.0.4:
+    resolution: {integrity: sha512-YtvRZDuyWQ+tOj0nUjfnZt4ZQmJVWfK9+yPmV5OXpQ4k4AkOGcSfKvSXbPNkV0ERqc4eakkBSZ7/Wyx1y6h/Sg==}
+
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
 
@@ -841,6 +847,8 @@ snapshots:
   ms@2.1.3: {}
 
   nanoid@3.3.12: {}
+
+  nipplejs@1.0.4: {}
 
   picocolors@1.1.1: {}
 

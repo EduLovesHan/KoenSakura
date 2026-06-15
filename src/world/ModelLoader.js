@@ -4,8 +4,8 @@ import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 import { Water } from 'three/addons/objects/Water.js';
 import { broker } from './EventBroker.js';
-import { registrarAnimaciones, registrarTexturaAgua } from './animaciones.js';
-import { mallasSuelo, registrarBoxColision } from './colisiones.js';
+import { registraranimations, registrarTexturaAgua } from './animations.js';
+import { mallasSuelo, registrarBoxColision } from './collisions.js';
 import vertexShader from '../shaders/phong.vert?raw';
 import fragmentShader from '../shaders/phong.frag?raw';
 
@@ -13,16 +13,12 @@ export const aguasInstanciadas = [];
 
 // Cargar la textura de normales del agua
 const textureLoader = new THREE.TextureLoader();
-const waterNormals = textureLoader.load('assets/texturas/waternormals3.webp', (texture) => {
+const waterNormals = textureLoader.load('assets/textures/others/waternormals3.webp', (texture) => {
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
 });
 
-// ══════════════════════════════════════════════════════════════════
-// Uniforms globales para el shader Phong custom.
-// Se aplica SOLO a mallas estáticas (Mesh).
-// SkinnedMesh (peces) y mallas de agua conservan su MeshStandardMaterial
-// original del GLB y se iluminan con las luces nativas de Three.js.
-// ══════════════════════════════════════════════════════════════════
+// Uniforms globales para el shader Phong que se aplica solo a mallas estaticas
+// Mallas con esqueletos y mallas de agua conservan el material estandar y se iluminan con luces nativas de treejs
 
 export const phongUniformsGlobales = {
     uAmbientColor: { value: new THREE.Color().setRGB((0xd8 + 0.001) / 255, (0xe2 + 0.001) / 255, (0xf0 + 0.001) / 255) },
@@ -34,7 +30,7 @@ export const phongUniformsGlobales = {
     uSpecularIntensity: { value: 0.0 },
     uShininess: { value: 30.0 },
     uCameraPosition: { value: new THREE.Vector3() },
-    // Point Lights del Pool (farolas) — compartidos por todos los materiales
+    // Point Lights de las farolas, compartidos por todos los materiales
     uPointLightPos0: { value: new THREE.Vector3(0, -100, 0) },
     uPointLightPos1: { value: new THREE.Vector3(0, -100, 0) },
     uPointLightPos2: { value: new THREE.Vector3(0, -100, 0) },
@@ -47,7 +43,7 @@ export const phongUniformsGlobales = {
 };
 
 function crearMaterialPhong(originalMaterial) {
-    // ── Extraer textura y color originales del material GLTF ──
+    // Extraer textura y color originales del material GLTF
     const {
         map: texturaOriginal = null,
         color,
@@ -65,7 +61,7 @@ function crearMaterialPhong(originalMaterial) {
     // Si la opacidad es < 1 o el material original ya era transparente
     const esTransparente = transparent || opacidadOriginal < 1.0;
 
-    // Si el original tiene alphaTest configurado, o usamos un fallback minúsculo si es transparente
+    // Si el original tiene alphaTest configurado
     const alphaTestOriginal = alphaTest !== undefined && alphaTest > 0
         ? alphaTest
         : (esTransparente ? 0.05 : 0.0);
@@ -78,7 +74,7 @@ function crearMaterialPhong(originalMaterial) {
         ? blending
         : THREE.NormalBlending;
 
-    // ── Crear una instancia NUEVA de ShaderMaterial (nunca compartida) ──
+    // Crear una instancia nueva de ShaderMaterial
     const nuevoMaterial = new THREE.ShaderMaterial({
         vertexShader,
         fragmentShader,
@@ -87,7 +83,7 @@ function crearMaterialPhong(originalMaterial) {
         depthWrite: depthWriteOriginal,
         blending: blendingOriginal,
         uniforms: {
-            // Globales compartidos por referencia (modificar uno los modifica todos — intencional)
+            // Globales compartidos por referencia
             uAmbientColor: phongUniformsGlobales.uAmbientColor,
             uAmbientIntensity: phongUniformsGlobales.uAmbientIntensity,
             uLightColor: phongUniformsGlobales.uLightColor,
@@ -106,7 +102,7 @@ function crearMaterialPhong(originalMaterial) {
             uPointLightColor: phongUniformsGlobales.uPointLightColor,
             uPointLightIntensity: phongUniformsGlobales.uPointLightIntensity,
             uPointLightDistance: phongUniformsGlobales.uPointLightDistance,
-            // Per-mesh: cada malla tiene su propia textura y color
+            // Cada malla tiene su propia textura y color
             uMap: { value: texturaOriginal },
             uHasTexture: { value: texturaOriginal ? 1.0 : 0.0 },
             uBaseColor: { value: colorOriginal },
@@ -118,20 +114,7 @@ function crearMaterialPhong(originalMaterial) {
     return nuevoMaterial;
 }
 
-/**
- * Aplica el shader Phong SOLO a mallas estáticas (Mesh).
- * Excluye:
- *   - SkinnedMesh → conservan material para animación
- *   - Mallas cuyo nombre contiene 'agua' → conservan material para transparencia/UV
- *   - Mallas con materiales emisivos → tienen luz propia
- *   - Cajas de colisión
- *   - Modelo 'muñeca' → conserva material GLTF original para transparencias alpha
- */
-
 function aplicarMaterialPhong(model) {
-    // ── EXCLUIR modelo completo si es la muñeca ──
-    // Conserva su MeshStandardMaterial original para que las texturas
-    // con canal alpha (pelo, ropa, accesorios) se rendericen correctamente.
     const nombreModelo = (model.name || '').toLowerCase();
     const esModeloExcluido = nombreModelo.includes('muñeca') || nombreModelo.includes('muneca');
 
@@ -151,22 +134,11 @@ function aplicarMaterialPhong(model) {
 
     model.traverse((child) => {
         if (!child.isMesh || !child.material) return;
-
-        // ── EXCLUIR SkinnedMesh (peces con bones) ──
-        // Conservan su MeshStandardMaterial original para que las animaciones
-        // de bones funcionen correctamente. Se iluminan con las luces nativas
-        // de Three.js (AmbientLight, DirectionalLight, PointLight).
         if (child.isSkinnedMesh) return;
-
-        // ── EXCLUIR mallas de agua ──
-        // Conservan su material original para la transparencia y animación UV.
         const nombreLower = child.name.toLowerCase();
         if (nombreLower.includes('agua')) return;
-
-        // No tocar las cajas de colisión
         if (nombreLower.includes('caja_colision')) return;
 
-        // ── EXCLUIR mallas de muñeca por nombre de malla individual ──
         if (nombreLower.includes('muñeca') || nombreLower.includes('muneca')) {
             const mats = Array.isArray(child.material) ? child.material : [child.material];
             mats.forEach(mat => {
@@ -177,7 +149,7 @@ function aplicarMaterialPhong(model) {
             return;
         }
 
-        // Omitir mallas con materiales emisivos (luz propia, ej. farolas)
+        // Omitir mallas con materiales emisivos
         const materialesOriginales = Array.isArray(child.material)
             ? child.material
             : [child.material];
@@ -187,21 +159,18 @@ function aplicarMaterialPhong(model) {
         );
         if (tieneEmisivo) return;
 
-        // ── Crear material Phong individual para cada material original ──
+        // Crear material Phong individual para cada material original ──
         if (Array.isArray(child.material)) {
             // Multi-material: crear un ShaderMaterial por cada sub-material
             child.material = child.material.map(mat => crearMaterialPhong(mat));
         } else {
-            // Material único: crear un ShaderMaterial nuevo con su textura/color preservados
+            // Material único: crear un ShaderMaterial nuevo con su textura preservada
             child.material = crearMaterialPhong(child.material);
         }
     });
 }
 
-/**
- * Detecta si un modelo contiene SkinnedMesh (mallas con esqueleto/bones).
- * Se usa para decidir si clonar con SkeletonUtils.clone() o con clone() normal.
- */
+
 function tieneSkinnedMesh(model) {
     let encontrado = false;
     model.traverse((child) => {
@@ -229,13 +198,13 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
     aguasInstanciadas.length = 0;
 
     try {
-        const respuesta = await fetch('assets/mapaObjetos.json');
+        const respuesta = await fetch('assets/objectMap.json');
         if (!respuesta.ok) {
             throw new Error(`No se pudo cargar el archivo de configuración. Status: ${respuesta.status}`);
         }
         const configuracion = await respuesta.json();
 
-        // Contar el total de instancias de todos los modelos
+        // Contar el total de instancias de todos los models
         let totalInstancias = 0;
         for (const item of configuracion) {
             totalInstancias += item.instancias.length;
@@ -263,20 +232,61 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
                     console.log(`[SkeletonUtils] Modelo ${item.archivo} contiene SkinnedMesh — se usará SkeletonUtils.clone()`);
                 }
 
-                // (La búsqueda de materiales emisivos se ha delegado a la suscripción del módulo de iluminación)
-
                 // Iterar cada instancia del modelo
                 for (const instancia of item.instancias) {
-                    //  Clonación: SkeletonUtils.clone() para modelos con bones
+                    //  se usa SkeletonUtils.clone() para models con bones
                     const clon = usarSkeletonUtils
                         ? SkeletonUtils.clone(modeloBase)
                         : modeloBase.clone();
 
-                    // Detectar si se procesa el modelo de colisiones
-                    const esModeloColisiones = item.archivo.toLowerCase().includes('colisiones');
+                    // Aplicar culling y sombras de manera óptima
+                    clon.traverse((child) => {
+                        if (child.isMesh) {
+                            if (child.geometry) {
+                                child.geometry.computeBoundingBox();
+                                child.geometry.computeBoundingSphere();
+                            }
+                            child.frustumCulled = true;
 
-                    if (esModeloColisiones) {
-                        // Lógica para modelos de colisiones
+                            // Optimización de Back-Face Culling 
+                            const nombreHijo = child.name.toLowerCase();
+                            const esPlanoSinGrosor = nombreHijo.includes('sakura') || 
+                                                     nombreHijo.includes('hoja') || 
+                                                     nombreHijo.includes('leaf') || 
+                                                     nombreHijo.includes('leaves') || 
+                                                     nombreHijo.includes('follaje') || 
+                                                     nombreHijo.includes('muñeca') || 
+                                                     nombreHijo.includes('muneca') ||
+                                                     nombreHijo.includes('flor') ||
+                                                     nombreHijo.includes('petalo') ||
+                                                     nombreHijo.includes('agua');
+
+                            if (child.material) {
+                                const subMateriales = Array.isArray(child.material) ? child.material : [child.material];
+                                subMateriales.forEach(mat => {
+                                    if (mat) {
+                                        mat.side = esPlanoSinGrosor ? THREE.DoubleSide : THREE.FrontSide;
+                                    }
+                                });
+                            }
+
+                            // Configurar sombras óptimas
+                            const esCriticoParaSombras = nombreHijo.includes('jugador') || 
+                                                         nombreHijo.includes('player') || 
+                                                         nombreHijo.includes('estatua') || 
+                                                         nombreHijo.includes('torii') || 
+                                                         nombreHijo.includes('puente');
+                                                         
+                            child.castShadow = esCriticoParaSombras;
+                            child.receiveShadow = !esCriticoParaSombras; // Suelo, farolas lejanas y paredes solo reciben o no proyectan
+                        }
+                    });
+
+                    // Detectar si se procesa el modelo de colisiones
+                    const esModeloCollisions = item.archivo.toLowerCase().includes('collisions') || item.archivo.toLowerCase().includes('colisiones');
+
+                    if (esModeloCollisions) {
+                        // Lógica para models de collisions
                         const { posicion, rotacion, rotacionY, escala } = instancia;
 
                         if (posicion) clon.position.set(posicion[0], posicion[1], posicion[2]);
@@ -322,7 +332,6 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
                         continue;
                     }
 
-                    //  Registrar texturas de agua ANTES de aplicar el shader
                     //  Registrar y reemplazar mallas de agua por THREE.Water
                     if (item.tieneAgua) {
                         const mallasAguaParaReemplazar = [];
@@ -340,13 +349,12 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
                                 console.log('[Agua] Textura registrada desde:', hijo.name);
                             }
 
-                            // Instanciar THREE.Water con la geometría original
+                            // Instanciar THREE.Water con la geometría original y target de reflejos optimizado
                             const water = new Water(
                                 hijo.geometry,
                                 {
-                                    textureWidth: 256,
-                                    textureHeight: 256,
-                                    //clipBias: 0.003,
+                                    textureWidth: window.esMovil ? 64 : 128,
+                                    textureHeight: window.esMovil ? 64 : 128,
                                     waterNormals: waterNormals,
                                     sunDirection: new THREE.Vector3(10, 20, 10).normalize(),
                                     sunColor: 0xffffff,
@@ -374,7 +382,7 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
                         });
                     }
 
-                    //  Aplicar shader Phong SOLO a mallas estáticas
+                    //  Aplicar shader Phong solo a mallas estáticas
                     aplicarMaterialPhong(clon);
 
                     const { posicion, rotacion, rotacionY, escala } = instancia;
@@ -420,8 +428,8 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
                     });
 
                     // Si tiene animaciones, arrancar el AnimationMixer
-                    if (item.tieneAnimaciones && gltf.animations && gltf.animations.length > 0) {
-                        registrarAnimaciones(clon, gltf.animations);
+                    if (item.tieneanimations && gltf.animations && gltf.animations.length > 0) {
+                        registraranimations(clon, gltf.animations);
                     }
 
                     // Incrementar el contador e informar al LoadingManager de la tarea completada
@@ -430,7 +438,7 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
                         loadingManager.itemEnd(`instancia_${contadorInstancias}`);
                     }
 
-                    // Ceder control al navegador de forma diferida (Lotes/Batching)
+                    // Ceder control al navegador de forma diferida (Lotes)
                     if (contadorInstancias % BATCH_SIZE === 0) {
                         await esperarSiguienteTick();
                     }

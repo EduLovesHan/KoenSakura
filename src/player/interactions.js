@@ -1,4 +1,5 @@
 import { broker } from '../world/EventBroker.js';
+import { idiomaActual } from '../core/i18n.js';
 
 const objetosInteractivos = [];
 let objetoCercanoActual = null;
@@ -17,8 +18,10 @@ export function inicializarinteractions() {
                 const estaOculto = modalDialogo.classList.contains('oculto');
                 if (estaOculto) {
                     const { titulo, texto } = objetoCercanoActual;
-                    dialogoTitulo.innerText = titulo;
-                    dialogoTexto.innerText = texto;
+                    
+                    dialogoTitulo.innerText = titulo[idiomaActual] || titulo;
+                    dialogoTexto.innerText = texto[idiomaActual] || texto;
+                    
                     modalDialogo.classList.remove('oculto');
                 } else {
                     modalDialogo.classList.add('oculto');

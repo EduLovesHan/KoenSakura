@@ -51,7 +51,8 @@ function crearMaterialPhong(originalMaterial) {
         transparent,
         alphaTest,
         depthWrite,
-        blending
+        blending,
+        side,
     } = originalMaterial;
 
     const colorOriginal = color
@@ -82,6 +83,7 @@ function crearMaterialPhong(originalMaterial) {
         alphaTest: alphaTestOriginal,
         depthWrite: depthWriteOriginal,
         blending: blendingOriginal,
+        side: side !== undefined ? side : THREE.FrontSide,
         uniforms: {
             // Globales compartidos por referencia
             uAmbientColor: phongUniformsGlobales.uAmbientColor,
@@ -250,6 +252,7 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
 
                             // Optimización de Back-Face Culling 
                             const nombreHijo = child.name.toLowerCase();
+                            const nombreArchivo = item.archivo.toLowerCase();
                             const esPlanoSinGrosor = nombreHijo.includes('sakura') || 
                                                      nombreHijo.includes('hoja') || 
                                                      nombreHijo.includes('leaf') || 
@@ -259,7 +262,24 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
                                                      nombreHijo.includes('muneca') ||
                                                      nombreHijo.includes('flor') ||
                                                      nombreHijo.includes('petalo') ||
-                                                     nombreHijo.includes('agua');
+                                                     nombreHijo.includes('agua') ||
+                                                     nombreHijo.includes('museo') ||
+                                                     nombreHijo.includes('pared') ||
+                                                     nombreHijo.includes('wall') ||
+                                                     nombreHijo.includes('techo') ||
+                                                     nombreHijo.includes('roof') ||
+                                                     nombreHijo.includes('ceiling') ||
+                                                     nombreHijo.includes('columna') ||
+                                                     nombreHijo.includes('column') ||
+                                                     nombreHijo.includes('puerta') ||
+                                                     nombreHijo.includes('door') ||
+                                                     nombreHijo.includes('cristal') ||
+                                                     nombreHijo.includes('glass') ||
+                                                     nombreHijo.includes('vidrio') ||
+                                                     nombreHijo.includes('marco') ||
+                                                     nombreHijo.includes('ventana') ||
+                                                     nombreHijo.includes('window') ||
+                                                     nombreArchivo.includes('museo');
 
                             if (child.material) {
                                 const subMateriales = Array.isArray(child.material) ? child.material : [child.material];

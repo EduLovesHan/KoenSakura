@@ -1,4 +1,3 @@
-
 # KoenSakura - Paseo Virtual 3D
 
 ## Resumen
@@ -112,5 +111,3 @@ Mira el recorrido completo y la explicación del proyecto aquí:
 
 ## Licencia
 Este proyecto está bajo la Licencia MIT - mira el archivo [LICENSE](LICENSE) para más detalles.
-
-```

@@ -118,8 +118,4 @@ Watch the full walkthrough and explanation of the project here:
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](https://www.google.com/search?q=LICENSE) file for details.
-
-```
-
-```
+This project is licensed under the MIT License - see the LICENSE file for details.

@@ -1,5 +1,13 @@
 import { animationsUI } from './AnimationManager.js';
 import { gsap } from 'gsap';
+import { setIdioma, actualizarDOM } from '../core/i18n.js';
+
+// Inicializar idioma al cargar
+actualizarDOM();
+
+// Listeners para los botones
+document.getElementById('btn-lang-es')?.addEventListener('click', () => setIdioma('es'));
+document.getElementById('btn-lang-en')?.addEventListener('click', () => setIdioma('en'));
 
 // Cierra el menú superior animando el icono y ocultando el contenedor
 export function cerrarMenuSuperior() {
@@ -33,8 +41,21 @@ export function alternarMenuPrincipal(onInteraccion) {
 
 // Abre el menú superior y rota el icono de sakura
 function abrirMenuSuperior(panelMenuSuperior, iconoBoton) {
+    // Forzar el reinicio al menú principal y de carruseles antes de animar la apertura
+    resetearEstadoMenu();
+
     panelMenuSuperior.classList.remove('oculto');
     animationsUI.aparecerMenu(panelMenuSuperior);
+    
+    // Forzar el cierre de diálogos 3D al abrir el menú
+    const modalDialogo = document.getElementById('modal-dialogo');
+    const uiInteraccion = document.getElementById('ui-interaccion');
+    if (modalDialogo && !modalDialogo.classList.contains('oculto')) {
+        modalDialogo.classList.add('oculto');
+    }
+    if (uiInteraccion && !uiInteraccion.classList.contains('oculto')) {
+        uiInteraccion.classList.add('oculto');
+    }
     
     if (iconoBoton) {
         gsap.to(iconoBoton, {
@@ -52,11 +73,30 @@ function resetearEstadoMenu() {
     const contenedorBotones = document.querySelector('.contenedor-botones-grid');
     if (contenedorBotones) contenedorBotones.classList.remove('oculto');
     // Restaurar título
-    const tituloMenu = document.querySelector('#panel-menu-superior h3');
-    if (tituloMenu) tituloMenu.textContent = 'Menú';
+    actualizarDOM();
     // Ocultar botón volver
     const btnVolver = document.getElementById('btn-volver-menu');
     if (btnVolver) btnVolver.classList.add('oculto');
+
+    // Resetear todas las diapositivas de los carruseles a la primera posición
+    document.querySelectorAll('.control-slide').forEach(slide => {
+        if (slide.getAttribute('data-index') === '0') {
+            slide.classList.add('active');
+        } else {
+            slide.classList.remove('active');
+        }
+    });
+
+    // Resetear los puntos indicadores de los carruseles
+    document.querySelectorAll('.indicador-puntos').forEach(contenedor => {
+        Array.from(contenedor.children).forEach((punto, indice) => {
+            if (indice === 0) {
+                punto.classList.add('active');
+            } else {
+                punto.classList.remove('active');
+            }
+        });
+    });
 }
 
 // Cierra el menú superior con animación y restablece la rotación del icono de sakura
@@ -167,7 +207,7 @@ export function inicializarUI(onInteraccion) {
                 gridBotones.classList.remove('oculto');
             }
             if (tituloMenu) {
-                tituloMenu.textContent = 'Menú';
+                actualizarDOM();
             }
         });
     }
@@ -206,7 +246,7 @@ export function inicializarUI(onInteraccion) {
                     btnVolver.classList.add('oculto');
                 }
                 if (tituloMenu) {
-                    tituloMenu.textContent = 'Menú';
+                    actualizarDOM();
                 }
             }
 

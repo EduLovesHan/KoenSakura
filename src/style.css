@@ -89,7 +89,7 @@ canvas {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 100;
+    z-index: 1000;
     background: rgba(49, 2, 20, 0.95);
     border: 8px solid #ff758c;
     padding: 25px 25px 15px 25px;
@@ -413,7 +413,7 @@ input[type="range"] {
     overflow-y: auto;
     text-align: center;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 117, 140, 0.4);
-    z-index: 200;
+    z-index: 900;
 }
 
 .dialogo-contenido h3 {

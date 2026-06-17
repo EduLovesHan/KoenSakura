@@ -13,7 +13,12 @@ let esDeDia = true;
 const NUM_LUCES_POOL = 6;
 export const lucesPool = [];
 export const posicionesFarolasGlobal = [];
-const ALTURA_LUZ_FAROLA = 4.0; // Offset Y desde la base del modelo hasta la bombilla
+export const configuracionFarolas = {
+    color: 0xffaa00,
+    altura: 4.0,
+    intensidad: 2.0,
+    distancia: 20.0
+};
 
 // Registrar material para brillar en la noche
 export function registrarMaterialEmisivo(material) {
@@ -37,11 +42,21 @@ export function inicializarLighting(scene) {
     directionalLight.color.setRGB(1.0, (0xf5 + 0.001) / 255, (0xe6 + 0.001) / 255);
     directionalLight.intensity = 1.5;
     directionalLight.position.set(10, 20, 10);
+    directionalLight.castShadow = true;
+
+    // Configurar cámara de sombras optimizada
+    directionalLight.shadow.camera.left = -120;
+    directionalLight.shadow.camera.right = 120;
+    directionalLight.shadow.camera.top = 120;
+    directionalLight.shadow.camera.bottom = -120;
+    directionalLight.shadow.camera.near = 0.5;
+    directionalLight.shadow.camera.far = 150;
+    directionalLight.shadow.bias = -0.0005;
 
     // Limitar resolución de sombras en móviles
     const esMovil = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || ('ontouchstart' in window);
-    directionalLight.shadow.mapSize.width = esMovil ? 512 : 1024;
-    directionalLight.shadow.mapSize.height = esMovil ? 512 : 1024;
+    directionalLight.shadow.mapSize.width = esMovil ? 256 : 1024;
+    directionalLight.shadow.mapSize.height = esMovil ? 256 : 1024;
 
     scene.add(directionalLight);
 
@@ -85,15 +100,15 @@ export function registrarPosicionFarola(posicion) {
 }
 
 export function actualizarLucesFarolas(camara) {
-    if (esDeDia) {
-        phongUniformsGlobales.uPointLightIntensity.value = 0.0;
+    const intensidadActual = phongUniformsGlobales.uPointLightIntensity.value;
+    if (intensidadActual <= 0.0) {
         for (const luz of lucesPool) {
             luz.intensity = 0;
         }
         return;
     }
 
-    // De noche se calculan distancias y se asignan las luces
+    // Se calculan distancias y se asignan las luces
     const { position: camaraPos } = camara;
     const distancias = posicionesFarolasGlobal.map((pos, idx) => ({
         idx,
@@ -118,19 +133,17 @@ export function actualizarLucesFarolas(camara) {
         if (i < distancias.length) {
             const posFarola = posicionesFarolasGlobal[distancias[i].idx];
             // Posición en espacio mundo con offset de altura
-            tempVec.set(posFarola.x, posFarola.y + ALTURA_LUZ_FAROLA, posFarola.z);
+            tempVec.set(posFarola.x, posFarola.y + configuracionFarolas.altura, posFarola.z);
             tempVec.applyMatrix4(camara.matrixWorldInverse);
             uniformPos[i].value.copy(tempVec);
 
-            lucesPool[i].position.set(posFarola.x, posFarola.y + ALTURA_LUZ_FAROLA, posFarola.z);
-            lucesPool[i].intensity = 2.0;
+            lucesPool[i].position.set(posFarola.x, posFarola.y + configuracionFarolas.altura, posFarola.z);
+            lucesPool[i].intensity = intensidadActual;
         } else {
             uniformPos[i].value.set(0, -100, 0);
             lucesPool[i].intensity = 0;
         }
     }
-
-    phongUniformsGlobales.uPointLightIntensity.value = 2.0;
 }
 
 // Función para animar el clima con GSAP
@@ -243,22 +256,14 @@ export function cambiarClimaSuave(esDeDiaTarget, skybox, duracion = 3.5) {
     });
 
     // Animar luces de farolas
-    const targetPoolIntensity = esDeDiaTarget ? 0.0 : 2.0;
-    // Animar el uniform compartido del shader
+    const targetPoolIntensity = esDeDiaTarget ? 0.0 : configuracionFarolas.intensidad;
+    // Animar el uniform compartido del shader (las luces físicas del pool se sincronizan automáticamente en el frame loop)
     gsap.killTweensOf(phongUniformsGlobales.uPointLightIntensity);
     gsap.to(phongUniformsGlobales.uPointLightIntensity, {
         value: targetPoolIntensity,
-        duration: duracion,
+        duration: esDeDiaTarget ? duracion * 0.7 : duracion * 0.7,
+        delay: esDeDiaTarget ? 0.0 : duracion * 0.3,
         ease: ease
-    });
-    // Animar las PointLights reales
-    lucesPool.forEach(luz => {
-        gsap.killTweensOf(luz);
-        gsap.to(luz, {
-            intensity: targetPoolIntensity,
-            duration: duracion,
-            ease: ease
-        });
     });
 
     // Sincronizar el checkbox del menu
@@ -339,6 +344,24 @@ export function configurarcontrolsLighting(skybox) {
 broker.on('modeloCargado', ({ modelo, datosJSON }) => {
     // Si es farola, registrar su posición para la iluminación por proximidad
     if (datosJSON.esFarola) {
+        // Actualizar la configuración global si viene especificada en el JSON
+        if (datosJSON.farolaColor !== undefined) {
+            configuracionFarolas.color = new THREE.Color(datosJSON.farolaColor).getHex();
+            phongUniformsGlobales.uPointLightColor.value.setHex(configuracionFarolas.color);
+            lucesPool.forEach(luz => luz.color.setHex(configuracionFarolas.color));
+        }
+        if (datosJSON.farolaAltura !== undefined) {
+            configuracionFarolas.altura = Number(datosJSON.farolaAltura);
+        }
+        if (datosJSON.farolaIntensidad !== undefined) {
+            configuracionFarolas.intensidad = Number(datosJSON.farolaIntensidad);
+        }
+        if (datosJSON.farolaDistancia !== undefined) {
+            configuracionFarolas.distancia = Number(datosJSON.farolaDistancia);
+            phongUniformsGlobales.uPointLightDistance.value = configuracionFarolas.distancia;
+            lucesPool.forEach(luz => luz.distance = configuracionFarolas.distancia);
+        }
+
         const posFarola = modelo.position.clone();
         registrarPosicionFarola(posFarola);
     }

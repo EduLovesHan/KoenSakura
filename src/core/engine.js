@@ -9,7 +9,7 @@ export function inicializarengine() {
     const scene = new THREE.Scene();
 
     // Crear Cámara
-    const camara = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 5000);
+    const camara = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
     camara.position.set(0.8, 3.5, 25);
 
     // Crear Renderizador
@@ -17,9 +17,11 @@ export function inicializarengine() {
         antialias: true, // Activado para suavizar los dientes de sierra
         powerPreference: "high-performance" // Fuerza el uso de la GPU dedicada si existe
     });
+    renderizador.shadowMap.enabled = true;
+    renderizador.shadowMap.type = THREE.PCFSoftShadowMap;
 
-    // Limita a un máximo de 1.2 pixel ratio en móvil para compensar el antialias
-    renderizador.setPixelRatio(esMovil ? Math.min(window.devicePixelRatio, 1.2) : Math.min(window.devicePixelRatio, 2.0));
+    // Limita a un máximo de 1.5 pixel ratio en PC y 1.0 en móvil para compensar el antialias
+    renderizador.setPixelRatio(esMovil ? 1.0 : Math.min(window.devicePixelRatio, 1.5));
 
     camara.aspect = window.innerWidth / window.innerHeight;
     camara.updateProjectionMatrix();
@@ -35,7 +37,7 @@ export function inicializarengine() {
         camara.aspect = window.innerWidth / window.innerHeight;
         camara.updateProjectionMatrix();
         renderizador.setSize(window.innerWidth, window.innerHeight);
-        renderizador.setPixelRatio(esMovil ? Math.min(window.devicePixelRatio, 1.2) : Math.min(window.devicePixelRatio, 2.0));
+        renderizador.setPixelRatio(esMovil ? 1.0 : Math.min(window.devicePixelRatio, 1.5));
     });
 
     return { scene, camara, renderizador };

@@ -29,7 +29,7 @@
                     <span class="logo-kanji">桜</span>
                 </div>
                 <h1 class="carga-titulo">KoenSakura</h1>
-                <p class="carga-subtitulo">Paseo Virtual · 3D</p>
+                <p class="carga-subtitulo" data-i18n="carga_subtitulo">Paseo Virtual · 3D</p>
 
                 <div class="carga-spinner">
                     <div class="spinner-anillo"></div>
@@ -40,9 +40,9 @@
                     <div class="carga-barra-relleno" id="carga-barra"></div>
                 </div>
 
-                <p class="carga-porcentaje" id="carga-porcentaje">Cargando... 0%</p>
+                <p class="carga-porcentaje" id="carga-porcentaje"><span data-i18n="carga_progreso">Cargando...</span> 0%</p>
 
-                <button id="btn-entrar" style="display: none;">Entrar al Paseo</button>
+                <button id="btn-entrar" style="display: none;" data-i18n="btn_entrar">Entrar al Paseo</button>
             </div>
         </div>
 
@@ -50,7 +50,7 @@
             <img src="assets/textures/others/sakura.png" class="icono-sakura" alt="Abrir menú">
         </button>
 
-        <div id="ui-interaccion" class="oculto">
+        <div id="ui-interaccion" class="oculto" data-i18n="ui_interactuar">
             Interactuar
         </div>
 
@@ -62,29 +62,27 @@
         </div>
 
         <div id="panel-menu-superior" class="oculto">
-            <h3 id="titulo-menu">Menú</h3>
+            <h3 id="titulo-menu" data-i18n="menu_titulo">Menú</h3>
             
             <button id="btn-volver-menu" class="btn-volver oculto">
-                <span class="flecha-volver">◀</span> 
+                <span class="flecha-volver">◀</span>
             </button>
 
             <div class="menu-scroll-container">
                 <div class="contenedor-botones-grid">
-                    <button class="btn-opcion" data-tab="general">General</button>
-                    <button class="btn-opcion" data-tab="ayuda">Ayuda</button>
-                    <button class="btn-opcion" data-tab="controls">Controles</button>
-                    
-                    <button class="btn-opcion" data-tab="ajustes">Ajustes</button>
-                    <button class="btn-opcion" data-tab="creditos">Créditos</button>
+                    <button class="btn-opcion" data-tab="general" data-i18n="btn_general">General</button>
+                    <button class="btn-opcion" data-tab="ayuda" data-i18n="btn_ayuda">Ayuda</button>
+                    <button class="btn-opcion" data-tab="controls" data-i18n="btn_controles">Controles</button>
+                    <button class="btn-opcion" data-tab="ajustes" data-i18n="btn_ajustes">Ajustes</button>
+                    <button class="btn-opcion" data-tab="creditos" data-i18n="btn_creditos">Créditos</button>
                 </div>
+
                 <div id="tab-general" class="tab-contenido oculto">
-                    <p>Una experiencia web interactiva en 3D desarrollada como proyecto final de Programación Gráfica. Consiste
-                        en un recorrido virtual inmersivo en primera persona a través de una plaza con estética japonesa al
-                        estilo low-poly.</p>
+                    <p data-i18n="texto_general">Una experiencia web interactiva en 3D desarrollada como proyecto final de Programación Gráfica. Consiste en un recorrido virtual inmersivo en primera persona a través de una plaza con estética japonesa al estilo low-poly.</p>
                 </div>
 
                 <div id="tab-ayuda" class="tab-contenido oculto">
-                    <p>En construccion</p>
+                    <p data-i18n="texto_ayuda">En construcción</p>
                 </div>
 
                 <div id="tab-controls" class="tab-contenido oculto">
@@ -94,21 +92,21 @@
                                 <div class="fila-teclas">
                                     <div class="tecla-grupo">
                                         <span class="tecla-3d">W</span>
-                                        <span class="etiqueta-tecla">Adelante</span>
+                                        <span class="etiqueta-tecla" data-i18n="ctrl_adelante">Adelante</span>
                                     </div>
                                 </div>
                                 <div class="fila-teclas">
                                     <div class="tecla-grupo">
                                         <span class="tecla-3d">A</span>
-                                        <span class="etiqueta-tecla">Izquierda</span>
+                                        <span class="etiqueta-tecla" data-i18n="ctrl_izq">Izquierda</span>
                                     </div>
                                     <div class="tecla-grupo">
                                         <span class="tecla-3d">S</span>
-                                        <span class="etiqueta-tecla">Atrás</span>
+                                        <span class="etiqueta-tecla" data-i18n="ctrl_atras">Atrás</span>
                                     </div>
                                     <div class="tecla-grupo">
                                         <span class="tecla-3d">D</span>
-                                        <span class="etiqueta-tecla">Derecha</span>
+                                        <span class="etiqueta-tecla" data-i18n="ctrl_der">Derecha</span>
                                     </div>
                                 </div>
                             </div>
@@ -118,11 +116,11 @@
                             <div class="fila-teclas">
                                 <div class="tecla-grupo">
                                     <span class="tecla-3d">E</span>
-                                    <span class="etiqueta-tecla">Interactuar</span>
+                                    <span class="etiqueta-tecla" data-i18n="ctrl_interact">Interactuar</span>
                                 </div>
                                 <div class="tecla-grupo">
                                     <span class="tecla-3d" style="font-size: 16px;">ESC</span>
-                                    <span class="etiqueta-tecla">Mostrar cursor</span>
+                                    <span class="etiqueta-tecla" data-i18n="ctrl_cursor">Mostrar cursor</span>
                                 </div>
                             </div>
                         </div>
@@ -130,7 +128,7 @@
                         <div class="control-slide" data-index="2">
                             <div class="tecla-grupo">
                                 <span class="tecla-3d">🖱️</span>
-                                <span class="etiqueta-tecla">Mover la cámara</span>
+                                <span class="etiqueta-tecla" data-i18n="ctrl_camara">Mover la cámara</span>
                             </div>
                         </div>
                     </div>
@@ -149,16 +147,16 @@
                 <div id="tab-ajustes" class="tab-contenido oculto">
                     <div class="control-carousel">
                         <div class="control-slide active" data-index="0">
-                            <h4 class="titulo-carrusel">Sonido</h4>
+                            <h4 class="titulo-carrusel" data-i18n="ajustes_sonido">Sonido</h4>
                             <div class="control-grupo" style="width: 100%;">
-                                <label>Música</label>
+                                <label data-i18n="ajustes_musica">Música</label>
                                 <div class="slider-con-mute">
                                     <input type="range" id="musica-slider" min="0" max="1" step="0.01" value="0.3">
                                     <label><input type="checkbox" id="musica-mute"> Mute</label>
                                 </div>
                             </div>
                             <div class="control-grupo" style="width: 100%;">
-                                <label>SFX</label>
+                                <label data-i18n="ajustes_sfx">SFX</label>
                                 <div class="slider-con-mute">
                                     <input type="range" id="sfx-slider" min="0" max="2" step="0.01" value="1.5">
                                     <label><input type="checkbox" id="sfx-mute"> Mute</label>
@@ -167,12 +165,23 @@
                         </div>
 
                         <div class="control-slide" data-index="1">
-                            <h4 class="titulo-carrusel">Iluminación</h4>
-                            <div class="control-grupo" style="width: 100%;">
-                                <label>Modo Noche</label>
-                                <div class="slider-con-mute">
-                                    <label><input type="checkbox" id="modo-noche-checkbox"> Activar</label>
+                            <h4 class="titulo-carrusel" data-i18n="ajustes_iluminacion">Iluminación</h4>
+                            <div class="control-grupo" style="margin-bottom: 15px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 10px;">
+                                    <span data-i18n="ajustes_noche" style="font-size: 16px;">Modo Noche</span>
+                                    <label style="margin: 0; display: flex; align-items: center; white-space: nowrap;">
+                                        <input type="checkbox" id="modo-noche-checkbox" style="margin-right: 8px;">
+                                        <span data-i18n="btn_activar">Activar</span>
+                                    </label>
                                 </div>
+                            </div>
+                        </div>
+
+                        <div class="control-slide" data-index="2">
+                            <h4 class="titulo-carrusel" data-i18n="ajustes_idioma">Idioma</h4>
+                            <div class="fila-teclas" style="margin-bottom: 20px;">
+                                <button id="btn-lang-es" class="btn-opcion" style="width: 48%; max-width: 150px; white-space: nowrap;">Español</button>
+                                <button id="btn-lang-en" class="btn-opcion" style="width: 48%; max-width: 150px; white-space: nowrap;">English</button>
                             </div>
                         </div>
                     </div>
@@ -182,13 +191,14 @@
                         <div class="indicador-puntos">
                             <span class="punto active"></span>
                             <span class="punto"></span>
+                            <span class="punto"></span>
                         </div>
                         <button class="btn-nav" id="next-ajustes">▶</button>
                     </div>
                 </div>
 
                 <div id="tab-creditos" class="tab-contenido oculto">
-                    <p><strong>Desarrollado por:</strong> ...</p>
+                    <p><strong data-i18n="texto_creditos_titulo">Desarrollado por:</strong> ...</p>
                 </div>
             </div>
         </div>

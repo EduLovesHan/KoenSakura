@@ -1,5 +1,6 @@
 import './style.css';
 import * as THREE from 'three';
+import Stats from 'three/addons/libs/stats.module.js';
 import { inicializarengine } from './core/engine.js';
 import { controlsPrimeraPersona } from './player/controls.js';
 import { inicializarinteractions, actualizarinteractions } from './player/interactions.js';
@@ -10,6 +11,7 @@ import { inicializarLighting, configurarcontrolsLighting, ambientLight, directio
 import { actualizaranimations } from './world/animations.js';
 import { inicializarAudio, reproducirClick, configurarcontrolsAudio } from './audio/AudioManager.js';
 import { inicializarUI } from './ui/menu.js';
+import { idiomaActual, diccionario } from './core/i18n.js';
 
 // Pantalla de carga
 const pantallaCarga = document.getElementById('pantalla-carga');
@@ -31,7 +33,8 @@ loadingManager.onProgress = (_url, cargados, total) => {
     const porcentajeActual = Math.round((cargados / total) * 100);
     porcentajeMaximo = Math.max(porcentajeMaximo, porcentajeActual);
     barraRelleno.style.width = `${porcentajeMaximo}%`;
-    textoPorcentaje.textContent = `Cargando... ${porcentajeMaximo}%`;
+    const prefijo = diccionario[idiomaActual].carga_progreso;
+    textoPorcentaje.textContent = `${prefijo} ${porcentajeMaximo}%`;
 };
 
 loadingManager.onLoad = async () => {
@@ -102,6 +105,12 @@ const { scene, camara, renderizador } = inicializarengine();
 const objetosColision = [];
 const timer = new THREE.Timer();
 
+// Inicializar el panel de FPS (Stats)
+const stats = new Stats();
+stats.showPanel(0); // 0: fps
+stats.dom.style.zIndex = '10000';
+document.body.appendChild(stats.dom);
+
 // Configuración del audio y controles de movimiento
 inicializarAudio(camara);
 const controls = new controlsPrimeraPersona(camara, document.body, objetosColision);
@@ -170,6 +179,7 @@ function animar(timestamp) {
         skybox.actualizar(camara);
     }
     renderizador.render(scene, camara);
+    stats.update();
 }
 // Iniciar el bucle
 animar();

@@ -19,7 +19,6 @@ const waterNormals = textureLoader.load('assets/textures/others/waternormals3.we
 
 // Uniforms globales para el shader Phong que se aplica solo a mallas estaticas
 // Mallas con esqueletos y mallas de agua conservan el material estandar y se iluminan con luces nativas de treejs
-
 export const phongUniformsGlobales = {
     uAmbientColor: { value: new THREE.Color().setRGB((0xd8 + 0.001) / 255, (0xe2 + 0.001) / 255, (0xf0 + 0.001) / 255) },
     uAmbientIntensity: { value: 0.6 },
@@ -42,7 +41,7 @@ export const phongUniformsGlobales = {
     uPointLightDistance: { value: 20.0 }
 };
 
-function crearMaterialPhong(originalMaterial) {
+function crearMaterialPhong(originalMaterial, nombreMalla = '', nombreModelo = '') {
     // Extraer textura y color originales del material GLTF
     const {
         map: texturaOriginal = null,
@@ -59,17 +58,62 @@ function crearMaterialPhong(originalMaterial) {
         ? color.clone()
         : new THREE.Color(0xffffff);
 
-    // Si la opacidad es < 1 o el material original ya era transparente
-    const esTransparente = transparent || opacidadOriginal < 1.0;
+    // Normalizar nombres para hacer la comprobación de contexto
+    const nombreMallaLower = nombreMalla.toLowerCase();
+    const nombreMatLower = (originalMaterial.name || '').toLowerCase();
+    const nombreModeloLower = nombreModelo.toLowerCase();
+
+    // Unificar nombres de malla, material y archivo de modelo para evitar fallos de filtro
+    const contextoCompleto = nombreMallaLower + '_' + nombreMatLower + '_' + nombreModeloLower;
+
+    // Detectar si la malla pertenece a elementos arquitectónicos que deben ser 100% sólidos y visibles por ambos lados
+    const esArquitecturaSolida = contextoCompleto.includes('casa') ||
+        contextoCompleto.includes('casita') ||
+        contextoCompleto.includes('tradicional') ||
+        contextoCompleto.includes('pared') ||
+        contextoCompleto.includes('wall') ||
+        contextoCompleto.includes('techo') ||
+        contextoCompleto.includes('roof') ||
+        contextoCompleto.includes('ceiling') ||
+        contextoCompleto.includes('columna') ||
+        contextoCompleto.includes('column') ||
+        contextoCompleto.includes('puerta') ||
+        contextoCompleto.includes('door') ||
+        contextoCompleto.includes('piso') ||
+        contextoCompleto.includes('floor') ||
+        contextoCompleto.includes('suelo') ||
+        contextoCompleto.includes('museo') ||
+        contextoCompleto.includes('plaza') ||
+        contextoCompleto.includes('estructura') ||
+        contextoCompleto.includes('building');
+
+    // Identificar si explícitamente se trata de elementos transparentes de vidrio/ventanas
+    const esVidrio = contextoCompleto.includes('cristal') ||
+        contextoCompleto.includes('glass') ||
+        contextoCompleto.includes('vidrio') ||
+        contextoCompleto.includes('ventana') ||
+        contextoCompleto.includes('window');
+
+    // Determinar los estados finales de renderizado
+    let esTransparente = transparent || opacidadOriginal < 1.0;
+    let depthWriteFinal = depthWrite !== undefined ? depthWrite : true;
+    let sideFinal = side !== undefined ? side : THREE.FrontSide;
+    let opacidadFinal = opacidadOriginal;
+
+    // Si es arquitectura y no es vidrio, forzamos para que sea 100% sólido y visible por ambos lados
+    if (esArquitecturaSolida && !esVidrio) {
+        esTransparente = false;
+        depthWriteFinal = true;
+        sideFinal = THREE.DoubleSide;
+        opacidadFinal = 1.0; // Ignorar cualquier valor de opacidad parcial proveniente de Blender
+    }
 
     // Si el original tiene alphaTest configurado
     const alphaTestOriginal = alphaTest !== undefined && alphaTest > 0
         ? alphaTest
         : (esTransparente ? 0.05 : 0.0);
 
-    const depthWriteOriginal = depthWrite !== undefined
-        ? depthWrite
-        : true;
+    const depthWriteOriginal = depthWriteFinal;
 
     const blendingOriginal = blending !== undefined
         ? blending
@@ -82,8 +126,9 @@ function crearMaterialPhong(originalMaterial) {
         transparent: esTransparente,
         alphaTest: alphaTestOriginal,
         depthWrite: depthWriteOriginal,
+        depthTest: true,
         blending: blendingOriginal,
-        side: side !== undefined ? side : THREE.FrontSide,
+        side: sideFinal,
         uniforms: {
             // Globales compartidos por referencia
             uAmbientColor: phongUniformsGlobales.uAmbientColor,
@@ -108,7 +153,7 @@ function crearMaterialPhong(originalMaterial) {
             uMap: { value: texturaOriginal },
             uHasTexture: { value: texturaOriginal ? 1.0 : 0.0 },
             uBaseColor: { value: colorOriginal },
-            uOpacity: { value: opacidadOriginal },
+            uOpacity: { value: opacidadFinal },
             uAlphaTest: { value: alphaTestOriginal }
         }
     });
@@ -161,13 +206,13 @@ function aplicarMaterialPhong(model) {
         );
         if (tieneEmisivo) return;
 
-        // Crear material Phong individual para cada material original ──
+        // Crear material Phong individual para cada material original
         if (Array.isArray(child.material)) {
             // Multi-material: crear un ShaderMaterial por cada sub-material
-            child.material = child.material.map(mat => crearMaterialPhong(mat));
+            child.material = child.material.map(mat => crearMaterialPhong(mat, child.name, model.name));
         } else {
             // Material único: crear un ShaderMaterial nuevo con su textura preservada
-            child.material = crearMaterialPhong(child.material);
+            child.material = crearMaterialPhong(child.material, child.name, model.name);
         }
     });
 }
@@ -253,50 +298,85 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
                             // Optimización de Back-Face Culling 
                             const nombreHijo = child.name.toLowerCase();
                             const nombreArchivo = item.archivo.toLowerCase();
-                            const esPlanoSinGrosor = nombreHijo.includes('sakura') || 
-                                                     nombreHijo.includes('hoja') || 
-                                                     nombreHijo.includes('leaf') || 
-                                                     nombreHijo.includes('leaves') || 
-                                                     nombreHijo.includes('follaje') || 
-                                                     nombreHijo.includes('muñeca') || 
-                                                     nombreHijo.includes('muneca') ||
-                                                     nombreHijo.includes('flor') ||
-                                                     nombreHijo.includes('petalo') ||
-                                                     nombreHijo.includes('agua') ||
-                                                     nombreHijo.includes('museo') ||
-                                                     nombreHijo.includes('pared') ||
-                                                     nombreHijo.includes('wall') ||
-                                                     nombreHijo.includes('techo') ||
-                                                     nombreHijo.includes('roof') ||
-                                                     nombreHijo.includes('ceiling') ||
-                                                     nombreHijo.includes('columna') ||
-                                                     nombreHijo.includes('column') ||
-                                                     nombreHijo.includes('puerta') ||
-                                                     nombreHijo.includes('door') ||
-                                                     nombreHijo.includes('cristal') ||
-                                                     nombreHijo.includes('glass') ||
-                                                     nombreHijo.includes('vidrio') ||
-                                                     nombreHijo.includes('marco') ||
-                                                     nombreHijo.includes('ventana') ||
-                                                     nombreHijo.includes('window') ||
-                                                     nombreArchivo.includes('museo');
+                            const esPlanoSinGrosor = nombreHijo.includes('sakura') ||
+                                nombreHijo.includes('hoja') ||
+                                nombreHijo.includes('leaf') ||
+                                nombreHijo.includes('leaves') ||
+                                nombreHijo.includes('follaje') ||
+                                nombreHijo.includes('muñeca') ||
+                                nombreHijo.includes('muneca') ||
+                                nombreHijo.includes('flor') ||
+                                nombreHijo.includes('petalo') ||
+                                nombreHijo.includes('agua') ||
+                                nombreHijo.includes('museo') ||
+                                nombreHijo.includes('pared') ||
+                                nombreHijo.includes('wall') ||
+                                nombreHijo.includes('techo') ||
+                                nombreHijo.includes('roof') ||
+                                nombreHijo.includes('ceiling') ||
+                                nombreHijo.includes('columna') ||
+                                nombreHijo.includes('column') ||
+                                nombreHijo.includes('puerta') ||
+                                nombreHijo.includes('door') ||
+                                nombreHijo.includes('cristal') ||
+                                nombreHijo.includes('glass') ||
+                                nombreHijo.includes('vidrio') ||
+                                nombreHijo.includes('marco') ||
+                                nombreHijo.includes('ventana') ||
+                                nombreHijo.includes('window') ||
+                                nombreArchivo.includes('museo') ||
+                                nombreHijo.includes('casa') ||
+                                nombreHijo.includes('casita') ||
+                                nombreHijo.includes('tradicional');
 
                             if (child.material) {
                                 const subMateriales = Array.isArray(child.material) ? child.material : [child.material];
                                 subMateriales.forEach(mat => {
                                     if (mat) {
                                         mat.side = esPlanoSinGrosor ? THREE.DoubleSide : THREE.FrontSide;
+
+                                        // Identificar componentes sólidos de las casas/zonas tradicionales
+                                        const esCasitaOPared = nombreHijo.includes('casa') ||
+                                            nombreHijo.includes('casita') ||
+                                            nombreHijo.includes('tradicional') ||
+                                            nombreHijo.includes('pared') ||
+                                            nombreHijo.includes('wall') ||
+                                            nombreHijo.includes('techo') ||
+                                            nombreHijo.includes('roof') ||
+                                            nombreHijo.includes('ceiling') ||
+                                            nombreHijo.includes('columna') ||
+                                            nombreHijo.includes('column') ||
+                                            nombreHijo.includes('puerta') ||
+                                            nombreHijo.includes('door') ||
+                                            nombreHijo.includes('piso') ||
+                                            nombreHijo.includes('floor') ||
+                                            nombreHijo.includes('suelo') ||
+                                            nombreArchivo.includes('museo');
+
+                                        // Mantener transparencias de ventanas/vidrios si existen
+                                        const esVidrio = nombreHijo.includes('cristal') ||
+                                            nombreHijo.includes('glass') ||
+                                            nombreHijo.includes('vidrio') ||
+                                            nombreHijo.includes('ventana') ||
+                                            nombreHijo.includes('window');
+
+                                        if (esCasitaOPared && !esVidrio) {
+                                            mat.transparent = false;
+                                            mat.depthWrite = true;
+                                            mat.depthTest = true;
+                                            mat.needsUpdate = true;
+                                        }
                                     }
                                 });
                             }
 
                             // Configurar sombras óptimas
-                            const esCriticoParaSombras = nombreHijo.includes('jugador') || 
-                                                         nombreHijo.includes('player') || 
-                                                         nombreHijo.includes('estatua') || 
-                                                         nombreHijo.includes('torii') || 
-                                                         nombreHijo.includes('puente');
-                                                         
+                            const esCriticoParaSombras = nombreHijo.includes('jugador') ||
+                                nombreHijo.includes('player') ||
+                                nombreHijo.includes('estatua') ||
+                                nombreHijo.includes('torii') ||
+                                nombreHijo.includes('puente');
+
                             child.castShadow = esCriticoParaSombras;
                             child.receiveShadow = !esCriticoParaSombras; // Suelo, farolas lejanas y paredes solo reciben o no proyectan
                         }

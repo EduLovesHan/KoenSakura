@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# GLB Principal
+public/assets/models/plazaPrincipal.glb

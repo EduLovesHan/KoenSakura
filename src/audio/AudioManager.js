@@ -2,10 +2,11 @@ import * as THREE from 'three';
 import { broker } from '../world/EventBroker.js';
 
 let listener;
-let sonidoFondo, sonidoClick, sonidoPasos;
+let sonidoFondo, sonidoClick, sonidoPasos, sonidoInteractivo;
 let sfxVolume = 1.5;
 let sfxMuted = false;
 let jugadorEstaCaminando = false;
+let musicaActualRuta = 'assets/audio/MusicaFondo.mp3';
 
 // Carga e inicialización de audios
 export function inicializarAudio(camara) {
@@ -40,6 +41,9 @@ export function inicializarAudio(camara) {
             sonidoPasos.play();
         }
     });
+
+    // Sonido interactivo genérico
+    sonidoInteractivo = new THREE.Audio(listener);
 
     // Reproducir música y sonidos al hacer clic y ocultar menú
     document.body.addEventListener('click', () => {
@@ -102,6 +106,7 @@ function actualizarVolumenSFX() {
     const volumenEfectivo = sfxMuted ? 0 : sfxVolume;
     if (sonidoPasos) sonidoPasos.setVolume(volumenEfectivo);
     if (sonidoClick) sonidoClick.setVolume(volumenEfectivo);
+    if (sonidoInteractivo) sonidoInteractivo.setVolume(volumenEfectivo);
 }
 
 export function actualizarAudioPasos(isWalking) {
@@ -119,3 +124,65 @@ export function actualizarAudioPasos(isWalking) {
 broker.on('jugadorCaminando', (isWalking) => {
     actualizarAudioPasos(isWalking);
 });
+
+export function obtenerMusicaFondoActual() {
+    return musicaActualRuta;
+}
+
+export function cambiarMusicaFondo(rutaArchivo) {
+    if (!sonidoFondo || !listener) return;
+    
+    if (musicaActualRuta === rutaArchivo) return;
+    
+    musicaActualRuta = rutaArchivo;
+    const estabaSonando = sonidoFondo.isPlaying;
+    
+    if (sonidoFondo.isPlaying) {
+        sonidoFondo.stop();
+    }
+    
+    const audioLoader = new THREE.AudioLoader();
+    audioLoader.load(rutaArchivo, (buffer) => {
+        sonidoFondo.setBuffer(buffer);
+        sonidoFondo.setLoop(true);
+        if (estabaSonando && listener.context.state !== 'suspended') {
+            sonidoFondo.play();
+        }
+    });
+}
+
+// Caché de buffers de audio para evitar cargarlos repetidamente
+const cacheAudios = {};
+
+export function reproducirSonidoInteractivo(rutaAudio) {
+    if (!listener || !sonidoInteractivo) return;
+    if (listener.context.state === 'suspended') listener.context.resume();
+
+    if (sonidoInteractivo.isPlaying) {
+        sonidoInteractivo.stop();
+    }
+
+    const volumenEfectivo = sfxMuted ? 0 : sfxVolume;
+    sonidoInteractivo.setVolume(volumenEfectivo);
+
+    if (cacheAudios[rutaAudio]) {
+        sonidoInteractivo.setBuffer(cacheAudios[rutaAudio]);
+        sonidoInteractivo.setLoop(false);
+        sonidoInteractivo.play();
+    } else {
+        const audioLoader = new THREE.AudioLoader();
+        audioLoader.load(rutaAudio, (buffer) => {
+            cacheAudios[rutaAudio] = buffer;
+            sonidoInteractivo.setBuffer(buffer);
+            sonidoInteractivo.setLoop(false);
+            sonidoInteractivo.setVolume(sfxMuted ? 0 : sfxVolume);
+            sonidoInteractivo.play();
+        });
+    }
+}
+
+export function detenerSonidoInteractivo() {
+    if (sonidoInteractivo && sonidoInteractivo.isPlaying) {
+        sonidoInteractivo.stop();
+    }
+}

@@ -36,9 +36,29 @@ export const phongUniformsGlobales = {
     uPointLightPos3: { value: new THREE.Vector3(0, -100, 0) },
     uPointLightPos4: { value: new THREE.Vector3(0, -100, 0) },
     uPointLightPos5: { value: new THREE.Vector3(0, -100, 0) },
-    uPointLightColor: { value: new THREE.Color(0xffaa00) },
-    uPointLightIntensity: { value: 0.0 },
-    uPointLightDistance: { value: 20.0 }
+    
+    uPointLightColor0: { value: new THREE.Color(0xffaa00) },
+    uPointLightColor1: { value: new THREE.Color(0xffaa00) },
+    uPointLightColor2: { value: new THREE.Color(0xffaa00) },
+    uPointLightColor3: { value: new THREE.Color(0xffaa00) },
+    uPointLightColor4: { value: new THREE.Color(0xffaa00) },
+    uPointLightColor5: { value: new THREE.Color(0xffaa00) },
+    
+    uPointLightIntensity0: { value: 0.0 },
+    uPointLightIntensity1: { value: 0.0 },
+    uPointLightIntensity2: { value: 0.0 },
+    uPointLightIntensity3: { value: 0.0 },
+    uPointLightIntensity4: { value: 0.0 },
+    uPointLightIntensity5: { value: 0.0 },
+    
+    uPointLightDistance0: { value: 20.0 },
+    uPointLightDistance1: { value: 20.0 },
+    uPointLightDistance2: { value: 20.0 },
+    uPointLightDistance3: { value: 20.0 },
+    uPointLightDistance4: { value: 20.0 },
+    uPointLightDistance5: { value: 20.0 },
+    
+    uPointLightIntensityFactor: { value: 0.0 }
 };
 
 function crearMaterialPhong(originalMaterial, nombreMalla = '', nombreModelo = '') {
@@ -140,15 +160,35 @@ function crearMaterialPhong(originalMaterial, nombreMalla = '', nombreModelo = '
             uSpecularIntensity: phongUniformsGlobales.uSpecularIntensity,
             uShininess: phongUniformsGlobales.uShininess,
             uCameraPosition: phongUniformsGlobales.uCameraPosition,
+            
             uPointLightPos0: phongUniformsGlobales.uPointLightPos0,
             uPointLightPos1: phongUniformsGlobales.uPointLightPos1,
             uPointLightPos2: phongUniformsGlobales.uPointLightPos2,
             uPointLightPos3: phongUniformsGlobales.uPointLightPos3,
             uPointLightPos4: phongUniformsGlobales.uPointLightPos4,
             uPointLightPos5: phongUniformsGlobales.uPointLightPos5,
-            uPointLightColor: phongUniformsGlobales.uPointLightColor,
-            uPointLightIntensity: phongUniformsGlobales.uPointLightIntensity,
-            uPointLightDistance: phongUniformsGlobales.uPointLightDistance,
+            
+            uPointLightColor0: phongUniformsGlobales.uPointLightColor0,
+            uPointLightColor1: phongUniformsGlobales.uPointLightColor1,
+            uPointLightColor2: phongUniformsGlobales.uPointLightColor2,
+            uPointLightColor3: phongUniformsGlobales.uPointLightColor3,
+            uPointLightColor4: phongUniformsGlobales.uPointLightColor4,
+            uPointLightColor5: phongUniformsGlobales.uPointLightColor5,
+            
+            uPointLightIntensity0: phongUniformsGlobales.uPointLightIntensity0,
+            uPointLightIntensity1: phongUniformsGlobales.uPointLightIntensity1,
+            uPointLightIntensity2: phongUniformsGlobales.uPointLightIntensity2,
+            uPointLightIntensity3: phongUniformsGlobales.uPointLightIntensity3,
+            uPointLightIntensity4: phongUniformsGlobales.uPointLightIntensity4,
+            uPointLightIntensity5: phongUniformsGlobales.uPointLightIntensity5,
+            
+            uPointLightDistance0: phongUniformsGlobales.uPointLightDistance0,
+            uPointLightDistance1: phongUniformsGlobales.uPointLightDistance1,
+            uPointLightDistance2: phongUniformsGlobales.uPointLightDistance2,
+            uPointLightDistance3: phongUniformsGlobales.uPointLightDistance3,
+            uPointLightDistance4: phongUniformsGlobales.uPointLightDistance4,
+            uPointLightDistance5: phongUniformsGlobales.uPointLightDistance5,
+            
             // Cada malla tiene su propia textura y color
             uMap: { value: texturaOriginal },
             uHasTexture: { value: texturaOriginal ? 1.0 : 0.0 },

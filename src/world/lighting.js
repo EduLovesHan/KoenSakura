@@ -94,14 +94,31 @@ function refrescarGUI() {
     }
 }
 
-// Registrar una posición de farola
-export function registrarPosicionFarola(posicion) {
-    posicionesFarolasGlobal.push(posicion.clone());
+function sanitizarColor(colorVal) {
+    if (typeof colorVal === 'string') {
+        let clean = colorVal.trim();
+        if (clean.length === 6 && !clean.startsWith('#') && /^[0-9a-fA-F]{6}$/.test(clean)) {
+            clean = '#' + clean;
+        }
+        return new THREE.Color(clean);
+    }
+    return new THREE.Color(colorVal !== undefined ? colorVal : 0xffaa00);
+}
+
+// Registrar una posición de farola con sus datos de iluminación
+export function registrarPosicionFarola(posicion, datosJSON = {}) {
+    posicionesFarolasGlobal.push({
+        posicion: posicion.clone(),
+        color: sanitizarColor(datosJSON.farolaColor),
+        altura: datosJSON.farolaAltura !== undefined ? Number(datosJSON.farolaAltura) : 4.0,
+        intensidad: datosJSON.farolaIntensidad !== undefined ? Number(datosJSON.farolaIntensidad) : 2.0,
+        distancia: datosJSON.farolaDistancia !== undefined ? Number(datosJSON.farolaDistancia) : 20.0
+    });
 }
 
 export function actualizarLucesFarolas(camara) {
-    const intensidadActual = phongUniformsGlobales.uPointLightIntensity.value;
-    if (intensidadActual <= 0.0) {
+    const factor = phongUniformsGlobales.uPointLightIntensityFactor.value;
+    if (factor <= 0.0) {
         for (const luz of lucesPool) {
             luz.intensity = 0;
         }
@@ -110,9 +127,9 @@ export function actualizarLucesFarolas(camara) {
 
     // Se calculan distancias y se asignan las luces
     const { position: camaraPos } = camara;
-    const distancias = posicionesFarolasGlobal.map((pos, idx) => ({
+    const distancias = posicionesFarolasGlobal.map((farola, idx) => ({
         idx,
-        dist: camaraPos.distanceToSquared(pos)
+        dist: camaraPos.distanceToSquared(farola.posicion)
     }));
 
     distancias.sort((a, b) => a.dist - b.dist);
@@ -129,18 +146,55 @@ export function actualizarLucesFarolas(camara) {
         phongUniformsGlobales.uPointLightPos5
     ];
 
+    const uniformColor = [
+        phongUniformsGlobales.uPointLightColor0,
+        phongUniformsGlobales.uPointLightColor1,
+        phongUniformsGlobales.uPointLightColor2,
+        phongUniformsGlobales.uPointLightColor3,
+        phongUniformsGlobales.uPointLightColor4,
+        phongUniformsGlobales.uPointLightColor5
+    ];
+
+    const uniformIntensity = [
+        phongUniformsGlobales.uPointLightIntensity0,
+        phongUniformsGlobales.uPointLightIntensity1,
+        phongUniformsGlobales.uPointLightIntensity2,
+        phongUniformsGlobales.uPointLightIntensity3,
+        phongUniformsGlobales.uPointLightIntensity4,
+        phongUniformsGlobales.uPointLightIntensity5
+    ];
+
+    const uniformDistance = [
+        phongUniformsGlobales.uPointLightDistance0,
+        phongUniformsGlobales.uPointLightDistance1,
+        phongUniformsGlobales.uPointLightDistance2,
+        phongUniformsGlobales.uPointLightDistance3,
+        phongUniformsGlobales.uPointLightDistance4,
+        phongUniformsGlobales.uPointLightDistance5
+    ];
+
     for (let i = 0; i < NUM_LUCES_POOL; i++) {
         if (i < distancias.length) {
-            const posFarola = posicionesFarolasGlobal[distancias[i].idx];
+            const farola = posicionesFarolasGlobal[distancias[i].idx];
             // Posición en espacio mundo con offset de altura
-            tempVec.set(posFarola.x, posFarola.y + configuracionFarolas.altura, posFarola.z);
+            tempVec.set(farola.posicion.x, farola.posicion.y + farola.altura, farola.posicion.z);
             tempVec.applyMatrix4(camara.matrixWorldInverse);
             uniformPos[i].value.copy(tempVec);
 
-            lucesPool[i].position.set(posFarola.x, posFarola.y + configuracionFarolas.altura, posFarola.z);
-            lucesPool[i].intensity = intensidadActual;
+            uniformColor[i].value.copy(farola.color);
+            uniformIntensity[i].value = farola.intensidad * factor;
+            uniformDistance[i].value = farola.distancia;
+
+            lucesPool[i].position.set(farola.posicion.x, farola.posicion.y + farola.altura, farola.posicion.z);
+            lucesPool[i].color.copy(farola.color);
+            lucesPool[i].intensity = farola.intensidad * factor;
+            lucesPool[i].distance = farola.distancia;
         } else {
             uniformPos[i].value.set(0, -100, 0);
+            uniformColor[i].value.setHex(0x000000);
+            uniformIntensity[i].value = 0.0;
+            uniformDistance[i].value = 0.0;
+
             lucesPool[i].intensity = 0;
         }
     }
@@ -256,11 +310,11 @@ export function cambiarClimaSuave(esDeDiaTarget, skybox, duracion = 3.5) {
     });
 
     // Animar luces de farolas
-    const targetPoolIntensity = esDeDiaTarget ? 0.0 : configuracionFarolas.intensidad;
+    const targetPoolIntensityFactor = esDeDiaTarget ? 0.0 : 1.0;
     // Animar el uniform compartido del shader (las luces físicas del pool se sincronizan automáticamente en el frame loop)
-    gsap.killTweensOf(phongUniformsGlobales.uPointLightIntensity);
-    gsap.to(phongUniformsGlobales.uPointLightIntensity, {
-        value: targetPoolIntensity,
+    gsap.killTweensOf(phongUniformsGlobales.uPointLightIntensityFactor);
+    gsap.to(phongUniformsGlobales.uPointLightIntensityFactor, {
+        value: targetPoolIntensityFactor,
         duration: esDeDiaTarget ? duracion * 0.7 : duracion * 0.7,
         delay: esDeDiaTarget ? 0.0 : duracion * 0.3,
         ease: ease
@@ -344,26 +398,8 @@ export function configurarcontrolsLighting(skybox) {
 broker.on('modeloCargado', ({ modelo, datosJSON }) => {
     // Si es farola, registrar su posición para la iluminación por proximidad
     if (datosJSON.esFarola) {
-        // Actualizar la configuración global si viene especificada en el JSON
-        if (datosJSON.farolaColor !== undefined) {
-            configuracionFarolas.color = new THREE.Color(datosJSON.farolaColor).getHex();
-            phongUniformsGlobales.uPointLightColor.value.setHex(configuracionFarolas.color);
-            lucesPool.forEach(luz => luz.color.setHex(configuracionFarolas.color));
-        }
-        if (datosJSON.farolaAltura !== undefined) {
-            configuracionFarolas.altura = Number(datosJSON.farolaAltura);
-        }
-        if (datosJSON.farolaIntensidad !== undefined) {
-            configuracionFarolas.intensidad = Number(datosJSON.farolaIntensidad);
-        }
-        if (datosJSON.farolaDistancia !== undefined) {
-            configuracionFarolas.distancia = Number(datosJSON.farolaDistancia);
-            phongUniformsGlobales.uPointLightDistance.value = configuracionFarolas.distancia;
-            lucesPool.forEach(luz => luz.distance = configuracionFarolas.distancia);
-        }
-
         const posFarola = modelo.position.clone();
-        registrarPosicionFarola(posFarola);
+        registrarPosicionFarola(posFarola, datosJSON);
     }
 
     // Buscar y registrar materiales emisivos en el modelo cargado

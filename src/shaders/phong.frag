@@ -16,32 +16,50 @@ uniform vec3 uBaseColor;
 uniform float uOpacity;
 uniform float uAlphaTest;
 
-// ── Point Lights del Pool (farolas) ──
+// Point Lights farolas
 uniform vec3 uPointLightPos0;
 uniform vec3 uPointLightPos1;
 uniform vec3 uPointLightPos2;
 uniform vec3 uPointLightPos3;
 uniform vec3 uPointLightPos4;
 uniform vec3 uPointLightPos5;
-uniform vec3 uPointLightColor;      // Color compartido (las 6 farolas)
-uniform float uPointLightIntensity; // Intensidad compartida
-uniform float uPointLightDistance;  // Radio de atenuación
+
+uniform vec3 uPointLightColor0;
+uniform vec3 uPointLightColor1;
+uniform vec3 uPointLightColor2;
+uniform vec3 uPointLightColor3;
+uniform vec3 uPointLightColor4;
+uniform vec3 uPointLightColor5;
+
+uniform float uPointLightIntensity0;
+uniform float uPointLightIntensity1;
+uniform float uPointLightIntensity2;
+uniform float uPointLightIntensity3;
+uniform float uPointLightIntensity4;
+uniform float uPointLightIntensity5;
+
+uniform float uPointLightDistance0;
+uniform float uPointLightDistance1;
+uniform float uPointLightDistance2;
+uniform float uPointLightDistance3;
+uniform float uPointLightDistance4;
+uniform float uPointLightDistance5;
 
 varying vec3 vNormal;
 varying vec3 vPosition;
 varying vec2 vUv;
 
 // Calcula la contribución difusa de un point light con atenuación por distancia
-vec3 calcPointLight(vec3 lightPos, vec3 N) {
+vec3 calcPointLight(vec3 lightPos, vec3 N, vec3 color, float intensity, float distance) {
     vec3 toLight = lightPos - vPosition;
     float dist = length(toLight);
-    if (dist > uPointLightDistance || uPointLightDistance <= 0.0) return vec3(0.0);
+    if (dist > distance || distance <= 0.0) return vec3(0.0);
     vec3 L = toLight / dist; // normalize
     float diff = max(dot(N, L), 0.0);
     // Atenuación lineal suave
-    float atten = clamp(1.0 - dist / uPointLightDistance, 0.0, 1.0);
+    float atten = clamp(1.0 - dist / distance, 0.0, 1.0);
     atten *= atten; // Caída cuadrática para resultado más natural
-    return uPointLightColor * uPointLightIntensity * diff * atten;
+    return color * intensity * diff * atten;
 }
 
 void main() {
@@ -68,12 +86,12 @@ void main() {
     
     // Contribución de las 6 Point Lights (farolas)
     vec3 pointDiffuse = vec3(0.0);
-    pointDiffuse += calcPointLight(uPointLightPos0, N);
-    pointDiffuse += calcPointLight(uPointLightPos1, N);
-    pointDiffuse += calcPointLight(uPointLightPos2, N);
-    pointDiffuse += calcPointLight(uPointLightPos3, N);
-    pointDiffuse += calcPointLight(uPointLightPos4, N);
-    pointDiffuse += calcPointLight(uPointLightPos5, N);
+    pointDiffuse += calcPointLight(uPointLightPos0, N, uPointLightColor0, uPointLightIntensity0, uPointLightDistance0);
+    pointDiffuse += calcPointLight(uPointLightPos1, N, uPointLightColor1, uPointLightIntensity1, uPointLightDistance1);
+    pointDiffuse += calcPointLight(uPointLightPos2, N, uPointLightColor2, uPointLightIntensity2, uPointLightDistance2);
+    pointDiffuse += calcPointLight(uPointLightPos3, N, uPointLightColor3, uPointLightIntensity3, uPointLightDistance3);
+    pointDiffuse += calcPointLight(uPointLightPos4, N, uPointLightColor4, uPointLightIntensity4, uPointLightDistance4);
+    pointDiffuse += calcPointLight(uPointLightPos5, N, uPointLightColor5, uPointLightIntensity5, uPointLightDistance5);
     
     // Obtener color base (textura o color plano)
     vec4 texColor = vec4(1.0);

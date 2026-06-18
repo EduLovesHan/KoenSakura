@@ -82,6 +82,13 @@ class controlsPrimeraPersona {
         this.vincularEventosTeclado();
         this.vincularSeguridadMovilTouch();
         this.vincularCambioOrientacion();
+        
+        // Escuchar evento para liberar el cursor exclusivamente en la interacción de música
+        broker.on('mostrarCursorMusica', (mostrar) => {
+            if (mostrar && document.pointerLockElement) {
+                document.exitPointerLock();
+            }
+        });
     }
 
     vincularBloqueoPunteroClic() {
@@ -124,7 +131,8 @@ class controlsPrimeraPersona {
     esElementoUI(elementoTarget) {
         return elementoTarget.closest('#panel-menu-superior') || 
                elementoTarget.closest('#btn-menu-superior') || 
-               elementoTarget.closest('.lil-gui');
+               elementoTarget.closest('.lil-gui') ||
+               elementoTarget.closest('#modal-dialogo');
     }
 
     reajustarJoystickOrientacion() {
@@ -377,6 +385,9 @@ class controlsPrimeraPersona {
     vincularElementoInteractivo(elementoUI) {
         elementoUI.style.pointerEvents = 'auto'; // Permitir capturar eventos touch
         elementoUI.addEventListener('touchstart', (eventoTouch) => {
+            if (eventoTouch.target.closest('.btn-musica')) {
+                return;
+            }
             eventoTouch.preventDefault();
             eventoTouch.stopPropagation();
             this.simularPulsacionTeclaE();

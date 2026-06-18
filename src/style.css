@@ -95,14 +95,13 @@ canvas {
     padding: 25px 25px 15px 25px;
     border-radius: 15px;
     width: 90vw;
-    max-width: 480px; /* Tamaño ideal y amplio para PC */
+    max-width: 480px; 
     max-height: 85vh;
-    overflow: visible; /* Evita que el título se recorte */
+    overflow: visible;
     backdrop-filter: blur(10px);
     box-sizing: border-box;
     box-shadow: 0px 8px 0px #ad2033, 0 0 25px rgba(255, 117, 140, 0.4);
 
-    /* Estructura vertical con flexbox */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -134,11 +133,10 @@ canvas {
     width: max-content;
 }
 
-/* Contenedor de scroll interno para el contenido del menú */
 .menu-scroll-container {
     width: 100%;
     flex: 1 1 auto;
-    max-height: 75vh; /* Altura más holgada en PC */
+    max-height: 75vh; 
     overflow-y: auto;
     padding: 0 6px 15px 6px; /* Padding inferior y lateral para evitar cortes visuales */
     box-sizing: border-box;
@@ -148,7 +146,6 @@ canvas {
     gap: 15px;
 }
 
-/* Scrollbar personalizado para el menú scrollable */
 .menu-scroll-container::-webkit-scrollbar {
     width: 8px;
 }
@@ -204,11 +201,10 @@ canvas {
 }
 
 .contenedor-botones-grid {
-    /* Cambia de Grid a Flexbox en columna */
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 22px; /* Espaciado amplio para PC */
+    gap: 22px; 
     width: 100%;
 }
 
@@ -226,25 +222,18 @@ canvas {
     word-wrap: break-word;
     box-shadow: 0px 4px 0px #637c34;
 
-    /* --- FIX ANTILAG: Forzar renderizado por GPU --- */
-    transform: translateZ(0); /* Crea una capa de composición 3D */
-    will-change: transform;    /* Pista de optimización para el navegador */
-    backface-visibility: hidden; /* Evita parpadeos */
-
-    /* --- Medidas para PC --- */
+    transform: translateZ(0); 
+    will-change: transform;    
+    backface-visibility: hidden;
     width: 85%;
     max-width: 280px;
-    padding: 16px 15px; /* Botones cómodos y grandes */
-    font-size: 18px; /* Texto legible */
-
-    /* Asegura la transición suave de vuelta */
+    padding: 16px 15px; 
+    font-size: 18px;
     transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.2s ease-in-out;
 }
 
-/* Saneamiento del hover para evitar deformaciones excesivas */
 .btn-opcion:hover {
-    background: #f06779; /* Color rosa al hover */
-    /* Un scale más controlado que no rompa el layout */
+    background: #f06779; 
     transform: scale(1.05) translateZ(0); 
 }
 
@@ -430,6 +419,57 @@ input[type="range"] {
     min-height: 60px;
 }
 
+#dialogo-opciones-musica {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+    width: 100%;
+    align-items: center;
+}
+
+.btn-musica {
+    font-family: 'Fredoka One', cursive, sans-serif;
+    letter-spacing: 1px;
+    background: #ff758c;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    width: 80%;
+    max-width: 220px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0px 4px 0px #c24d60;
+    transition: transform 0.1s, background 0.2s;
+    outline: none;
+}
+
+.btn-musica:hover {
+    background: #ff4b6b;
+    transform: scale(1.05);
+}
+
+.btn-musica:active {
+    transform: translateY(4px);
+    box-shadow: 0px 0px 0px #c24d60;
+}
+
+.btn-musica.active-song {
+    background: #84a547;
+    box-shadow: 0px 4px 0px #637c34;
+}
+
+.btn-musica.active-song:hover {
+    background: #9bd047;
+}
+
+.btn-musica.active-song:active {
+    transform: translateY(4px);
+    box-shadow: 0px 0px 0px #637c34;
+}
+
 
 #pantalla-carga {
     position: fixed;
@@ -601,7 +641,7 @@ input[type="range"] {
 
 @keyframes rotarDisp { 50% { transform: rotate(-90deg); } }
 
-/* Regla estricta: Si está en vertical, muestra cortina y apaga el resto */
+/* Si está en vertical, muestra la pantalla de carga */
 @media screen and (orientation: portrait) {
     #cortina-orientacion {
         display: flex !important;
@@ -615,36 +655,34 @@ input[type="range"] {
     #panel-menu-superior {
         padding: 20px 15px;
         width: 95vw;
-        max-width: 350px; /* Límite estricto para móvil */
+        max-width: 350px; 
         gap: 10px;
     }
     #panel-menu-superior h3 {
         margin: -40px auto 0 auto;
         padding: 8px 30px;
-        font-size: 22px; /* Título más pequeño */
+        font-size: 22px; 
     }
     .menu-scroll-container {
-        max-height: 50vh; /* Altura compacta en móvil para evitar scroll global */
+        max-height: 50vh; 
         gap: 8px;
     }
     .contenedor-botones-grid {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 15px; /* Menos espacio muerto entre botones */
+        gap: 15px; 
         width: 100%;
     }
     .btn-opcion {
-        padding: 12px 10px; /* Tamaño táctil compacto */
+        padding: 12px 10px; 
         font-size: 15px;
         box-shadow: 0px 3px 0px #637c34;
         width: 85%;
         max-width: 100%;
-        /* Aseguramos conservar el fix si hubo cambio de transform */
         transform: translateZ(0);
     }
     .btn-opcion:hover {
-        /* En móvil el hover no es tan relevante, pero controlamos el scale */
         transform: scale(1.02) translateZ(0);
     }
     .btn-opcion:active {

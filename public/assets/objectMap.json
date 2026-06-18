@@ -2,65 +2,232 @@
   {
     "archivo": "assets/models/arbol1.glb",
     "instancias": [
-      { "posicion": [10,0,30], "escala": 1.5 },
-      { "posicion": [-10,0,30], "escala": 1.5 },
-      { "posicion": [60,0,135], "escala": 2 },
-      { "posicion": [-20,0,190], "escala": 2 },
-      { "posicion": [-70,0,190], "escala": 2 }
+      {
+        "posicion": [
+          10,
+          0,
+          30
+        ],
+        "escala": 1.5
+      },
+      {
+        "posicion": [
+          -10,
+          0,
+          30
+        ],
+        "escala": 1.5
+      },
+      {
+        "posicion": [
+          60,
+          0,
+          135
+        ],
+        "escala": 2
+      },
+      {
+        "posicion": [
+          -20,
+          0,
+          190
+        ],
+        "escala": 2
+      },
+      {
+        "posicion": [
+          -70,
+          0,
+          190
+        ],
+        "escala": 2
+      }
     ]
   },
   {
     "archivo": "assets/models/banca.glb",
     "instancias": [
-      { "posicion": [-25,0,95], "escala": 1.5, "rotacion": [0,1.52,0] },
-      { "posicion": [-27,0,37], "escala": 1.5, "rotacion": [0,-1.52,0] },
-      { "posicion": [26,0,35], "escala": 1.5, "rotacion": [0,-1.52,0] },
-      { "posicion": [35,0,95], "escala": 1.5, "rotacion": [0,1.52,0] }
+      {
+        "posicion": [
+          -25,
+          0,
+          95
+        ],
+        "escala": 1.5,
+        "rotacion": [
+          0,
+          1.52,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          -27,
+          0,
+          37
+        ],
+        "escala": 1.5,
+        "rotacion": [
+          0,
+          -1.52,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          26,
+          0,
+          35
+        ],
+        "escala": 1.5,
+        "rotacion": [
+          0,
+          -1.52,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          35,
+          0,
+          95
+        ],
+        "escala": 1.5,
+        "rotacion": [
+          0,
+          1.52,
+          0
+        ]
+      }
     ]
   },
   {
     "archivo": "assets/models/estatuaHachiko.glb",
     "instancias": [
-      { "posicion": [-52,-0.25,93], "escala": 1.5, "rotacion": [0,-1.52,0] }
+      {
+        "posicion": [
+          -52,
+          -0.25,
+          93
+        ],
+        "escala": 1.5,
+        "rotacion": [
+          0,
+          -1.52,
+          0
+        ]
+      }
     ]
   },
-   {
+  {
     "archivo": "assets/models/perroCat.glb",
     "instancias": [
-      { "posicion": [-52,0.5,52], "escala": 2.5, "rotacion": [0,-1.52,0] }
+      {
+        "posicion": [
+          -52,
+          0.5,
+          52
+        ],
+        "escala": 2.5,
+        "rotacion": [
+          0,
+          -1.52,
+          0
+        ]
+      }
     ]
   },
   {
     "archivo": "assets/models/loboGirl_optimized.glb",
     "instancias": [
-      { "posicion": [-100,-1.3,44], "escala": 18, "rotacion": [0,7.17,0] }
+      {
+        "posicion": [
+          -100,
+          -1.3,
+          44
+        ],
+        "escala": 18,
+        "rotacion": [
+          0,
+          7.17,
+          0
+        ]
+      }
     ]
   },
   {
     "archivo": "assets/models/loboBoy_optimized.glb",
     "instancias": [
-      { "posicion": [-100,-1,98], "escala": 18, "rotacion": [0,2.28,0] }
+      {
+        "posicion": [
+          -100,
+          -1,
+          98
+        ],
+        "escala": 18,
+        "rotacion": [
+          0,
+          2.28,
+          0
+        ]
+      }
     ]
   },
   {
     "archivo": "assets/models/pisoHiroshima.glb",
     "instancias": [
-      { "posicion": [-77,0.5,52], "escala": 1, "rotacion": [0,-3.14,0] }
+      {
+        "posicion": [
+          -77,
+          0.5,
+          52
+        ],
+        "escala": 1,
+        "rotacion": [
+          0,
+          -3.14,
+          0
+        ]
+      }
     ]
   },
   {
     "archivo": "assets/models/hiroshima.glb",
     "instancias": [
-      { "posicion": [-77,0.6,52], "escala": 1.1, "rotacion": [0,-9.38,0] }
+      {
+        "posicion": [
+          -77,
+          0.6,
+          52
+        ],
+        "escala": 1.1,
+        "rotacion": [
+          0,
+          -9.38,
+          0
+        ]
+      }
     ]
   },
-   {
+  {
     "archivo": "assets/models/maqHiroshima.glb",
     "instancias": [
-      { "posicion": [-70,0.6,45], "escala": 1.5, "rotacion": [0,3.14,0] }
+      {
+        "posicion": [
+          -70,
+          0.6,
+          45
+        ],
+        "escala": 1.5,
+        "rotacion": [
+          0,
+          3.14,
+          0
+        ]
+      }
     ]
   },
-   {
+  {
     "archivo": "assets/models/luzNoche.glb",
     "esFarola": true,
     "farolaColor": "#ffffff",
@@ -68,31 +235,132 @@
     "farolaIntensidad": 3.0,
     "farolaDistancia": 20.0,
     "instancias": [
-      { "posicion": [-70,10,45], "escala": 2, "rotacion": [0,3.14,0] },
-      { "posicion": [-75,10,45], "escala": 2, "rotacion": [0,3.14,0] },
-      { "posicion": [-65,10,45], "escala": 2, "rotacion": [0,3.14,0] },
-      
-      { "posicion": [-105,6.8,75], "escala": 2, "rotacion": [0,3.14,0] },
-      { "posicion": [-110,6.8,75], "escala": 2, "rotacion": [0,3.14,0] },
-    
-      { "posicion": [-105,6.7,65], "escala": 2, "rotacion": [0,3.14,0] },
-      { "posicion": [-110,6.7,65], "escala": 2, "rotacion": [0,3.14,0] }
-  
+      {
+        "posicion": [
+          -70,
+          10,
+          45
+        ],
+        "escala": 2,
+        "rotacion": [
+          0,
+          3.14,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          -75,
+          10,
+          45
+        ],
+        "escala": 2,
+        "rotacion": [
+          0,
+          3.14,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          -65,
+          10,
+          45
+        ],
+        "escala": 2,
+        "rotacion": [
+          0,
+          3.14,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          -105,
+          6.8,
+          75
+        ],
+        "escala": 2,
+        "rotacion": [
+          0,
+          3.14,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          -110,
+          6.8,
+          75
+        ],
+        "escala": 2,
+        "rotacion": [
+          0,
+          3.14,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          -105,
+          6.7,
+          65
+        ],
+        "escala": 2,
+        "rotacion": [
+          0,
+          3.14,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          -110,
+          6.7,
+          65
+        ],
+        "escala": 2,
+        "rotacion": [
+          0,
+          3.14,
+          0
+        ]
+      }
     ]
   },
   {
     "archivo": "assets/models/kimono.glb",
     "instancias": [
-      { "posicion": [-80,0.5,41], "escala": 1.5, "rotacion": [0,-6.18,0] }
+      {
+        "posicion": [
+          -80,
+          0.5,
+          41
+        ],
+        "escala": 1.5,
+        "rotacion": [
+          0,
+          -6.18,
+          0
+        ]
+      }
     ]
   },
   {
     "archivo": "assets/models/pinturaMar.glb",
     "instancias": [
       {
-        "posicion": [-50, 0, 140],
+        "posicion": [
+          -50,
+          0,
+          140
+        ],
         "escala": 0.7,
-        "rotacion": [0, 3.141592653589793, 0],
+        "rotacion": [
+          0,
+          3.141592653589793,
+          0
+        ],
         "interactivo": {
           "titulo": {
             "es": "La Gran Ola de Kanagawa",
@@ -110,15 +378,43 @@
   {
     "archivo": "assets/models/plantaSakura.glb",
     "instancias": [
-      { "posicion": [-88,0.8,92.5], "escala": 1.3, "rotacion": [0,3.14,0] },
-      { "posicion": [-60,0.8,92.5], "escala": 1.3, "rotacion": [0,3.14,0] }
-      ]
+      {
+        "posicion": [
+          -88,
+          0.8,
+          92.5
+        ],
+        "escala": 1.3,
+        "rotacion": [
+          0,
+          3.14,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          -60,
+          0.8,
+          92.5
+        ],
+        "escala": 1.3,
+        "rotacion": [
+          0,
+          3.14,
+          0
+        ]
+      }
+    ]
   },
   {
     "archivo": "assets/models/mostrador.glb",
     "instancias": [
       {
-        "posicion": [-52,0,93.5],
+        "posicion": [
+          -52,
+          0,
+          93.5
+        ],
         "escala": 2.25,
         "interactivo": {
           "titulo": {
@@ -130,25 +426,38 @@
             "en": "Hachiko was a Japanese Akita dog remembered for waiting for his owner, Professor Hidesaburo Ueno, at Shibuya Station for nearly nine years after his death."
           },
           "distancia": 8,
-          "rotacion": [0,3.14,0]
+          "rotacion": [
+            0,
+            3.14,
+            0
+          ]
         }
       },
       {
-        "posicion": [-100,0,99],
+        "posicion": [
+          -100,
+          0,
+          99
+        ],
         "escala": 2.25,
         "interactivo": {
           "titulo": {
             "es": "Sakura o Cerezo Japonés",
             "en": "Sakura or Japanese Cherry Blossom"
           },
-          "texto": {            "es": "Es un árbol emblemático de Japón, venerado por su belleza efímera. Representa la fragilidad de la vida, la renovación y la esperanza.",
+          "texto": {
+            "es": "Es un árbol emblemático de Japón, venerado por su belleza efímera. Representa la fragilidad de la vida, la renovación y la esperanza.",
             "en": "It is an iconic tree in Japan, revered for its fleeting beauty. It represents the fragility of life, renewal, and hope."
           },
           "distancia": 8
         }
       },
-        {
-        "posicion": [-52,0,52],
+      {
+        "posicion": [
+          -52,
+          0,
+          52
+        ],
         "escala": 2.25,
         "interactivo": {
           "titulo": {
@@ -160,18 +469,27 @@
             "en": "Hachiko was a Japanese Akita dog remembered for waiting for his owner, Professor Hidesaburo Ueno, at Shibuya Station for nearly nine years after his death."
           },
           "distancia": 8,
-          "rotacion": [0,3.14,0]
+          "rotacion": [
+            0,
+            3.14,
+            0
+          ]
         }
       },
       {
-        "posicion": [-100,0,45],
+        "posicion": [
+          -100,
+          0,
+          45
+        ],
         "escala": 2.25,
         "interactivo": {
           "titulo": {
             "es": "sioio",
             "en": "Sakura or Japanese Cherry Blossom"
           },
-          "texto": {            "es": "Es un árbol emblemático de Japón, venerado por su belleza efímera. Representa la fragilidad de la vida, la renovación y la esperanza.",
+          "texto": {
+            "es": "Es un árbol emblemático de Japón, venerado por su belleza efímera. Representa la fragilidad de la vida, la renovación y la esperanza.",
             "en": "It is an iconic tree in Japan, revered for its fleeting beauty. It represents the fragility of life, renewal, and hope."
           },
           "distancia": 8
@@ -182,26 +500,96 @@
   {
     "archivo": "assets/models/cerezo.glb",
     "instancias": [
-      { "posicion": [18,0.2,125], "escala": 5, "rotacion": [0,-3.141592653589793,0] },
-      { "posicion": [18,0.2,95], "escala": 5 },
-      { "posicion": [-18,0.2,125], "escala": 5 },
-      { "posicion": [-18,0.2,95], "escala": 5, "rotacion": [0,-3.141592653589793,0] }
+      {
+        "posicion": [
+          18,
+          0.2,
+          125
+        ],
+        "escala": 5,
+        "rotacion": [
+          0,
+          -3.141592653589793,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          18,
+          0.2,
+          95
+        ],
+        "escala": 5
+      },
+      {
+        "posicion": [
+          -18,
+          0.2,
+          125
+        ],
+        "escala": 5
+      },
+      {
+        "posicion": [
+          -18,
+          0.2,
+          95
+        ],
+        "escala": 5,
+        "rotacion": [
+          0,
+          -3.141592653589793,
+          0
+        ]
+      }
     ]
   },
   {
     "archivo": "assets/models/bonsai.glb",
     "instancias": [
-      { "posicion": [-115,0,125], "escala": 3.5, "rotacion": [0,1.52,0] },
-      { "posicion": [-115,0,180], "escala": 3.5, "rotacion": [0,1.52,0] }
+      {
+        "posicion": [
+          -115,
+          0,
+          125
+        ],
+        "escala": 3.5,
+        "rotacion": [
+          0,
+          1.52,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          -115,
+          0,
+          180
+        ],
+        "escala": 3.5,
+        "rotacion": [
+          0,
+          1.52,
+          0
+        ]
+      }
     ]
   },
   {
     "archivo": "assets/models/toroStone.glb",
     "instancias": [
       {
-        "posicion": [53.5,0,175],
+        "posicion": [
+          53.5,
+          0,
+          175
+        ],
         "escala": 6,
-        "rotacion": [0,3.14,0],
+        "rotacion": [
+          0,
+          3.14,
+          0
+        ],
         "interactivo": {
           "titulo": {
             "es": "Toro o Farolillo Japones",
@@ -214,53 +602,337 @@
           "distancia": 8
         }
       },
-      { "posicion": [13,0,95], "escala": 6, "rotacion": [0,1.52,0] },
-      { "posicion": [-13,0,95], "escala": 6, "rotacion": [0,1.52,0] },
-      { "posicion": [-15,0,125], "escala": 6, "rotacion": [0,1.52,0] },
-      { "posicion": [15,0,125], "escala": 6, "rotacion": [0,1.52,0] }
+      {
+        "posicion": [
+          13,
+          0,
+          95
+        ],
+        "escala": 6,
+        "rotacion": [
+          0,
+          1.52,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          -13,
+          0,
+          95
+        ],
+        "escala": 6,
+        "rotacion": [
+          0,
+          1.52,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          -15,
+          0,
+          125
+        ],
+        "escala": 6,
+        "rotacion": [
+          0,
+          1.52,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          15,
+          0,
+          125
+        ],
+        "escala": 6,
+        "rotacion": [
+          0,
+          1.52,
+          0
+        ]
+      }
     ]
   },
   {
     "archivo": "assets/models/vegetacion.glb",
     "instancias": [
-      { "posicion": [52,0,190], "escala": 4, "rotacion": [0,1.52,0] },
-      { "posicion": [52,1,150], "escala": 4, "rotacion": [0,-1.52,0] }
+      {
+        "posicion": [
+          52,
+          0,
+          190
+        ],
+        "escala": 4,
+        "rotacion": [
+          0,
+          1.52,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          52,
+          1,
+          150
+        ],
+        "escala": 4,
+        "rotacion": [
+          0,
+          -1.52,
+          0
+        ]
+      }
     ]
   },
   {
     "archivo": "assets/models/lampara.glb",
     "instancias": [
-      { "posicion": [50,0,95], "escala": 3.5, "rotacion": [0,3.14,0] },
-      { "posicion": [-90,0,165], "escala": 3.5, "rotacion": [0,3.14,0] },
-      { "posicion": [-30,0,165], "escala": 3.5, "rotacion": [0,3.14,0] }
+      {
+        "posicion": [
+          50,
+          0,
+          95
+        ],
+        "escala": 3.5,
+        "rotacion": [
+          0,
+          3.14,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          -90,
+          0,
+          165
+        ],
+        "escala": 3.5,
+        "rotacion": [
+          0,
+          3.14,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          -30,
+          0,
+          165
+        ],
+        "escala": 3.5,
+        "rotacion": [
+          0,
+          3.14,
+          0
+        ]
+      }
     ]
   },
   {
     "archivo": "assets/models/cerezo2.glb",
     "instancias": [
-      { "posicion": [-50,0,35], "escala": 3, "rotacion": [0,3.14,0] },
-      { "posicion": [-20,0,35], "escala": 3, "rotacion": [0,3.14,0] },
-      { "posicion": [18,0,35], "escala": 3, "rotacion": [0,3.14,0] },
-      { "posicion": [45,0,35], "escala": 3, "rotacion": [0,3.14,0] },
-      { "posicion": [75,0,35], "escala": 3, "rotacion": [0,3.14,0] },
-      { "posicion": [100,0,35], "escala": 3, "rotacion": [0,3.14,0] },
-      { "posicion": [115,0,60], "escala": 3, "rotacion": [0,3.14,0] },
-      { "posicion": [115,0,85], "escala": 3, "rotacion": [0,3.14,0] },
-      { "posicion": [115,0,135], "escala": 3, "rotacion": [0,3.14,0] },
-      { "posicion": [80,0,135], "escala": 3, "rotacion": [0,3.14,0] },
-      { "posicion": [-115,0,150], "escala": 3, "rotacion": [0,1.52,0] },
-      { "posicion": [20,0,190], "escala": 3, "rotacion": [0,1.52,0] },
-      { "posicion": [40,0,150], "escala": 3, "rotacion": [0,1.52,0] },
-      { "posicion": [-45,0,190], "escala": 3, "rotacion": [0,1.52,0] }
+      {
+        "posicion": [
+          -50,
+          0,
+          35
+        ],
+        "escala": 3,
+        "rotacion": [
+          0,
+          3.14,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          -20,
+          0,
+          35
+        ],
+        "escala": 3,
+        "rotacion": [
+          0,
+          3.14,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          18,
+          0,
+          35
+        ],
+        "escala": 3,
+        "rotacion": [
+          0,
+          3.14,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          45,
+          0,
+          35
+        ],
+        "escala": 3,
+        "rotacion": [
+          0,
+          3.14,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          75,
+          0,
+          35
+        ],
+        "escala": 3,
+        "rotacion": [
+          0,
+          3.14,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          100,
+          0,
+          35
+        ],
+        "escala": 3,
+        "rotacion": [
+          0,
+          3.14,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          115,
+          0,
+          60
+        ],
+        "escala": 3,
+        "rotacion": [
+          0,
+          3.14,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          115,
+          0,
+          85
+        ],
+        "escala": 3,
+        "rotacion": [
+          0,
+          3.14,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          115,
+          0,
+          135
+        ],
+        "escala": 3,
+        "rotacion": [
+          0,
+          3.14,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          80,
+          0,
+          135
+        ],
+        "escala": 3,
+        "rotacion": [
+          0,
+          3.14,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          -115,
+          0,
+          150
+        ],
+        "escala": 3,
+        "rotacion": [
+          0,
+          1.52,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          20,
+          0,
+          190
+        ],
+        "escala": 3,
+        "rotacion": [
+          0,
+          1.52,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          40,
+          0,
+          150
+        ],
+        "escala": 3,
+        "rotacion": [
+          0,
+          1.52,
+          0
+        ]
+      },
+      {
+        "posicion": [
+          -45,
+          0,
+          190
+        ],
+        "escala": 3,
+        "rotacion": [
+          0,
+          1.52,
+          0
+        ]
+      }
     ]
   },
   {
     "archivo": "assets/models/muñeca.glb",
     "instancias": [
       {
-        "posicion": [-74,1.5,91],
+        "posicion": [
+          -74,
+          1.5,
+          91
+        ],
         "escala": 0.4,
-        "rotacion": [0,3.14,0],
+        "rotacion": [
+          0,
+          3.14,
+          0
+        ],
         "interactivo": {
           "titulo": {
             "es": "Muñeca Kokeshi",
@@ -280,21 +952,41 @@
     "tieneAgua": true,
     "tieneanimations": true,
     "instancias": [
-      { "posicion": [0,0,0] }
+      {
+        "posicion": [
+          0,
+          0,
+          0
+        ]
+      }
     ]
   },
   {
     "archivo": "assets/models/plazaPrincipal_colisiones.glb",
     "instancias": [
-      { "posicion": [0,0,0] }
+      {
+        "posicion": [
+          0,
+          0,
+          0
+        ]
+      }
     ]
   },
   {
     "archivo": "assets/models/letreroBasico.glb",
     "instancias": [
       {
-        "posicion": [70,0,45],
-        "rotacion": [0,3.141592653589793,0],
+        "posicion": [
+          70,
+          0,
+          45
+        ],
+        "rotacion": [
+          0,
+          3.141592653589793,
+          0
+        ],
         "interactivo": {
           "titulo": {
             "es": "Monte Fuji",
@@ -311,49 +1003,228 @@
   {
     "archivo": "assets/models/farolaPrueba.glb",
     "esFarola": true,
-    "colisionPadding": [1.5,1.5],
+    "colisionPadding": [
+      1.5,
+      1.5
+    ],
     "farolaColor": "#ffaa00",
     "farolaAltura": 7.0,
     "farolaIntensidad": 3.0,
     "farolaDistancia": 20.0,
     "instancias": [
-      { "posicion": [8,-1,35] },
-      { "posicion": [-8,-1,35] },
-      { "posicion": [-35,-1,35] },
-      { "posicion": [-46.5,-1,52] },
-      { "posicion": [-98,-1,52] },
-      { "posicion": [-98,-1,88] },
-      { "posicion": [35,-1,35] },
-      { "posicion": [60,-1,35] },
-      { "posicion": [85,-1,35] },
-      { "posicion": [110,-1,35] },
-      { "posicion": [116,-1,75] },
-      { "posicion": [116,-1,100] },
-      { "posicion": [116,-1,125] },
-      { "posicion": [95,-1,134] },
-      { "posicion": [70,-1,134] },
-      { "posicion": [45,-1,134] },
-      { "posicion": [42,-1,160] },
-      { "posicion": [35,-1,190] },
-      { "posicion": [7,-1,190] },
-      { "posicion": [-7,-1,190] },
-      { "posicion": [-30,-1,190] },
-      { "posicion": [-55,-1,190] },
-      { "posicion": [-80,-1,190] },
-      { "posicion": [-105,-1,190] },
-      { "posicion": [-117,-1,165] },
-      { "posicion": [-117,-1,140] },
-      { "posicion": [-117,-1,115] },
-      { "posicion": [-46.5,-1,91] }
+      {
+        "posicion": [
+          8,
+          -1,
+          35
+        ]
+      },
+      {
+        "posicion": [
+          -8,
+          -1,
+          35
+        ]
+      },
+      {
+        "posicion": [
+          -35,
+          -1,
+          35
+        ]
+      },
+      {
+        "posicion": [
+          -46.5,
+          -1,
+          52
+        ]
+      },
+      {
+        "posicion": [
+          -98,
+          -1,
+          52
+        ]
+      },
+      {
+        "posicion": [
+          -98,
+          -1,
+          88
+        ]
+      },
+      {
+        "posicion": [
+          35,
+          -1,
+          35
+        ]
+      },
+      {
+        "posicion": [
+          60,
+          -1,
+          35
+        ]
+      },
+      {
+        "posicion": [
+          85,
+          -1,
+          35
+        ]
+      },
+      {
+        "posicion": [
+          110,
+          -1,
+          35
+        ]
+      },
+      {
+        "posicion": [
+          116,
+          -1,
+          75
+        ]
+      },
+      {
+        "posicion": [
+          116,
+          -1,
+          100
+        ]
+      },
+      {
+        "posicion": [
+          116,
+          -1,
+          125
+        ]
+      },
+      {
+        "posicion": [
+          95,
+          -1,
+          134
+        ]
+      },
+      {
+        "posicion": [
+          70,
+          -1,
+          134
+        ]
+      },
+      {
+        "posicion": [
+          45,
+          -1,
+          134
+        ]
+      },
+      {
+        "posicion": [
+          42,
+          -1,
+          160
+        ]
+      },
+      {
+        "posicion": [
+          35,
+          -1,
+          190
+        ]
+      },
+      {
+        "posicion": [
+          7,
+          -1,
+          190
+        ]
+      },
+      {
+        "posicion": [
+          -7,
+          -1,
+          190
+        ]
+      },
+      {
+        "posicion": [
+          -30,
+          -1,
+          190
+        ]
+      },
+      {
+        "posicion": [
+          -55,
+          -1,
+          190
+        ]
+      },
+      {
+        "posicion": [
+          -80,
+          -1,
+          190
+        ]
+      },
+      {
+        "posicion": [
+          -105,
+          -1,
+          190
+        ]
+      },
+      {
+        "posicion": [
+          -117,
+          -1,
+          165
+        ]
+      },
+      {
+        "posicion": [
+          -117,
+          -1,
+          140
+        ]
+      },
+      {
+        "posicion": [
+          -117,
+          -1,
+          115
+        ]
+      },
+      {
+        "posicion": [
+          -46.5,
+          -1,
+          91
+        ]
+      }
     ]
   },
   {
     "archivo": "assets/models/monje.glb",
     "instancias": [
       {
-        "posicion": [-112,4.5,81.5],
+        "posicion": [
+          -112,
+          4.5,
+          81.5
+        ],
         "escala": 2.7,
-        "rotacion": [0,3.14,0],
+        "rotacion": [
+          0,
+          3.14,
+          0
+        ],
         "interactivo": {
           "titulo": {
             "es": "Monje",
@@ -372,9 +1243,17 @@
     "archivo": "assets/models/samurai.glb",
     "instancias": [
       {
-        "posicion": [-108,5.6,82],
+        "posicion": [
+          -108,
+          5.6,
+          82
+        ],
         "escala": 0.09,
-        "rotacion": [0,3.14,0],
+        "rotacion": [
+          0,
+          3.14,
+          0
+        ],
         "interactivo": {
           "titulo": {
             "es": "Samurai",
@@ -393,9 +1272,17 @@
     "archivo": "assets/models/geisha_optimized.glb",
     "instancias": [
       {
-        "posicion": [-103,1.6,81.5],
+        "posicion": [
+          -103,
+          1.6,
+          81.5
+        ],
         "escala": 1.8,
-        "rotacion": [0,-4.66,0],
+        "rotacion": [
+          0,
+          -4.66,
+          0
+        ],
         "interactivo": {
           "titulo": {
             "es": "Geisha",
@@ -404,6 +1291,211 @@
           "texto": {
             "es": " Una mujer japonesa que se dedica al entretenimiento de personas mediante danzas, música y conversaciones",
             "en": " A Japanese woman who is dedicated to entertaining people through dances, music, and conversations."
+          },
+          "distancia": 5
+        }
+      }
+    ]
+  },
+  {
+    "archivo": "assets/models/pezKoi.glb",
+    "tieneanimations": true,
+    "instancias": [
+      {
+        "posicion": [
+          61.868,
+          0,
+          189.552
+        ],
+        "escala": 0.602
+      },
+      {
+        "posicion": [
+          59.701,
+          -0.225,
+          186.612
+        ],
+        "escala": 0.602
+      },
+      {
+        "posicion": [
+          65.324,
+          -0.225,
+          184.084
+        ],
+        "escala": 0.602
+      },
+      {
+        "posicion": [
+          61.868,
+          0,
+          172.552
+        ],
+        "escala": 0.602
+      },
+      {
+        "posicion": [
+          64.699,
+          -0.225,
+          166.968
+        ],
+        "escala": 0.602
+      },
+      {
+        "posicion": [
+          59.076,
+          -0.225,
+          169.495
+        ],
+        "escala": 0.602
+      }
+    ]
+  },
+  {
+    "archivo": "assets/models/museo.glb",
+    "instancias": [
+      {
+        "posicion": [
+          -70.9,
+          -0.5,
+          48.2
+        ],
+        "escala": 1.9,
+        "rotacion": [
+          0,
+          3.14,
+          0
+        ],
+        "tieneAnimations": false,
+        "interactivo": {
+          "titulo": {
+            "es": "Museo Cultural",
+            "en": "Cultural Museum"
+          },
+          "texto": {
+            "es": "Espacio dedicado a la preservación de la historia y el arte tradicional japonés.",
+            "en": "A space dedicated to the preservation of history and traditional Japanese art."
+          },
+          "distancia": 5
+        }
+      }
+    ]
+  },
+  {
+    "archivo": "assets/models/plazaLago.glb",
+    "instancias": [
+      {
+        "posicion": [
+          86,
+          2,
+          180
+        ],
+        "escala": 2,
+        "rotacion": [
+          0,
+          -1.57,
+          0
+        ],
+        "tieneAnimations": false,
+        "interactivo": {
+          "titulo": {
+            "es": "Plaza Lago",
+            "en": "Lake Plaza"
+          },
+          "texto": {
+            "es": "Es un lugar de encuentro para la comunidad, donde las personas pueden relajarse, pasear y disfrutar de la naturaleza.",
+            "en": "It is a meeting place for the community, where people can relax, walk and enjoy nature."
+          },
+          "distancia": 5
+        }
+      }
+    ]
+  },
+  {
+    "archivo": "assets/models/gatoNegroMov.glb",
+    "tieneanimations": true,
+    "instancias": [
+      {
+        "posicion": [
+          -95,
+          -0.3,
+          88
+        ],
+        "escala": 0.1,
+        "hitboxEscala": [
+          2,
+          5,
+          1.5
+        ],
+        "interactivo": {
+          "titulo": {
+            "es": "Gato negro",
+            "en": "Black Cat"
+          },
+          "texto": {
+            "es": "Miau",
+            "en": "Meow"
+          },
+          "distancia": 5
+        }
+      }
+    ]
+  },
+  {
+    "archivo": "assets/models/gatoGrisMov.glb",
+    "tieneanimations": true,
+    "animacionInicial": 4,
+    "instancias": [
+      {
+        "posicion": [
+          -48.5,
+          -0.3,
+          57
+        ],
+        "escala": 1.5,
+        "hitboxEscala": [
+          2,
+          5,
+          1.5
+        ],
+        "interactivo": {
+          "titulo": {
+            "es": "Gato gris",
+            "en": "Gray Cat"
+          },
+          "texto": {
+            "es": "Miau",
+            "en": "Meow"
+          },
+          "distancia": 5
+        }
+      },
+      {
+        "posicion": [
+          -50,
+          -0.3,
+          85
+        ],
+        "rotacion": [
+          0,
+          -1.57,
+          0
+        ],
+        "escala": 1.5,
+        "animacionInicial": 6,
+        "hitboxEscala": [
+          2,
+          5,
+          1.5
+        ],
+        "interactivo": {
+          "titulo": {
+            "es": "Gato gris",
+            "en": "Gray Cat"
+          },
+          "texto": {
+            "es": "Miau",
+            "en": "Meow"
           },
           "distancia": 5
         }

@@ -163,6 +163,11 @@ function crearMaterialPhong(originalMaterial, nombreMalla = '', nombreModelo = '
 
 function aplicarMaterialPhong(model) {
     const nombreModelo = (model.name || '').toLowerCase();
+
+    if (nombreModelo.includes('pezkoi') || nombreModelo.includes('koi') || nombreModelo.includes('pez')) {
+        return;
+    }
+
     const esModeloExcluido = nombreModelo.includes('muñeca') || nombreModelo.includes('muneca');
 
     if (esModeloExcluido) {
@@ -511,8 +516,10 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
                     // Añadir clon a la escena
                     scene.add(clon);
 
-                    // Etiquetar para generación automática de hitbox, excepto el entorno base (plazaPrincipal)
-                    if (!item.archivo.toLowerCase().includes('plazaprincipal')) {
+                    // Generar hitbox automática excepto para las plazas y el museo
+                    const esPlaza = item.archivo.toLowerCase().includes('plaza');
+                    const esMuseo = item.archivo.toLowerCase().includes('museo');
+                    if (!esPlaza && !esMuseo) {
                         clon.userData.generarHitboxAutomata = true;
                     }
 
@@ -529,7 +536,8 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
 
                     // Si tiene animaciones, arrancar el AnimationMixer
                     if (item.tieneanimations && gltf.animations && gltf.animations.length > 0) {
-                        registraranimations(clon, gltf.animations);
+                        const animIdx = instancia.animacionInicial ?? item.animacionInicial ?? 0;
+                        registraranimations(clon, gltf.animations, animIdx);
                     }
 
                     // Incrementar el contador e informar al LoadingManager de la tarea completada

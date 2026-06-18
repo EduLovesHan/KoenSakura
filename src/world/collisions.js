@@ -163,7 +163,7 @@ export function procesarCollisions(modelo, scene, objetosColision, configItem = 
                 'sakura', 'flor', 'flower', 'petal',
                 'copa', 'canopy', 'crown',
                 'shadow', 'sombra',
-                'plane', 'suelo', 'floor', 'ground'
+                'plane', 'suelo', 'floor', 'ground', 'agua', 'water'
             ];
 
             modelo.traverse((child) => {
@@ -196,30 +196,36 @@ export function procesarCollisions(modelo, scene, objetosColision, configItem = 
                 caja.setFromObject(modelo);
             }
 
-            //hacer caja mas pegada al modelo
-            const shrinkFactor = configItem.shrinkFactor !== undefined
-                ? configItem.shrinkFactor
-                : 0.85;
-
-            const tamañoOriginal = caja.getSize(new THREE.Vector3());
             const centro = caja.getCenter(new THREE.Vector3());
 
-            const tamañoReducido = tamañoOriginal.clone().multiplyScalar(shrinkFactor);
+            let tamañoFinal;
 
-            // Rearmar la caja desde el centro con las dimensiones reducidas
-            caja.setFromCenterAndSize(centro, tamañoReducido);
+            if (configItem.hitboxEscala !== undefined) {
+                const he = configItem.hitboxEscala;
+                if (Array.isArray(he)) {
+                    tamañoFinal = new THREE.Vector3(he[0], he[1], he[2]);
+                } else {
+                    tamañoFinal = new THREE.Vector3(he, he, he);
+                }
+            } else {
+                const shrinkFactor = configItem.shrinkFactor !== undefined
+                    ? configItem.shrinkFactor
+                    : 0.85;
+                tamañoFinal = caja.getSize(new THREE.Vector3()).multiplyScalar(shrinkFactor);
+            }
+
+            caja.setFromCenterAndSize(centro, tamañoFinal);
 
             // Crear la hitbox visual y registrar
             const hitbox = new THREE.Mesh(
-                new THREE.BoxGeometry(tamañoReducido.x, tamañoReducido.y, tamañoReducido.z),
+                new THREE.BoxGeometry(tamañoFinal.x, tamañoFinal.y, tamañoFinal.z),
                 new THREE.MeshBasicMaterial({ visible: false })
             );
 
             hitbox.position.copy(centro);
             scene.add(hitbox);
             objetosColision.push(hitbox);
-            const box = new THREE.Box3().setFromObject(hitbox);
-            registrarBoxColision(box);
+            registrarBoxColision(new THREE.Box3().setFromObject(hitbox));
         }
     }
 }
@@ -233,39 +239,44 @@ export function resolverMovimientoJugador(posCamara, vectorMovimiento) {
     const posBase = posCamara.clone();
     const maxStepHeight = 0.4;
 
+    const cajasYaSolapadas = new Set();
+    for (let i = 0; i < collidableBoxes.length; i++) {
+        if (playerBox.intersectsBox(collidableBoxes[i])) {
+            cajasYaSolapadas.add(i);
+        }
+    }
+
     // Evaluar movimiento solo en el eje X
     let movXPermitido = vectorMovimiento.x;
 
     if (movXPermitido !== 0) {
-        // posición actual + solo el desplazamiento X
         const candidataX = posBase.clone();
         candidataX.x += movXPermitido;
 
-        // Construir la hitbox del jugador en esa posición
         const boxTestX = new THREE.Box3();
         actualizarBoxTemporal(candidataX, boxTestX, COLLISION_SKIN);
 
         let colisionX = false;
-        for (const box of collidableBoxes) {
+        for (let i = 0; i < collidableBoxes.length; i++) {
+            if (cajasYaSolapadas.has(i)) continue;
+            const box = collidableBoxes[i];
             if (boxTestX.intersectsBox(box)) {
                 colisionX = true;
-
-                // Intentar step-up
                 const candidataSubida = candidataX.clone();
                 candidataSubida.y += maxStepHeight;
                 const boxSubida = new THREE.Box3();
                 actualizarBoxTemporal(candidataSubida, boxSubida, COLLISION_SKIN);
 
                 let colisionSubida = false;
-                for (const b of collidableBoxes) {
-                    if (boxSubida.intersectsBox(b)) {
+                for (let j = 0; j < collidableBoxes.length; j++) {
+                    if (cajasYaSolapadas.has(j)) continue;
+                    if (boxSubida.intersectsBox(collidableBoxes[j])) {
                         colisionSubida = true;
                         break;
                     }
                 }
 
                 if (!colisionSubida) {
-                    // aceptar X y elevar Y
                     posBase.y += maxStepHeight;
                     colisionX = false;
                 }
@@ -275,11 +286,10 @@ export function resolverMovimientoJugador(posCamara, vectorMovimiento) {
         }
 
         if (colisionX) {
-            movXPermitido = 0; // Bloquear X, Z libre
+            movXPermitido = 0;
         }
     }
 
-    // Aplicar el resultado de X a la posición base
     posBase.x += movXPermitido;
 
     // Evaluar movimiento solo en el eje Z
@@ -293,19 +303,20 @@ export function resolverMovimientoJugador(posCamara, vectorMovimiento) {
         actualizarBoxTemporal(candidataZ, boxTestZ, COLLISION_SKIN);
 
         let colisionZ = false;
-        for (const box of collidableBoxes) {
+        for (let i = 0; i < collidableBoxes.length; i++) {
+            if (cajasYaSolapadas.has(i)) continue;
+            const box = collidableBoxes[i];
             if (boxTestZ.intersectsBox(box)) {
                 colisionZ = true;
-
-                // Intentar step-up en Z
                 const candidataSubida = candidataZ.clone();
                 candidataSubida.y += maxStepHeight;
                 const boxSubida = new THREE.Box3();
                 actualizarBoxTemporal(candidataSubida, boxSubida, COLLISION_SKIN);
 
                 let colisionSubida = false;
-                for (const b of collidableBoxes) {
-                    if (boxSubida.intersectsBox(b)) {
+                for (let j = 0; j < collidableBoxes.length; j++) {
+                    if (cajasYaSolapadas.has(j)) continue;
+                    if (boxSubida.intersectsBox(collidableBoxes[j])) {
                         colisionSubida = true;
                         break;
                     }
@@ -321,14 +332,12 @@ export function resolverMovimientoJugador(posCamara, vectorMovimiento) {
         }
 
         if (colisionZ) {
-            movZPermitido = 0; // Bloquear Z
+            movZPermitido = 0;
         }
     }
 
-    // Aplicar el resultado de Z
     posBase.z += movZPermitido;
 
-    // Resolver Y usando Raycaster para rampas
     const origenRayo = posBase.clone();
     origenRayo.y += 5.0;
 
@@ -352,7 +361,7 @@ export function resolverMovimientoJugador(posCamara, vectorMovimiento) {
 function actualizarBoxTemporal(posCamara, targetBox, skin = 0) {
     targetBox.min.set(
         posCamara.x - playerHalfWidth - skin,
-        posCamara.y - camOffset,
+        posCamara.y - camOffset + margenPies,
         posCamara.z - playerHalfWidth - skin
     );
     targetBox.max.set(

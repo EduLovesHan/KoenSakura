@@ -9,14 +9,26 @@ const texturesAgua1 = [];
 // velocidad de desplazamiento UV para agua
 const velAgua1 = { u: 0.0002, v: 0.000 };
 
-//Registrar el AnimationMixer y arrancar todos los clips del modelo
-export function registraranimations(modelo, clips) {
-    if (!clips || clips.length === 0) return;
+
+export function registraranimations(modelo, animaciones, animacionIndex = 0) {
+    if (!animaciones || animaciones.length === 0) return;
+
     const mixer = new THREE.AnimationMixer(modelo);
-    clips.forEach((clip) => mixer.clipAction(clip).play());
-    // Guardar en el array para que todos se actualicen cada frame
+    modelo.userData.mixer = mixer;
     mixers.push(mixer);
+
+    const clip = animaciones[animacionIndex] || animaciones[0];
+
+    if (modelo.userData.accionActual) {
+        modelo.userData.accionActual.stop();
+    }
+
+    const accion = mixer.clipAction(clip);
+    accion.play();
+
+    modelo.userData.accionActual = accion;
 }
+
 
 //Registrar una textura de agua para animación UV
 export function registrarTexturaAgua(textura) {

@@ -4,7 +4,7 @@ import { reproducirClick, cambiarMusicaFondo, obtenerMusicaFondoActual, reproduc
 
 const objetosInteractivos = [];
 let objetoCercanoActual = null;
-let uiInteraccion, modalDialogo, dialogoTitulo, dialogoTexto;
+let uiInteraccion, modalDialogo, dialogoTitulo, dialogoTexto, panelMusica;
 let timeoutSonidoEva = null;
 let sonidoEvaActivo = false;
 
@@ -27,9 +27,9 @@ export function inicializarinteractions() {
     modalDialogo = document.getElementById('modal-dialogo');
     dialogoTitulo = document.getElementById('dialogo-titulo');
     dialogoTexto = document.getElementById('dialogo-texto');
-    const opcionesMusica = document.getElementById('dialogo-opciones-musica');
+    panelMusica = document.getElementById('panel-musica');
 
-    // Configurar botones de música
+    // Configurar botones de música (panel separado)
     const botonesMusica = document.querySelectorAll('.btn-musica');
     botonesMusica.forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -51,12 +51,13 @@ export function inicializarinteractions() {
                     dialogoTitulo.innerText = titulo[idiomaActual] || titulo;
                     dialogoTexto.innerText = texto[idiomaActual] || texto;
                     
-                    if (objetoCercanoActual.esMusica && opcionesMusica) {
-                        opcionesMusica.classList.remove('oculto');
+                    // Mostrar panel de música como sub-panel separado si es interacción musical
+                    if (objetoCercanoActual.esMusica && panelMusica) {
+                        panelMusica.classList.remove('oculto');
                         actualizarBotonesMusicaActiva();
                         broker.emit('mostrarCursorMusica', true);
-                    } else if (opcionesMusica) {
-                        opcionesMusica.classList.add('oculto');
+                    } else if (panelMusica) {
+                        panelMusica.classList.add('oculto');
                     }
                     
                     modalDialogo.classList.remove('oculto');
@@ -76,7 +77,7 @@ export function inicializarinteractions() {
                     }
                 } else {
                     modalDialogo.classList.add('oculto');
-                    if (opcionesMusica) opcionesMusica.classList.add('oculto');
+                    if (panelMusica) panelMusica.classList.add('oculto');
                     broker.emit('mostrarCursorMusica', false);
                     reproducirClick();
 
@@ -133,8 +134,7 @@ export function actualizarinteractions(camara, isLocked) {
                 if (modalDialogo && !objetoCercanoActual) {
                     if (!modalDialogo.classList.contains('oculto')) {
                         modalDialogo.classList.add('oculto');
-                        const opcionesMusica = document.getElementById('dialogo-opciones-musica');
-                        if (opcionesMusica) opcionesMusica.classList.add('oculto');
+                        if (panelMusica) panelMusica.classList.add('oculto');
                         broker.emit('mostrarCursorMusica', false);
                         reproducirClick();
                     }

@@ -72,16 +72,35 @@ canvas {
     bottom: clamp(60px, 15vh, 120px);
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.6);
-    padding: 10px 20px;
-    border-radius: 10px;
-    border: 2px solid #84a547;
-    font-size: clamp(14px, 3.5vw, 18px);
+    background: linear-gradient(135deg, rgba(10, 5, 15, 0.85), rgba(20, 10, 25, 0.75));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 10px 22px;
+    border-radius: 30px;
+    border: 1px solid rgba(255, 179, 198, 0.25);
+    font-size: clamp(13px, 3vw, 16px);
     display: flex;
     align-items: center;
     gap: 10px;
     pointer-events: none;
     z-index: 50;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    animation: interaccionPulso 2s infinite;
+}
+
+.interaccion-tecla {
+    background: rgba(255, 179, 198, 0.2);
+    border: 1px solid rgba(255, 179, 198, 0.4);
+    border-radius: 5px;
+    padding: 2px 9px;
+    font-size: clamp(11px, 2.5vw, 14px);
+    color: #ffb3c6;
+    letter-spacing: 1px;
+}
+
+@keyframes interaccionPulso {
+    0%, 100% { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); }
+    50% { box-shadow: 0 4px 25px rgba(255, 117, 140, 0.25); }
 }
 
 #panel-menu-superior {
@@ -96,7 +115,8 @@ canvas {
     border-radius: 15px;
     width: 90vw;
     max-width: 480px; 
-    max-height: 85vh;
+    height: auto;
+    max-height: 80vh;
     overflow: visible;
     backdrop-filter: blur(10px);
     box-sizing: border-box;
@@ -135,10 +155,9 @@ canvas {
 
 .menu-scroll-container {
     width: 100%;
-    flex: 1 1 auto;
-    max-height: 75vh; 
-    overflow-y: auto;
-    padding: 0 6px 15px 6px; /* Padding inferior y lateral para evitar cortes visuales */
+    flex: 0 1 auto; 
+    overflow-y: auto; 
+    padding: 0 6px 15px 6px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -388,88 +407,186 @@ input[type="range"] {
     transform: scale(1.2);
 }
 
+/*cuadro de dialogo*/
 #modal-dialogo {
     position: absolute;
-    top: 50%;
+    bottom: clamp(30px, 5vh, 60px);
     left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(30, 10, 20, 0.95);
-    border: 5px solid #ff758c;
-    border-radius: 15px;
-    padding: 30px;
-    width: clamp(280px, 90%, 450px);
-    max-height: 85vh;
-    overflow-y: auto;
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 117, 140, 0.4);
+    transform: translateX(-50%);
+    width: clamp(280px, 90%, 850px);
     z-index: 900;
+    pointer-events: auto;
+    animation: dialogoEntrada 0.35s ease-out forwards;
 }
 
-.dialogo-contenido h3 {
-    margin-top: 0;
-    color: #84a547;
-    font-size: 28px;
+.dialogo-barra {
+    background: linear-gradient(135deg,
+        rgba(15, 8, 20, 0.9) 0%,
+        rgba(25, 12, 30, 0.95) 100%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 117, 140, 0.45);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7),
+                0 0 20px rgba(255, 117, 140, 0.1);
+    padding: 30px clamp(20px, 6vw, 60px) 25px;
+    position: relative;
 }
 
-.dialogo-contenido p {
-    font-size: 16px;
-    line-height: 1.5;
-    color: #eee;
-    margin: 0;
-    min-height: 60px;
+.dialogo-nombre-contenedor {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 10px;
 }
 
-#dialogo-opciones-musica {
+.dialogo-nombre {
+    color: #ffb3c6;
+    font-size: clamp(20px, 4.5vw, 28px);
+    letter-spacing: 3px;
+    text-shadow: 0 0 15px rgba(255, 117, 140, 0.4);
+}
+
+.dialogo-decorador {
+    color: rgba(255, 179, 198, 0.3);
+    font-size: 14px;
+    letter-spacing: 6px;
+}
+
+.dialogo-cuerpo {
+    color: rgba(255, 255, 255, 0.95);
+    font-size: clamp(16px, 3.2vw, 21px);
+    line-height: 1.7;
+    text-align: center;
+    max-width: 750px;
+    margin: 0 auto;
+    font-family: 'Fredoka One', cursive, sans-serif;
+    font-weight: normal;
+}
+
+.dialogo-indicador {
+    position: absolute;
+    bottom: 12px;
+    right: clamp(18px, 5vw, 45px);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    opacity: 0.5;
+}
+
+.dialogo-tecla {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
+    letter-spacing: 1px;
+}
+
+.dialogo-flecha {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 9px;
+    animation: parpadeoFlecha 1.5s infinite;
+}
+
+@keyframes dialogoEntrada {
+    from { opacity: 0; transform: translate(-50%, 15px); }
+    to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@keyframes parpadeoFlecha {
+    0%, 100% { opacity: 0.3; }
+    50%      { opacity: 1; }
+}
+
+/* panel de música */
+#panel-musica {
+    position: absolute;
+    right: clamp(15px, 4vw, 50px);
+    bottom: clamp(140px, 22vh, 220px);
+    z-index: 910;
+    animation: panelMusicaEntrada 0.3s ease-out;
+}
+
+.panel-musica-contenido {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-top: 20px;
-    width: 100%;
-    align-items: center;
+    gap: 8px;
+    min-width: 210px;
+    max-width: 280px;
+}
+
+.panel-musica-titulo {
+    color: rgba(255, 179, 198, 0.6);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-align: right;
+    margin-bottom: 4px;
+    padding-right: 5px;
 }
 
 .btn-musica {
     font-family: 'Fredoka One', cursive, sans-serif;
     letter-spacing: 1px;
-    background: #ff758c;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 20px;
-    width: 80%;
-    max-width: 220px;
-    font-size: 15px;
-    font-weight: bold;
+    background: linear-gradient(135deg, rgba(15, 8, 20, 0.85), rgba(25, 12, 30, 0.8));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 179, 198, 0.2);
+    border-radius: 10px;
+    padding: 12px 18px;
+    width: 100%;
+    font-size: 14px;
     cursor: pointer;
-    box-shadow: 0px 4px 0px #c24d60;
-    transition: transform 0.1s, background 0.2s;
+    transition: all 0.25s ease;
     outline: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-align: left;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.4);
 }
 
 .btn-musica:hover {
-    background: #ff4b6b;
-    transform: scale(1.05);
+    background: linear-gradient(135deg, rgba(255, 117, 140, 0.25), rgba(255, 117, 140, 0.15));
+    border-color: rgba(255, 179, 198, 0.45);
+    transform: translateX(-4px);
+    box-shadow: 0 4px 20px rgba(255, 117, 140, 0.15);
 }
 
 .btn-musica:active {
-    transform: translateY(4px);
-    box-shadow: 0px 0px 0px #c24d60;
+    transform: translateX(-2px) scale(0.98);
 }
 
 .btn-musica.active-song {
-    background: #84a547;
-    box-shadow: 0px 4px 0px #637c34;
+    background: linear-gradient(135deg, rgba(132, 165, 71, 0.3), rgba(132, 165, 71, 0.15));
+    border-color: rgba(132, 165, 71, 0.5);
+    box-shadow: 0 0 15px rgba(132, 165, 71, 0.15);
 }
 
 .btn-musica.active-song:hover {
-    background: #9bd047;
+    background: linear-gradient(135deg, rgba(132, 165, 71, 0.4), rgba(132, 165, 71, 0.25));
+    border-color: rgba(132, 165, 71, 0.6);
 }
 
-.btn-musica.active-song:active {
-    transform: translateY(4px);
-    box-shadow: 0px 0px 0px #637c34;
+.musica-icono {
+    color: #ffb3c6;
+    font-size: 16px;
+    opacity: 0.7;
 }
 
+.btn-musica.active-song .musica-icono {
+    color: #84a547;
+    opacity: 1;
+}
+
+@keyframes panelMusicaEntrada {
+    from { opacity: 0; transform: translateX(20px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
 
 #pantalla-carga {
     position: fixed;
@@ -596,7 +713,6 @@ input[type="range"] {
     box-shadow: 0px 2px 0px #c24d60;
 }
 
-/* animations de Carga */
 @keyframes girar { to { transform: rotate(360deg); } }
 @keyframes pulsarLogo { 50% { box-shadow: 0 0 50px rgba(255, 117, 140, 0.5); } }
 @keyframes pulsarBoton { 100% { box-shadow: 0px 6px 0px #c24d60, 0px 0px 25px rgba(255, 117, 140, 0.6); } }
@@ -656,6 +772,8 @@ input[type="range"] {
         padding: 20px 15px;
         width: 95vw;
         max-width: 350px; 
+        height: auto;
+        max-height: 85vh;
         gap: 10px;
     }
     #panel-menu-superior h3 {
@@ -663,10 +781,7 @@ input[type="range"] {
         padding: 8px 30px;
         font-size: 22px; 
     }
-    .menu-scroll-container {
-        max-height: 50vh; 
-        gap: 8px;
-    }
+  
     .contenedor-botones-grid {
         display: flex;
         flex-direction: column;
@@ -690,7 +805,7 @@ input[type="range"] {
         box-shadow: 0px 0px 0px #637c34;
     }
     .control-carousel {
-        min-height: 110px; /* Altura de carrusel reducida para evitar scroll */
+        min-height: 110px;
     }
     .carrusel-nav {
         margin-top: 4px;
@@ -722,5 +837,46 @@ input[type="range"] {
         height: 40px;
         top: 15px;
         left: 15px;
+    }
+    /* Panel de dialogo en móvil*/
+    .dialogo-barra {
+        padding: 25px 20px 22px;
+    }
+    .dialogo-nombre {
+        font-size: 16px;
+        letter-spacing: 2px;
+    }
+    .dialogo-decorador {
+        font-size: 10px;
+        letter-spacing: 4px;
+    }
+    .dialogo-cuerpo {
+        font-size: 12px;
+        line-height: 1.5;
+    }
+    .dialogo-indicador {
+        bottom: 8px;
+        right: 12px;
+    }
+    #panel-musica {
+        right: 10px;
+        bottom: 110px;
+    }
+    .panel-musica-contenido {
+        min-width: 170px;
+        max-width: 220px;
+        gap: 6px;
+    }
+    .btn-musica {
+        padding: 10px 14px;
+        font-size: 12px;
+        border-radius: 8px;
+    }
+    .panel-musica-titulo {
+        font-size: 10px;
+    }
+    #ui-interaccion {
+        bottom: clamp(50px, 12vh, 100px);
+        padding: 8px 18px;
     }
 }

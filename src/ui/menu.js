@@ -50,11 +50,15 @@ function abrirMenuSuperior(panelMenuSuperior, iconoBoton) {
     // Forzar el cierre de diálogos 3D al abrir el menú
     const modalDialogo = document.getElementById('modal-dialogo');
     const uiInteraccion = document.getElementById('ui-interaccion');
+    const panelMusica = document.getElementById('panel-musica');
     if (modalDialogo && !modalDialogo.classList.contains('oculto')) {
         modalDialogo.classList.add('oculto');
     }
     if (uiInteraccion && !uiInteraccion.classList.contains('oculto')) {
         uiInteraccion.classList.add('oculto');
+    }
+    if (panelMusica && !panelMusica.classList.contains('oculto')) {
+        panelMusica.classList.add('oculto');
     }
     
     if (iconoBoton) {
@@ -220,34 +224,17 @@ export function inicializarUI(onInteraccion) {
 
         botonPestana.addEventListener('click', () => {
             onInteraccion();
-            
+           
             const tabDestino = botonPestana.dataset.tab;
-            
-            // Detectar si la vista corresponde a móvil (ancho <= 1024px, alto <= 600px o flag esMovil del engine)
-            const isMobileLayout = window.innerWidth <= 1024 || window.innerHeight <= 600 || window.esMovil;
 
-            if (isMobileLayout) {
-                // Comportamiento móvil: ocultar cuadrícula y mostrar botón volver con título cambiado
-                if (gridBotones) {
-                    gridBotones.classList.add('oculto');
-                }
-                if (btnVolver) {
-                    btnVolver.classList.remove('oculto');
-                }
-                if (tituloMenu) {
-                    tituloMenu.textContent = botonPestana.innerText || botonPestana.textContent;
-                }
-            } else {
-                // Comportamiento PC: mantener cuadrícula, ocultar botón volver y título estático "Menú"
-                if (gridBotones) {
-                    gridBotones.classList.remove('oculto');
-                }
-                if (btnVolver) {
-                    btnVolver.classList.add('oculto');
-                }
-                if (tituloMenu) {
-                    actualizarDOM();
-                }
+            if (gridBotones) {
+                gridBotones.classList.add('oculto');
+            }
+            if (btnVolver) {
+                btnVolver.classList.remove('oculto');
+            }
+            if (tituloMenu) {
+                tituloMenu.textContent = botonPestana.innerText || botonPestana.textContent;
             }
 
             contenidosPestanas.forEach(contenidoTab => {
@@ -264,6 +251,7 @@ export function inicializarUI(onInteraccion) {
                     restablecerCarruselAjustes(0); 
                 }
             }
+           
         });
     });
 }

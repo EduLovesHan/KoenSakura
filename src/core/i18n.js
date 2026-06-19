@@ -30,7 +30,9 @@ export const diccionario = {
         ctrl_der: "Derecha",
         ctrl_interact: "Interactuar",
         ctrl_cursor: "Mostrar cursor",
-        ctrl_camara: "Mover la cámara"
+        ctrl_camara: "Mover la cámara",
+        ajustes_fps: "Mostrar FPS",
+        musica_seleccionar: "Seleccionar melodía"
     },
     en: {
         menu_titulo: "Menu",
@@ -61,7 +63,9 @@ export const diccionario = {
         ctrl_der: "Right",
         ctrl_interact: "Interact",
         ctrl_cursor: "Show cursor",
-        ctrl_camara: "Move camera"
+        ctrl_camara: "Move camera",
+        ajustes_fps: "Show FPS",
+        musica_seleccionar: "Select melody"
     }
 };
 
@@ -79,9 +83,6 @@ export function actualizarDOM() {
             el.textContent = diccionario[idiomaActual][clave];
         }
     });
-
-    // Si estamos en diseño móvil (cuadrícula oculta) y hay una pestaña abierta,
-    // el título superior debe ser el de la pestaña y no "Menú"
     const gridBotones = document.querySelector('.contenedor-botones-grid');
     if (gridBotones && gridBotones.classList.contains('oculto')) {
         const activeTab = document.querySelector('.tab-contenido:not(.oculto)');

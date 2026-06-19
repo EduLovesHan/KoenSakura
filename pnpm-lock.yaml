@@ -27,9 +27,21 @@ importers:
       '@gltf-transform/cli':
         specifier: ^4.4.0
         version: 4.4.0
+      '@gltf-transform/core':
+        specifier: ^4.4.0
+        version: 4.4.0
+      '@gltf-transform/extensions':
+        specifier: ^4.4.0
+        version: 4.4.0
+      '@gltf-transform/functions':
+        specifier: ^4.4.0
+        version: 4.4.0
       esbuild:
         specifier: ^0.28.0
         version: 0.28.0
+      meshoptimizer:
+        specifier: ^1.1.1
+        version: 1.1.1
       vite:
         specifier: ^8.0.12
         version: 8.0.16(@types/node@25.9.3)(esbuild@0.28.0)
@@ -1016,6 +1028,9 @@ packages:
 
   meshoptimizer@1.0.1:
     resolution: {integrity: sha512-Vix+QlA1YYT3FwmBBZ+49cE5y/b+pRrcXKqGpS5ouh33d3lSp2PoTpCw19E0cKDFWalembrHnIaZetf27a+W2g==}
+
+  meshoptimizer@1.1.1:
+    resolution: {integrity: sha512-oRFNWJRDA/WTrVj7NWvqa5HqE1t9MYDj2VaWirQCzCCrAd2GHrqR/sQezCxiWATPNlKTcRaPRHPJwIRoPBAp5g==}
 
   micromatch@4.0.8:
     resolution: {integrity: sha512-PXwfBhYu0hBCPw8Dn0E+WDYb7af3dSLVWKi3HGv84IdF4TyFoC0ysxFd0Goxw7nSv4T/PzEJQxsYsEiFCKo2BA==}
@@ -2168,6 +2183,8 @@ snapshots:
   math-intrinsics@1.1.0: {}
 
   meshoptimizer@1.0.1: {}
+
+  meshoptimizer@1.1.1: {}
 
   micromatch@4.0.8:
     dependencies:

@@ -83,8 +83,8 @@ uniform float uPointLightDistance4;
 uniform float uPointLightDistance5;
 
 vec3 calcFarolaDiffuse(vec3 lightPosView, vec3 N, vec3 color, float intensity, float maxDist) {
-    // vViewPosition en Three.js MeshPhong = -mvPosition.xyz (direcci\u00f3n al origen/c\u00e1mara)
-    // Por tanto la posici\u00f3n real del fragmento en view-space = -vViewPosition
+    // vViewPosition en Three.js MeshPhong = -mvPosition.xyz (dirección al origen/cámara)
+    // Por tanto la posición real del fragmento en view-space = -vViewPosition
     // toLight = lightPos - fragPos = lightPos - (-vViewPosition) = lightPos + vViewPosition
     vec3 toLight = lightPosView + vViewPosition;
     float dist = length(toLight);
@@ -362,6 +362,9 @@ function tieneSkinnedMesh(model) {
 
 const BATCH_SIZE = 5;
 
+// Orden de carga de zonas secundarias
+const ZONAS_SECUNDARIAS = ['hiroshima', 'yokai', 'museo', 'ramen', 'lago'];
+
 const esperarSiguienteTick = () => {
     if (typeof requestIdleCallback === 'function') {
         return new Promise((resolve) => requestIdleCallback(() => resolve()));
@@ -370,397 +373,272 @@ const esperarSiguienteTick = () => {
     }
 };
 
-export async function cargarEscenario(scene, objetosColision, loadingManager = null) {
-    const loader = loadingManager ? new GLTFLoader(loadingManager) : new GLTFLoader();
-
+// Crea un GLTFLoader configurado con Meshopt y Draco
+function crearGLTFLoader(mgr = null) {
+    const loader = mgr ? new GLTFLoader(mgr) : new GLTFLoader();
     loader.setMeshoptDecoder(MeshoptDecoder);
-
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
     loader.setDRACOLoader(dracoLoader);
+    return loader;
+}
 
-    // Resetear aguas instanciadas
+
+export async function cargarEscenario(scene, objetosColision, loadingManager = null) {
     aguasInstanciadas.length = 0;
 
+    let configuracion;
     try {
         const respuesta = await fetch('assets/objectMap.json');
-        if (!respuesta.ok) {
-            throw new Error(`No se pudo cargar el archivo de configuración. Status: ${respuesta.status}`);
+        if (!respuesta.ok) throw new Error(`Error HTTP ${respuesta.status}`);
+        configuracion = await respuesta.json();
+    } catch (error) {
+        console.error('[ModelLoader] Error al cargar objectMap.json:', error);
+        return;
+    }
+
+    const itemsPrincipal = configuracion.filter(i => (i.zona || 'principal') === 'principal');
+    const itemsSecundarios = configuracion.filter(i => (i.zona || 'principal') !== 'principal');
+
+    let totalInstanciasPrincipal = 0;
+    for (const item of itemsPrincipal) {
+        if (item.instancias) totalInstanciasPrincipal += item.instancias.length;
+    }
+    if (loadingManager) {
+        for (let i = 1; i <= totalInstanciasPrincipal; i++) {
+            loadingManager.itemStart(`ip_${i}`);
         }
-        const configuracion = await respuesta.json();
+    }
 
-        // Contar el total de instancias de todos los models
-        let totalInstancias = 0;
-        for (const item of configuracion) {
-            if (item.instancias) {
-                totalInstancias += item.instancias.length;
-            }
-        }
+    let contadorPrincipal = 0;
 
-        // Registrar anticipadamente todas las instancias en el LoadingManager
-        if (loadingManager) {
-            for (let i = 1; i <= totalInstancias; i++) {
-                loadingManager.itemStart(`instancia_${i}`);
-            }
-        }
+    async function cargarModelo(item, loader, esZonaPrincipal) {
+        try {
+            const gltf = await loader.loadAsync(item.archivo);
+            const modeloBase = gltf.scene;
+            modeloBase.name = item.archivo;
 
-        let contadorInstancias = 0;
+            const usarSkeletonUtils = tieneSkinnedMesh(modeloBase);
 
-        const cargarModelo = async (item) => {
-            try {
-                // Cargar el modelo base
-                const gltf = await loader.loadAsync(item.archivo);
-                const modeloBase = gltf.scene;
-                modeloBase.name = item.archivo;
+            for (const instancia of (item.instancias || [])) {
 
-                // Detectar si el modelo tiene SkinnedMesh
-                const usarSkeletonUtils = tieneSkinnedMesh(modeloBase);
-                if (usarSkeletonUtils) {
-                    console.log(`[SkeletonUtils] Modelo ${item.archivo} contiene SkinnedMesh — se usará SkeletonUtils.clone()`);
-                }
+                const clon = usarSkeletonUtils
+                    ? SkeletonUtils.clone(modeloBase)
+                    : modeloBase.clone();
 
-                // Iterar cada instancia del modelo
-                const instanciasToIterate = item.instancias || [];
-                for (const instancia of instanciasToIterate) {
-                    //  se usa SkeletonUtils.clone() para models con bones
-                    const clon = usarSkeletonUtils
-                        ? SkeletonUtils.clone(modeloBase)
-                        : modeloBase.clone();
+                // Culling y sombras
+                clon.traverse((child) => {
+                    if (!child.isMesh) return;
 
-                    // Aplicar culling y sombras de manera óptima
-                    clon.traverse((child) => {
-                        if (child.isMesh) {
-                            if (child.geometry) {
-                                child.geometry.computeBoundingBox();
-                                child.geometry.computeBoundingSphere();
-                            }
-                            child.frustumCulled = true;
-
-                            // Culling
-                            const nombreHijo = child.name.toLowerCase();
-                            const nombreArchivo = item.archivo.toLowerCase();
-                            const esPlanoSinGrosor = nombreHijo.includes('sakura') ||
-                                nombreArchivo.includes('bandera') ||
-                                nombreHijo.includes('bandera') ||
-                                /*nombreHijo.includes('hoja') ||
-                                nombreHijo.includes('leaf') ||
-                                nombreHijo.includes('leaves') ||*/
-                                nombreHijo.includes('follaje') ||
-                                nombreHijo.includes('muñeca') ||
-                                nombreHijo.includes('muneca') ||
-                                nombreHijo.includes('flor') ||
-                                nombreHijo.includes('petalo') ||
-                                nombreHijo.includes('agua') ||
-                                nombreHijo.includes('museo') ||
-                                nombreHijo.includes('pared') ||
-                                nombreHijo.includes('wall') ||
-                                nombreHijo.includes('techo') ||
-                                nombreHijo.includes('roof') ||
-                                nombreHijo.includes('ceiling') ||
-                                nombreHijo.includes('columna') ||
-                                nombreHijo.includes('column') ||
-                                nombreHijo.includes('puerta') ||
-                                nombreHijo.includes('door') ||
-                                nombreHijo.includes('cristal') ||
-                                nombreHijo.includes('glass') ||
-                                nombreHijo.includes('vidrio') ||
-                                nombreHijo.includes('marco') ||
-                                nombreHijo.includes('ventana') ||
-                                nombreHijo.includes('window') ||
-                                nombreArchivo.includes('museo') ||
-                                nombreHijo.includes('casa') ||
-                                nombreHijo.includes('casita') ||
-                                nombreHijo.includes('tradicional');
-
-                            if (child.material) {
-                                const subMateriales = Array.isArray(child.material) ? child.material : [child.material];
-                                subMateriales.forEach(mat => {
-                                    if (mat) {
-                                        mat.side = esPlanoSinGrosor ? THREE.DoubleSide : THREE.FrontSide;
-
-                                        // Identificar componentes sólidos de las casas/zonas tradicionales
-                                        const esCasitaOPared = nombreHijo.includes('casa') ||
-                                            nombreHijo.includes('casita') ||
-                                            nombreHijo.includes('tradicional') ||
-                                            nombreHijo.includes('pared') ||
-                                            nombreHijo.includes('wall') ||
-                                            nombreHijo.includes('techo') ||
-                                            nombreHijo.includes('roof') ||
-                                            nombreHijo.includes('ceiling') ||
-                                            nombreHijo.includes('columna') ||
-                                            nombreHijo.includes('column') ||
-                                            nombreHijo.includes('puerta') ||
-                                            nombreHijo.includes('door') ||
-                                            nombreHijo.includes('piso') ||
-                                            nombreHijo.includes('floor') ||
-                                            nombreHijo.includes('suelo') ||
-                                            nombreArchivo.includes('museo');
-
-                                        // Mantener transparencias de ventanas/vidrios si existen
-                                        const esVidrio = nombreHijo.includes('cristal') ||
-                                            nombreHijo.includes('glass') ||
-                                            nombreHijo.includes('vidrio') ||
-                                            nombreHijo.includes('ventana') ||
-                                            nombreHijo.includes('window');
-
-                                        if (esCasitaOPared && !esVidrio) {
-                                            mat.transparent = false;
-                                            mat.depthWrite = true;
-                                            mat.depthTest = true;
-                                            mat.needsUpdate = true;
-                                        }
-                                    }
-                                });
-                            }
-
-                            // Configurar sombras
-                            const esCastShadow =
-                                nombreHijo.includes('jugador') ||
-                                nombreHijo.includes('player') ||
-                                nombreHijo.includes('estatua') ||
-                                nombreHijo.includes('torii') ||
-                                nombreHijo.includes('puente') ||
-                                nombreHijo.includes('arbol') ||
-                                nombreHijo.includes('tree') ||
-                                nombreHijo.includes('cerezo') ||
-                                nombreHijo.includes('bonsai') ||
-                                nombreHijo.includes('farola') ||
-                                nombreHijo.includes('lampara') ||
-                                nombreHijo.includes('lantern') ||
-                                nombreHijo.includes('banca') ||
-                                nombreHijo.includes('bench') ||
-                                nombreHijo.includes('muro') ||
-                                nombreHijo.includes('fence') ||
-                                nombreHijo.includes('valla') ||
-                                nombreHijo.includes('piedra') ||
-                                nombreHijo.includes('stone') ||
-                                nombreHijo.includes('roca') ||
-                                nombreHijo.includes('rock') ||
-                                nombreHijo.includes('columna') ||
-                                nombreHijo.includes('column') ||
-                                nombreArchivo.includes('torii') ||
-                                nombreArchivo.includes('arbol') ||
-                                nombreArchivo.includes('tree') ||
-                                nombreArchivo.includes('cerezo') ||
-                                nombreArchivo.includes('bonsai') ||
-                                nombreArchivo.includes('farola') ||
-                                nombreArchivo.includes('lampara') ||
-                                nombreArchivo.includes('lantern') ||
-                                nombreArchivo.includes('banca') ||
-                                nombreArchivo.includes('bench') ||
-                                nombreArchivo.includes('estatua') ||
-                                nombreArchivo.includes('puente') ||
-                                nombreArchivo.includes('bamboo') ||
-                                nombreArchivo.includes('bambu');
-
-                            // Vegetación pequeña - no proyecta sombra
-                            const esVegetacionPequeno =
-                                nombreHijo.includes('sakura') ||
-                                nombreHijo.includes('follaje') ||
-                                nombreHijo.includes('petalo') ||
-                                nombreHijo.includes('pasto') ||
-                                nombreHijo.includes('grass') ||
-                                nombreHijo.includes('cesped');
-
-                            child.castShadow = esCastShadow && !esVegetacionPequeno;
-
-                            // Suelo, plazas y paredes reciben sombras
-                            const esSuelo =
-                                nombreHijo.includes('suelo') ||
-                                nombreHijo.includes('piso') ||
-                                nombreHijo.includes('floor') ||
-                                nombreHijo.includes('ground') ||
-                                nombreArchivo.includes('plaza') ||
-                                nombreArchivo.includes('suelo');
-
-                            child.receiveShadow = true; // Todos reciben sombras con MeshPhongMaterial
-                        }
-                    });
-
-                    // Modelo de colisiones
-                    const esModeloCollisions = item.archivo.toLowerCase().includes('collisions') || item.archivo.toLowerCase().includes('colisiones');
-
-                    if (esModeloCollisions) {
-                        // Lógica para models de collisions
-                        const { posicion, rotacion, rotacionY, escala } = instancia;
-
-                        if (posicion) clon.position.set(posicion[0], posicion[1], posicion[2]);
-                        if (rotacion) clon.rotation.set(rotacion[0], rotacion[1], rotacion[2]);
-                        else if (rotacionY !== undefined) clon.rotation.y = rotacionY;
-
-                        if (escala) {
-                            if (Array.isArray(escala)) clon.scale.set(escala[0], escala[1], escala[2]);
-                            else clon.scale.setScalar(escala);
-                        }
-
-                        scene.add(clon);
-
-                        // Actualizar matrices del mundo para calcular el Box3 correctamente
-                        clon.updateMatrixWorld(true);
-
-                        clon.traverse((hijo) => {
-                            if (hijo.isMesh) {
-                                const nombreLower = hijo.name.toLowerCase();
-                                if (nombreLower.includes('colision')) {
-                                    if (hijo.material) {
-                                        hijo.material.visible = false;
-                                    }
-
-                                    objetosColision.push(hijo);
-
-                                    if (nombreLower.includes('suelo') || nombreLower.includes('rampa') || nombreLower.includes('escalera') || nombreLower.includes('piso')) {
-                                        mallasSuelo.push(hijo);
-                                    } else {
-                                        const box = new THREE.Box3().setFromObject(hijo);
-                                        registrarBoxColision(box);
-                                    }
-                                }
-                            }
-                        });
-                        contadorInstancias++;
-                        if (loadingManager) {
-                            loadingManager.itemEnd(`instancia_${contadorInstancias}`);
-                        }
-                        if (contadorInstancias % BATCH_SIZE === 0) {
-                            await esperarSiguienteTick();
-                        }
-                        continue;
+                    if (child.geometry) {
+                        child.geometry.computeBoundingBox();
+                        child.geometry.computeBoundingSphere();
                     }
+                    child.frustumCulled = true;
 
-                    //  Registrar y reemplazar mallas de agua por THREE.Water
-                    if (item.tieneAgua) {
-                        const mallasAguaParaReemplazar = [];
-                        clon.traverse((hijo) => {
-                            const nombre = hijo.name.toLowerCase();
-                            if (hijo.isMesh && nombre.includes('agua')) {
-                                mallasAguaParaReemplazar.push(hijo);
+                    const nh = child.name.toLowerCase();
+                    const na = item.archivo.toLowerCase();
+
+                    const esDoubleSide =
+                        nh.includes('sakura') || na.includes('bandera') || nh.includes('bandera') ||
+                        nh.includes('follaje') || nh.includes('flor') || nh.includes('petalo') ||
+                        nh.includes('muñeca') || nh.includes('muneca') || nh.includes('agua') ||
+                        nh.includes('museo') || nh.includes('pared') || nh.includes('wall') ||
+                        nh.includes('techo') || nh.includes('roof') || nh.includes('ceiling') ||
+                        nh.includes('columna') || nh.includes('column') || nh.includes('puerta') ||
+                        nh.includes('door') || nh.includes('cristal') || nh.includes('glass') ||
+                        nh.includes('vidrio') || nh.includes('marco') || nh.includes('ventana') ||
+                        nh.includes('window') || na.includes('museo') ||
+                        nh.includes('casa') || nh.includes('casita') || nh.includes('tradicional');
+
+                    if (child.material) {
+                        const mats = Array.isArray(child.material) ? child.material : [child.material];
+                        mats.forEach(mat => {
+                            if (!mat) return;
+                            mat.side = esDoubleSide ? THREE.DoubleSide : THREE.FrontSide;
+
+                            const esSolido =
+                                nh.includes('casa') || nh.includes('casita') || nh.includes('tradicional') ||
+                                nh.includes('pared') || nh.includes('wall') || nh.includes('techo') ||
+                                nh.includes('roof') || nh.includes('ceiling') || nh.includes('columna') ||
+                                nh.includes('column') || nh.includes('puerta') || nh.includes('door') ||
+                                nh.includes('piso') || nh.includes('floor') || nh.includes('suelo') ||
+                                na.includes('museo');
+                            const esVidrio =
+                                nh.includes('cristal') || nh.includes('glass') || nh.includes('vidrio') ||
+                                nh.includes('ventana') || nh.includes('window');
+
+                            if (esSolido && !esVidrio) {
+                                mat.transparent = false;
+                                mat.depthWrite = true;
+                                mat.depthTest = true;
+                                mat.needsUpdate = true;
                             }
-                        });
-
-                        mallasAguaParaReemplazar.forEach((hijo) => {
-                            const textura = hijo.material.normalMap || hijo.material.map;
-                            if (textura) {
-                                registrarTexturaAgua(textura);
-                                console.log('[Agua] Textura registrada desde:', hijo.name);
-                            }
-
-                            // Instanciar THREE.Water con la geometría original y target de reflejos optimizado
-                            const water = new Water(
-                                hijo.geometry,
-                                {
-                                    textureWidth: window.esMovil ? 64 : 128,
-                                    textureHeight: window.esMovil ? 64 : 128,
-                                    waterNormals: waterNormals,
-                                    sunDirection: new THREE.Vector3(10, 20, 10).normalize(),
-                                    sunColor: 0xffffff,
-                                    waterColor: 0x001e0f,
-                                    distortionScale: 3.7,
-                                    fog: scene.fog !== undefined
-                                }
-                            );
-
-                            // Copiar transformaciones locales
-                            water.position.copy(hijo.position);
-                            water.rotation.copy(hijo.rotation);
-                            water.scale.copy(hijo.scale);
-                            water.name = hijo.name;
-
-                            // Reemplazar la malla original en la jerarquía del clon
-                            const parent = hijo.parent;
-                            if (parent) {
-                                parent.remove(hijo);
-                                parent.add(water);
-                            }
-
-                            // Guardar en array global para animar
-                            aguasInstanciadas.push(water);
                         });
                     }
 
-                    // Aplicar MeshPhongMaterial con farolas
-                    aplicarMaterialPhong(clon);
+                    const castShadow =
+                        nh.includes('jugador') || nh.includes('player') || nh.includes('estatua') ||
+                        nh.includes('torii') || nh.includes('puente') || nh.includes('arbol') ||
+                        nh.includes('tree') || nh.includes('cerezo') || nh.includes('bonsai') ||
+                        nh.includes('farola') || nh.includes('lampara') || nh.includes('lantern') ||
+                        nh.includes('banca') || nh.includes('bench') || nh.includes('muro') ||
+                        nh.includes('fence') || nh.includes('valla') || nh.includes('piedra') ||
+                        nh.includes('stone') || nh.includes('roca') || nh.includes('rock') ||
+                        nh.includes('columna') || nh.includes('column') ||
+                        na.includes('torii') || na.includes('arbol') || na.includes('tree') ||
+                        na.includes('cerezo') || na.includes('bonsai') || na.includes('farola') ||
+                        na.includes('lampara') || na.includes('lantern') || na.includes('banca') ||
+                        na.includes('bench') || na.includes('estatua') || na.includes('puente') ||
+                        na.includes('bamboo') || na.includes('bambu');
 
+                    const esVegetacionPequeña =
+                        nh.includes('sakura') || nh.includes('follaje') || nh.includes('petalo') ||
+                        nh.includes('pasto') || nh.includes('grass') || nh.includes('cesped');
+
+                    child.castShadow = castShadow && !esVegetacionPequeña;
+                    child.receiveShadow = true;
+                });
+
+                // Modelo de colisiones
+                const esColision = item.archivo.toLowerCase().includes('collisions') ||
+                    item.archivo.toLowerCase().includes('colisiones');
+
+                if (esColision) {
                     const { posicion, rotacion, rotacionY, escala } = instancia;
-
-                    // Posición
-                    if (posicion) {
-                        clon.position.set(posicion[0], posicion[1], posicion[2]);
-                    }
-
-                    // Rotación
-                    if (rotacion) {
-                        clon.rotation.set(rotacion[0], rotacion[1], rotacion[2]);
-                    } else if (rotacionY !== undefined) {
-                        clon.rotation.y = rotacionY;
-                    }
-
-                    // Escala
+                    if (posicion) clon.position.set(posicion[0], posicion[1], posicion[2]);
+                    if (rotacion) clon.rotation.set(rotacion[0], rotacion[1], rotacion[2]);
+                    else if (rotacionY !== undefined) clon.rotation.y = rotacionY;
                     if (escala) {
-                        if (Array.isArray(escala)) {
-                            clon.scale.set(escala[0], escala[1], escala[2]);
-                        } else {
-                            clon.scale.setScalar(escala);
-                        }
+                        if (Array.isArray(escala)) clon.scale.set(escala[0], escala[1], escala[2]);
+                        else clon.scale.setScalar(escala);
                     }
-
-                    // Añadir clon a la escena
                     scene.add(clon);
-
-                    // Generar hitbox automática excepto para las plazas y el museo
-                    const esPlaza = item.archivo.toLowerCase().includes('plaza');
-                    const esMuseo = item.archivo.toLowerCase().includes('museo');
-                    if (!esPlaza && !esMuseo) {
-                        clon.userData.generarHitboxAutomata = true;
-                    }
-
-                    // Emitir evento para desacoplar colisiones, iluminación por farolas e interacciones
-                    const datosJSON = { ...item, ...instancia };
-                    delete datosJSON.instancias;
-
-                    broker.emit('modeloCargado', {
-                        modelo: clon,
-                        datosJSON,
-                        scene,
-                        objetosColision
+                    clon.updateMatrixWorld(true);
+                    clon.traverse((hijo) => {
+                        if (!hijo.isMesh) return;
+                        const nl = hijo.name.toLowerCase();
+                        if (!nl.includes('colision')) return;
+                        if (hijo.material) hijo.material.visible = false;
+                        objetosColision.push(hijo);
+                        if (nl.includes('suelo') || nl.includes('rampa') ||
+                            nl.includes('escalera') || nl.includes('piso')) {
+                            mallasSuelo.push(hijo);
+                        } else {
+                            registrarBoxColision(new THREE.Box3().setFromObject(hijo));
+                        }
                     });
-
-                    // Si tiene animaciones, arrancar el AnimationMixer
-                    if ((item.tieneanimations || item.tieneAnimations) && gltf.animations && gltf.animations.length > 0) {
-                        const animIdx = instancia.animacionInicial ?? item.animacionInicial ?? 0;
-                        registraranimations(clon, gltf.animations, animIdx);
+                    if (esZonaPrincipal && loadingManager) {
+                        contadorPrincipal++;
+                        loadingManager.itemEnd(`ip_${contadorPrincipal}`);
                     }
-
-                    // Incrementar el contador e informar al LoadingManager de la tarea completada
-                    contadorInstancias++;
-                    if (loadingManager) {
-                        loadingManager.itemEnd(`instancia_${contadorInstancias}`);
-                    }
-
-                    // Ceder control al navegador de forma diferida (Lotes)
-                    if (contadorInstancias % BATCH_SIZE === 0) {
+                    if (esZonaPrincipal && contadorPrincipal % BATCH_SIZE === 0) {
                         await esperarSiguienteTick();
                     }
+                    continue;
                 }
 
-                const numInstancias = item.instancias ? item.instancias.length : 0;
-                console.log(`Modelo ${item.archivo} cargado y configurado con éxito (${numInstancias} instancias)`);
-            } catch (err) {
-                console.error(`Error al procesar el modelo ${item.archivo}:`, err);
-                // En caso de error, liberar las tareas del LoadingManager para este lote de instancias pendientes
-                if (loadingManager) {
-                    const numInstancias = item.instancias ? item.instancias.length : 0;
-                    for (let i = 0; i < numInstancias; i++) {
-                        contadorInstancias++;
-                        loadingManager.itemEnd(`instancia_${contadorInstancias}`);
-                    }
+                if (item.tieneAgua) {
+                    const aguasMallas = [];
+                    clon.traverse((hijo) => {
+                        if (hijo.isMesh && hijo.name.toLowerCase().includes('agua')) {
+                            aguasMallas.push(hijo);
+                        }
+                    });
+                    aguasMallas.forEach((hijo) => {
+                        const textura = hijo.material.normalMap || hijo.material.map;
+                        if (textura) {
+                            registrarTexturaAgua(textura);
+                            console.log('[Agua] Textura registrada desde:', hijo.name);
+                        }
+                        const water = new Water(hijo.geometry, {
+                            textureWidth: window.esMovil ? 64 : 128,
+                            textureHeight: window.esMovil ? 64 : 128,
+                            waterNormals,
+                            sunDirection: new THREE.Vector3(10, 20, 10).normalize(),
+                            sunColor: 0xffffff,
+                            waterColor: 0x001e0f,
+                            distortionScale: 3.7,
+                            fog: scene.fog !== undefined,
+                        });
+                        water.position.copy(hijo.position);
+                        water.rotation.copy(hijo.rotation);
+                        water.scale.copy(hijo.scale);
+                        water.name = hijo.name;
+                        const parent = hijo.parent;
+                        if (parent) { parent.remove(hijo); parent.add(water); }
+                        aguasInstanciadas.push(water);
+                    });
+                }
+
+                aplicarMaterialPhong(clon);
+
+                const { posicion, rotacion, rotacionY, escala } = instancia;
+                if (posicion) clon.position.set(posicion[0], posicion[1], posicion[2]);
+                if (rotacion) clon.rotation.set(rotacion[0], rotacion[1], rotacion[2]);
+                else if (rotacionY !== undefined) clon.rotation.y = rotacionY;
+                if (escala) {
+                    if (Array.isArray(escala)) clon.scale.set(escala[0], escala[1], escala[2]);
+                    else clon.scale.setScalar(escala);
+                }
+
+                scene.add(clon);
+
+                const esPlaza = item.archivo.toLowerCase().includes('plaza');
+                const esMuseo = item.archivo.toLowerCase().includes('museo');
+                if (!esPlaza && !esMuseo) clon.userData.generarHitboxAutomata = true;
+
+                const datosJSON = { ...item, ...instancia };
+                delete datosJSON.instancias;
+                broker.emit('modeloCargado', { modelo: clon, datosJSON, scene, objetosColision });
+
+                if ((item.tieneanimations || item.tieneAnimations) && gltf.animations?.length > 0) {
+                    const animIdx = instancia.animacionInicial ?? item.animacionInicial ?? 0;
+                    registraranimations(clon, gltf.animations, animIdx);
+                }
+
+                if (esZonaPrincipal && loadingManager) {
+                    contadorPrincipal++;
+                    loadingManager.itemEnd(`ip_${contadorPrincipal}`);
+                }
+                if (esZonaPrincipal && contadorPrincipal % BATCH_SIZE === 0) {
+                    await esperarSiguienteTick();
                 }
             }
-        };
 
-        // Cargar todos los modelos en paralelo
-        const loadPromises = configuracion.map(item => cargarModelo(item));
-        await Promise.all(loadPromises);
-    } catch (error) {
-        console.error("Error al cargar el mapa de objetos desde el JSON:", error);
+            console.log(`[${item.zona || 'principal'}] OK ${item.archivo} (${item.instancias?.length ?? 0} inst.)`);
+
+        } catch (err) {
+            console.error(`[ModelLoader] Error en ${item.archivo}:`, err);
+            if (esZonaPrincipal && loadingManager) {
+                const n = item.instancias?.length ?? 0;
+                for (let i = 0; i < n; i++) {
+                    contadorPrincipal++;
+                    loadingManager.itemEnd(`ip_${contadorPrincipal}`);
+                }
+            }
+        }
     }
+
+    const loaderPrincipal = crearGLTFLoader(loadingManager);
+    console.log(`[Zonas] Principal: ${itemsPrincipal.length} modelos, ${totalInstanciasPrincipal} instancias`);
+    await Promise.all(itemsPrincipal.map(item => cargarModelo(item, loaderPrincipal, true)));
+    console.log('[Zonas] Zona principal completa');
+    const loaderBg = crearGLTFLoader(null);
+    (async () => {
+        const porZona = {};
+        for (const item of itemsSecundarios) {
+            const z = item.zona || 'otro';
+            if (!porZona[z]) porZona[z] = [];
+            porZona[z].push(item);
+        }
+        for (const zona of ZONAS_SECUNDARIAS) {
+            const items = porZona[zona];
+            if (!items?.length) continue;
+            console.log(`[Zonas] '${zona}' en background: ${items.length} modelos`);
+            await Promise.all(items.map(item => cargarModelo(item, loaderBg, false)));
+            console.log(`[Zonas] '${zona}' completa`);
+        }
+        console.log('[Zonas] Todas las zonas cargadas');
+    })();
 }

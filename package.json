@@ -6,11 +6,17 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "compress": "node scripts/compress-models.mjs",
+    "add-zones": "node scripts/add-zones.mjs"
   },
   "devDependencies": {
     "@gltf-transform/cli": "^4.4.0",
+    "@gltf-transform/core": "^4.4.0",
+    "@gltf-transform/extensions": "^4.4.0",
+    "@gltf-transform/functions": "^4.4.0",
     "esbuild": "^0.28.0",
+    "meshoptimizer": "^1.1.1",
     "vite": "^8.0.12",
     "vite-plugin-compression": "^0.5.1"
   },

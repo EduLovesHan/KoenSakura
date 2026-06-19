@@ -42,7 +42,8 @@
         ],
         "escala": 2
       }
-    ]
+    ],
+    "zona": "principal"
   },
   {
     "archivo": "assets/models/banca.glb",
@@ -125,7 +126,8 @@
           0
         ]
       }
-    ]
+    ],
+    "zona": "principal"
   },
   {
     "archivo": "assets/models/stand.glb",
@@ -154,7 +156,8 @@
           0
         ]
       }
-    ]
+    ],
+    "zona": "principal"
   },
   {
     "archivo": "assets/models/fresco.glb",
@@ -172,7 +175,8 @@
           0
         ]
       }
-    ]
+    ],
+    "zona": "hiroshima"
   },
   {
     "archivo": "assets/models/naruto1.glb",
@@ -190,7 +194,8 @@
           0
         ]
       }
-    ]
+    ],
+    "zona": "ramen"
   },
   {
     "archivo": "assets/models/monedero.glb",
@@ -219,7 +224,8 @@
           0
         ]
       }
-    ]
+    ],
+    "zona": "ramen"
   },
   {
     "archivo": "assets/models/naruto2.glb",
@@ -237,7 +243,8 @@
           0
         ]
       }
-    ]
+    ],
+    "zona": "ramen"
   },
   {
     "archivo": "assets/models/ramen.glb",
@@ -255,7 +262,8 @@
           0
         ]
       }
-    ]
+    ],
+    "zona": "ramen"
   },
   {
     "archivo": "assets/models/guoba.glb",
@@ -273,7 +281,8 @@
           0
         ]
       }
-    ]
+    ],
+    "zona": "ramen"
   },
   {
     "archivo": "assets/models/ichirakuRamen.glb",
@@ -297,7 +306,8 @@
           "distancia": 12
         }
       }
-    ]
+    ],
+    "zona": "ramen"
   },
   {
     "archivo": "assets/models/estatuaHachiko.glb",
@@ -315,7 +325,8 @@
           0
         ]
       }
-    ]
+    ],
+    "zona": "hiroshima"
   },
   {
     "archivo": "assets/models/perroCat.glb",
@@ -333,7 +344,8 @@
           0
         ]
       }
-    ]
+    ],
+    "zona": "hiroshima"
   },
   {
     "archivo": "assets/models/loboGirl_optimized.glb",
@@ -351,7 +363,8 @@
           0
         ]
       }
-    ]
+    ],
+    "zona": "museo"
   },
   {
     "archivo": "assets/models/loboBoy_optimized.glb",
@@ -369,7 +382,8 @@
           0
         ]
       }
-    ]
+    ],
+    "zona": "museo"
   },
   {
     "archivo": "assets/models/pisoHiroshima.glb",
@@ -398,7 +412,8 @@
           0
         ]
       }
-    ]
+    ],
+    "zona": "hiroshima"
   },
   {
     "archivo": "assets/models/hiroshima.glb",
@@ -416,7 +431,8 @@
           0
         ]
       }
-    ]
+    ],
+    "zona": "hiroshima"
   },
   {
     "archivo": "assets/models/maqHiroshima.glb",
@@ -434,7 +450,8 @@
           0
         ]
       }
-    ]
+    ],
+    "zona": "hiroshima"
   },
   {
     "archivo": "assets/models/luzNoche.glb",
@@ -626,7 +643,8 @@
           0
         ]
       }
-    ]
+    ],
+    "zona": "museo"
   },
   {
     "archivo": "assets/models/kimono.glb",
@@ -655,7 +673,8 @@
           "distancia": 4
         }
       }
-    ]
+    ],
+    "zona": "museo"
   },
   {
     "archivo": "assets/models/linterna.glb",
@@ -717,7 +736,8 @@
           0
         ]
       }
-    ]
+    ],
+    "zona": "principal"
   },
   {
     "archivo": "assets/models/mostrador.glb",
@@ -813,7 +833,8 @@
           "distancia": 8
         }
       }
-    ]
+    ],
+    "zona": "hiroshima"
   },
   {
     "archivo": "assets/models/cerezo.glb",
@@ -860,7 +881,8 @@
           0
         ]
       }
-    ]
+    ],
+    "zona": "principal"
   },
   {
     "archivo": "assets/models/bonsai.glb",
@@ -878,7 +900,8 @@
           0
         ]
       }
-    ]
+    ],
+    "zona": "museo"
   },
   {
     "archivo": "assets/models/toroStone.glb",
@@ -977,7 +1000,8 @@
     "farolaColor": "#F3DC91",
     "farolaAltura": 2.5,
     "farolaIntensidad": 3,
-    "farolaDistancia": 25
+    "farolaDistancia": 25,
+    "zona": "principal"
   },
   {
     "archivo": "assets/models/vegetacion.glb",
@@ -1008,7 +1032,8 @@
           0
         ]
       }
-    ]
+    ],
+    "zona": "principal"
   },
   {
     "archivo": "assets/models/lampara.glb",
@@ -1096,7 +1121,8 @@
     "farolaColor": "#F3DC91",
     "farolaAltura": 2.5,
     "farolaIntensidad": 3,
-    "farolaDistancia": 25
+    "farolaDistancia": 25,
+    "zona": "museo"
   },
   {
     "archivo": "assets/models/cerezo2.glb",
@@ -1283,7 +1309,8 @@
           0
         ]
       }
-    ]
+    ],
+    "zona": "principal"
   },
   {
     "archivo": "assets/models/muñeca.glb",
@@ -1312,7 +1339,8 @@
           "distancia": 6
         }
       }
-    ]
+    ],
+    "zona": "yokai"
   },
   {
     "archivo": "assets/models/plazaPrincipal_optimizado.glb",
@@ -1326,7 +1354,8 @@
           0
         ]
       }
-    ]
+    ],
+    "zona": "principal"
   },
   {
     "archivo": "assets/models/plazaPrincipal_colisiones.glb",
@@ -1338,7 +1367,8 @@
           0
         ]
       }
-    ]
+    ],
+    "zona": "principal"
   },
   {
     "archivo": "assets/models/foodLetrero.glb",
@@ -1356,7 +1386,8 @@
           0
         ]
       }
-    ]
+    ],
+    "zona": "ramen"
   },
   {
     "archivo": "assets/models/foodTable.glb",
@@ -1374,7 +1405,8 @@
           0
         ]
       }
-    ]
+    ],
+    "zona": "ramen"
   },
   {
     "archivo": "assets/models/letreroBasico.glb",
@@ -1494,7 +1526,8 @@
           "distancia": 6
         }
       }
-    ]
+    ],
+    "zona": "principal"
   },
   {
     "archivo": "assets/models/farolaPrueba.glb",
@@ -1704,7 +1737,8 @@
           91
         ]
       }
-    ]
+    ],
+    "zona": "principal"
   },
   {
     "archivo": "assets/models/monje.glb",
@@ -1733,7 +1767,8 @@
           "distancia": 4
         }
       }
-    ]
+    ],
+    "zona": "museo"
   },
   {
     "archivo": "assets/models/samurai.glb",
@@ -1762,7 +1797,8 @@
           "distancia": 4
         }
       }
-    ]
+    ],
+    "zona": "museo"
   },
   {
     "archivo": "assets/models/geisha_optimized.glb",
@@ -1791,7 +1827,8 @@
           "distancia": 5
         }
       }
-    ]
+    ],
+    "zona": "museo"
   },
   {
     "archivo": "assets/models/pezKoi.glb",
@@ -1845,7 +1882,8 @@
         ],
         "escala": 0.602
       }
-    ]
+    ],
+    "zona": "lago"
   },
   {
     "archivo": "assets/models/museo.glb",
@@ -1875,7 +1913,8 @@
           "distancia": 5
         }
       }
-    ]
+    ],
+    "zona": "museo"
   },
   {
     "archivo": "assets/models/plazaLago.glb",
@@ -1905,7 +1944,8 @@
           "distancia": 5
         }
       }
-    ]
+    ],
+    "zona": "lago"
   },
   {
     "archivo": "assets/models/gatoNegroMov.glb",
@@ -1968,7 +2008,8 @@
           0
         ]
       }
-    ]
+    ],
+    "zona": "principal"
   },
   {
     "archivo": "assets/models/gatoGrisMov.glb",
@@ -2099,7 +2140,8 @@
         "escala": 1.5,
         "animacionInicial": 1
       }
-    ]
+    ],
+    "zona": "principal"
   },
   {
     "archivo": "assets/models/utah.glb",
@@ -2128,7 +2170,8 @@
           "distancia": 4
         }
       }
-    ]
+    ],
+    "zona": "museo"
   },
   {
     "archivo": "assets/models/walk.glb",
@@ -2157,7 +2200,8 @@
           "distancia": 4
         }
       }
-    ]
+    ],
+    "zona": "museo"
   },
   {
     "archivo": "assets/models/disc.glb",
@@ -2186,7 +2230,8 @@
           "distancia": 4
         }
       }
-    ]
+    ],
+    "zona": "museo"
   },
   {
     "archivo": "assets/models/mesitaMusica.glb",
@@ -2216,7 +2261,8 @@
           "distancia": 6
         }
       }
-    ]
+    ],
+    "zona": "museo"
   },
   {
     "archivo": "assets/models/vestidor.glb",
@@ -2245,7 +2291,8 @@
           "distancia": 6
         }
       }
-    ]
+    ],
+    "zona": "museo"
   },
   {
     "archivo": "assets/models/maquina.glb",
@@ -2274,7 +2321,8 @@
           "distancia": 4
         }
       }
-    ]
+    ],
+    "zona": "ramen"
   },
   {
     "archivo": "assets/models/eva.glb",
@@ -2305,7 +2353,8 @@
           "delayAudio": 500
         }
       }
-    ]
+    ],
+    "zona": "ramen"
   },
   {
     "archivo": "assets/models/foocourt.glb",
@@ -2334,7 +2383,8 @@
           "distancia": 8
         }
       }
-    ]
+    ],
+    "zona": "ramen"
   },
   {
     "archivo": "assets/models/bamboo.glb",
@@ -3578,7 +3628,8 @@
           0
         ]
       }
-    ]
+    ],
+    "zona": "principal"
   },
   {
     "archivo": "assets/models/yokaiOkiku.glb",
@@ -3607,7 +3658,8 @@
           "distancia": 6
         }
       }
-    ]
+    ],
+    "zona": "yokai"
   },
   {
     "archivo": "assets/models/yokaiJorogumo.glb",
@@ -3636,7 +3688,8 @@
           "distancia": 6
         }
       }
-    ]
+    ],
+    "zona": "yokai"
   },
   {
     "archivo": "assets/models/altar.glb",
@@ -3660,7 +3713,8 @@
           "distancia": 10
         }
       }
-    ]
+    ],
+    "zona": "yokai"
   },
   {
     "archivo": "assets/models/ciervoComiendo.glb",
@@ -3690,7 +3744,8 @@
           "distancia": 6
         }
       }
-    ]
+    ],
+    "zona": "lago"
   },
   {
     "archivo": "assets/models/ciervoSamba.glb",
@@ -3715,7 +3770,8 @@
           "distancia": 6
         }
       }
-    ]
+    ],
+    "zona": "principal"
   },
   {
     "archivo": "assets/models/ciervoViendoAlCielo.glb",
@@ -3745,7 +3801,8 @@
           "distancia": 6
         }
       }
-    ]
+    ],
+    "zona": "lago"
   },
   {
     "archivo": "assets/models/bandera.glb",
@@ -3769,6 +3826,7 @@
           0
         ]
       }
-    ]
+    ],
+    "zona": "principal"
   }
 ]

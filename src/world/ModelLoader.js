@@ -432,6 +432,8 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
                             const nombreHijo = child.name.toLowerCase();
                             const nombreArchivo = item.archivo.toLowerCase();
                             const esPlanoSinGrosor = nombreHijo.includes('sakura') ||
+                                nombreArchivo.includes('bandera') ||
+                                nombreHijo.includes('bandera') ||
                                 /*nombreHijo.includes('hoja') ||
                                 nombreHijo.includes('leaf') ||
                                 nombreHijo.includes('leaves') ||*/
@@ -715,7 +717,7 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
                     });
 
                     // Si tiene animaciones, arrancar el AnimationMixer
-                    if (item.tieneanimations && gltf.animations && gltf.animations.length > 0) {
+                    if ((item.tieneanimations || item.tieneAnimations) && gltf.animations && gltf.animations.length > 0) {
                         const animIdx = instancia.animacionInicial ?? item.animacionInicial ?? 0;
                         registraranimations(clon, gltf.animations, animIdx);
                     }

@@ -572,7 +572,8 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
 
                     if (esModeloCollisions) {
                         // Lógica para models de collisions
-                        const { posicion, rotacion, rotacionY, escala } = instancia;
+                        const { posicion, rotacion, rotacionY } = instancia;
+                        const escala = instancia.escala !== undefined ? instancia.escala : item.escala;
 
                         if (posicion) clon.position.set(posicion[0], posicion[1], posicion[2]);
                         if (rotacion) clon.rotation.set(rotacion[0], rotacion[1], rotacion[2]);
@@ -670,7 +671,8 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
                     // Aplicar MeshPhongMaterial con farolas
                     aplicarMaterialPhong(clon);
 
-                    const { posicion, rotacion, rotacionY, escala } = instancia;
+                    const { posicion, rotacion, rotacionY } = instancia;
+                    const escala = instancia.escala !== undefined ? instancia.escala : item.escala;
 
                     // Posición
                     if (posicion) {

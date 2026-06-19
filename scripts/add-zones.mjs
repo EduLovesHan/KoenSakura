@@ -31,9 +31,9 @@ const ZONA_MAP = {
     'assets/models/ciervoSamba.glb': 'principal',
     'assets/models/linterna.glb': 'principal',
     'assets/models/lamparaPequeña.glb': 'principal',
+    'assets/models/museo.glb': 'principal',
 
     //  zona museo   
-    'assets/models/museo.glb': 'museo',
     'assets/models/loboGirl_optimized.glb': 'museo',
     'assets/models/loboBoy_optimized.glb': 'museo',
     'assets/models/monje.glb': 'museo',

@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { Water } from 'three/addons/objects/Water.js';
 import { broker } from './EventBroker.js';
 import { registraranimations, registrarTexturaAgua } from './animations.js';
@@ -374,6 +375,10 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
 
     loader.setMeshoptDecoder(MeshoptDecoder);
 
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
+    loader.setDRACOLoader(dracoLoader);
+
     // Resetear aguas instanciadas
     aguasInstanciadas.length = 0;
 
@@ -387,7 +392,9 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
         // Contar el total de instancias de todos los models
         let totalInstancias = 0;
         for (const item of configuracion) {
-            totalInstancias += item.instancias.length;
+            if (item.instancias) {
+                totalInstancias += item.instancias.length;
+            }
         }
 
         // Registrar anticipadamente todas las instancias en el LoadingManager
@@ -399,7 +406,7 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
 
         let contadorInstancias = 0;
 
-        for (const item of configuracion) {
+        const cargarModelo = async (item) => {
             try {
                 // Cargar el modelo base
                 const gltf = await loader.loadAsync(item.archivo);
@@ -413,7 +420,8 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
                 }
 
                 // Iterar cada instancia del modelo
-                for (const instancia of item.instancias) {
+                const instanciasToIterate = item.instancias || [];
+                for (const instancia of instanciasToIterate) {
                     //  se usa SkeletonUtils.clone() para models con bones
                     const clon = usarSkeletonUtils
                         ? SkeletonUtils.clone(modeloBase)
@@ -734,18 +742,24 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
                     }
                 }
 
-                console.log(`Modelo ${item.archivo} cargado y configurado con éxito (${item.instancias.length} instancias)`);
+                const numInstancias = item.instancias ? item.instancias.length : 0;
+                console.log(`Modelo ${item.archivo} cargado y configurado con éxito (${numInstancias} instancias)`);
             } catch (err) {
                 console.error(`Error al procesar el modelo ${item.archivo}:`, err);
                 // En caso de error, liberar las tareas del LoadingManager para este lote de instancias pendientes
                 if (loadingManager) {
-                    for (let i = 0; i < item.instancias.length; i++) {
+                    const numInstancias = item.instancias ? item.instancias.length : 0;
+                    for (let i = 0; i < numInstancias; i++) {
                         contadorInstancias++;
                         loadingManager.itemEnd(`instancia_${contadorInstancias}`);
                     }
                 }
             }
-        }
+        };
+
+        // Cargar todos los modelos en paralelo
+        const loadPromises = configuracion.map(item => cargarModelo(item));
+        await Promise.all(loadPromises);
     } catch (error) {
         console.error("Error al cargar el mapa de objetos desde el JSON:", error);
     }

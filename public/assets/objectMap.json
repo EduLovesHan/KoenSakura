@@ -1306,8 +1306,8 @@
             "en": "Kokeshi Doll"
           },
           "texto": {
-            "es": "Una muñeca tradicional japonesa hecha de madera. Representa la resiliencia, la protección, la buena fortuna y la conexión espiritual",
-            "en": "A traditional Japanese wooden doll. It represents resilience, protection, good fortune, and spiritual connection."
+            "es": "En las casitas atras mio se encuentra Yōkais, estos son seres fantasticos que han funcionado como una herramienta cultural para dar forma a lo inexplicable",
+            "en": "In the houses behind me you can find Yokais, these are fantastic beings that have served as a cultural tool to give shape to the inexplicable"
           },
           "distancia": 6
         }
@@ -3575,6 +3575,197 @@
         "rotacion": [
           0,
           1.57,
+          0
+        ]
+      }
+    ]
+  },
+  {
+    "archivo": "assets/models/yokaiOkiku.glb",
+    "instancias": [
+      {
+        "posicion": [
+          -65.8,
+          1,
+          97
+        ],
+        "escala": 0.4,
+        "rotacion": [
+          0,
+          -3.14,
+          0
+        ],
+        "interactivo": {
+          "titulo": {
+            "es": "Okiku",
+            "en": "Okiku"
+          },
+          "texto": {
+            "es": "Es el espíritu de una mujer, cuentan que fue una criada que fue asesinada y que su espíritu vaga por el pozo.",
+            "en": "It's the spirit of a woman, they say she was a maid who was murdered and her spirit wanders around the well."
+          },
+          "distancia": 6
+        }
+      }
+    ]
+  },
+  {
+    "archivo": "assets/models/yokaiJorogumo.glb",
+    "instancias": [
+      {
+        "posicion": [
+          -82.5,
+          1.5,
+          97
+        ],
+        "escala": 1,
+        "rotacion": [
+          0,
+          -3.14,
+          0
+        ],
+        "interactivo": {
+          "titulo": {
+            "es": "Jorogumo",
+            "en": "Jorogumo"
+          },
+          "texto": {
+            "es": "Yokai araña que atrapa a sus presas con su telaraña.",
+            "en": "spider yokai that traps its prey with its web"
+          },
+          "distancia": 6
+        }
+      }
+    ]
+  },
+  {
+    "archivo": "assets/models/altar.glb",
+    "instancias": [
+      {
+        "posicion": [
+          95,
+          -0.5,
+          86
+        ],
+        "escala": 4,
+        "interactivo": {
+          "titulo": {
+            "es": "Altar",
+            "en": "Altar"
+          },
+          "texto": {
+            "es": "Este altar es un espacio sagrado donde las personas pueden honrar a las deidades, espíritus y ancestros. Tradicionalmente, se colocan ofrendas como comida, bebida, incienso y flores para mostrar respeto, pedir protección, salud, prosperidad y expresar gratitud.",
+            "en": "This altar is a sacred space where people can honor deities, spirits, and ancestors. Traditionally, offerings such as food, drink, incense, and flowers are placed to show respect, ask for protection, health, prosperity, and express gratitude."
+          },
+          "distancia": 10
+        }
+      }
+    ]
+  },
+  {
+    "archivo": "assets/models/ciervoComiendo.glb",
+    "tieneAnimations": true,
+    "instancias": [
+      {
+        "posicion": [
+          57,
+          -0.2,
+          132
+        ],
+        "escala": 2.5,
+        "rotacion": [
+          0,
+          0.8,
+          0
+        ],
+        "interactivo": {
+          "titulo": {
+            "es": "Ciervo",
+            "en": "Deer"
+          },
+          "texto": {
+            "es": "Se cree que los ciervos son mensajeros de los dioses y se les considera animales sagrados en la cultura japonesa. En muchos santuarios, los ciervos deambulan libremente.",
+            "en": "Deer are believed to be messengers of the gods and are considered sacred animals in Japanese culture. In many shrines, deer roam freely."
+          },
+          "distancia": 6
+        }
+      }
+    ]
+  },
+  {
+    "archivo": "assets/models/ciervoSamba.glb",
+    "tieneAnimations": true,
+    "instancias": [
+      {
+        "posicion": [
+          -36,
+          -0.5,
+          43
+        ],
+        "escala": 1,
+        "interactivo": {
+          "titulo": {
+            "es": "Ciervo",
+            "en": "Deer"
+          },
+          "texto": {
+            "es": "Se cree que los ciervos son mensajeros de los dioses y se les considera animales sagrados en la cultura japonesa. En muchos santuarios, los ciervos deambulan libremente.",
+            "en": "Deer are believed to be messengers of the gods and are considered sacred animals in Japanese culture. In many shrines, deer roam freely."
+          },
+          "distancia": 6
+        }
+      }
+    ]
+  },
+  {
+    "archivo": "assets/models/ciervoViendoAlCielo.glb",
+    "tieneAnimations": true,
+    "instancias": [
+      {
+        "posicion": [
+          -20,
+          0,
+          183
+        ],
+        "escala": 1.25,
+        "rotacion": [
+          0,
+          3.14,
+          0
+        ],
+        "interactivo": {
+          "titulo": {
+            "es": "Ciervo",
+            "en": "Deer"
+          },
+          "texto": {
+            "es": "Se cree que los ciervos son mensajeros de los dioses y se les considera animales sagrados en la cultura japonesa. En muchos santuarios, los ciervos deambulan libremente.",
+            "en": "Deer are believed to be messengers of the gods and are considered sacred animals in Japanese culture. In many shrines, deer roam freely."
+          },
+          "distancia": 6
+        }
+      }
+    ]
+  },
+  {
+    "archivo": "assets/models/bandera.glb",
+    "tieneAnimations": true,
+    "instancias": [
+      {
+        "posicion": [
+          -6,
+          0,
+          29.5
+        ],
+        "escala": 1.5,
+        "hitboxEscala": [
+          2,
+          15,
+          2
+        ],
+        "rotacion": [
+          0,
+          3.14,
           0
         ]
       }

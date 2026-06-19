@@ -6,8 +6,6 @@ import { Water } from 'three/addons/objects/Water.js';
 import { broker } from './EventBroker.js';
 import { registraranimations, registrarTexturaAgua } from './animations.js';
 import { mallasSuelo, registrarBoxColision } from './collisions.js';
-import vertexShader from '../shaders/phong.vert?raw';
-import fragmentShader from '../shaders/phong.frag?raw';
 
 export const aguasInstanciadas = [];
 
@@ -17,18 +15,7 @@ const waterNormals = textureLoader.load('assets/textures/others/waternormals3.we
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
 });
 
-// Uniforms globales para el shader Phong que se aplica solo a mallas estaticas
-// Mallas con esqueletos y mallas de agua conservan el material estandar y se iluminan con luces nativas de treejs
 export const phongUniformsGlobales = {
-    uAmbientColor: { value: new THREE.Color().setRGB((0xd8 + 0.001) / 255, (0xe2 + 0.001) / 255, (0xf0 + 0.001) / 255) },
-    uAmbientIntensity: { value: 0.6 },
-    uLightColor: { value: new THREE.Color().setRGB(1.0, (0xf5 + 0.001) / 255, (0xe6 + 0.001) / 255) },
-    uLightIntensity: { value: 1.5 },
-    uLightPosition: { value: new THREE.Vector3(10, 20, 10) },
-    uSpecularColor: { value: new THREE.Color(0xffffff) },
-    uSpecularIntensity: { value: 0.0 },
-    uShininess: { value: 30.0 },
-    uCameraPosition: { value: new THREE.Vector3() },
     // Point Lights de las farolas, compartidos por todos los materiales
     uPointLightPos0: { value: new THREE.Vector3(0, -100, 0) },
     uPointLightPos1: { value: new THREE.Vector3(0, -100, 0) },
@@ -36,33 +23,127 @@ export const phongUniformsGlobales = {
     uPointLightPos3: { value: new THREE.Vector3(0, -100, 0) },
     uPointLightPos4: { value: new THREE.Vector3(0, -100, 0) },
     uPointLightPos5: { value: new THREE.Vector3(0, -100, 0) },
-    
+
     uPointLightColor0: { value: new THREE.Color(0xffaa00) },
     uPointLightColor1: { value: new THREE.Color(0xffaa00) },
     uPointLightColor2: { value: new THREE.Color(0xffaa00) },
     uPointLightColor3: { value: new THREE.Color(0xffaa00) },
     uPointLightColor4: { value: new THREE.Color(0xffaa00) },
     uPointLightColor5: { value: new THREE.Color(0xffaa00) },
-    
+
     uPointLightIntensity0: { value: 0.0 },
     uPointLightIntensity1: { value: 0.0 },
     uPointLightIntensity2: { value: 0.0 },
     uPointLightIntensity3: { value: 0.0 },
     uPointLightIntensity4: { value: 0.0 },
     uPointLightIntensity5: { value: 0.0 },
-    
+
     uPointLightDistance0: { value: 20.0 },
     uPointLightDistance1: { value: 20.0 },
     uPointLightDistance2: { value: 20.0 },
     uPointLightDistance3: { value: 20.0 },
     uPointLightDistance4: { value: 20.0 },
     uPointLightDistance5: { value: 20.0 },
-    
-    uPointLightIntensityFactor: { value: 0.0 }
+
+    uPointLightIntensityFactor: { value: 0.0 },
+
+    uShininess: { value: 30.0 },
+    uSpecularIntensity: { value: 0.0 }
 };
 
+const FAROLAS_GLSL_DECLARATIONS = /* glsl */`
+// Farolas
+uniform vec3 uPointLightPos0;
+uniform vec3 uPointLightPos1;
+uniform vec3 uPointLightPos2;
+uniform vec3 uPointLightPos3;
+uniform vec3 uPointLightPos4;
+uniform vec3 uPointLightPos5;
+
+uniform vec3 uPointLightColor0;
+uniform vec3 uPointLightColor1;
+uniform vec3 uPointLightColor2;
+uniform vec3 uPointLightColor3;
+uniform vec3 uPointLightColor4;
+uniform vec3 uPointLightColor5;
+
+uniform float uPointLightIntensity0;
+uniform float uPointLightIntensity1;
+uniform float uPointLightIntensity2;
+uniform float uPointLightIntensity3;
+uniform float uPointLightIntensity4;
+uniform float uPointLightIntensity5;
+
+uniform float uPointLightDistance0;
+uniform float uPointLightDistance1;
+uniform float uPointLightDistance2;
+uniform float uPointLightDistance3;
+uniform float uPointLightDistance4;
+uniform float uPointLightDistance5;
+
+vec3 calcFarolaDiffuse(vec3 lightPosView, vec3 N, vec3 color, float intensity, float maxDist) {
+    // vViewPosition en Three.js MeshPhong = -mvPosition.xyz (direcci\u00f3n al origen/c\u00e1mara)
+    // Por tanto la posici\u00f3n real del fragmento en view-space = -vViewPosition
+    // toLight = lightPos - fragPos = lightPos - (-vViewPosition) = lightPos + vViewPosition
+    vec3 toLight = lightPosView + vViewPosition;
+    float dist = length(toLight);
+    if (dist > maxDist || maxDist <= 0.0) return vec3(0.0);
+    vec3 L = toLight / dist;
+    float diff = max(dot(N, L), 0.0);
+    float atten = clamp(1.0 - dist / maxDist, 0.0, 1.0);
+    atten *= atten;
+    return color * intensity * diff * atten;
+}
+`;
+
+const FAROLAS_GLSL_CONTRIBUTION = /* glsl */`
+    {
+        vec3 N_farolas = normalize( vNormal );
+        vec3 farolasContrib = vec3(0.0);
+        farolasContrib += calcFarolaDiffuse(uPointLightPos0, N_farolas, uPointLightColor0, uPointLightIntensity0, uPointLightDistance0);
+        farolasContrib += calcFarolaDiffuse(uPointLightPos1, N_farolas, uPointLightColor1, uPointLightIntensity1, uPointLightDistance1);
+        farolasContrib += calcFarolaDiffuse(uPointLightPos2, N_farolas, uPointLightColor2, uPointLightIntensity2, uPointLightDistance2);
+        farolasContrib += calcFarolaDiffuse(uPointLightPos3, N_farolas, uPointLightColor3, uPointLightIntensity3, uPointLightDistance3);
+        farolasContrib += calcFarolaDiffuse(uPointLightPos4, N_farolas, uPointLightColor4, uPointLightIntensity4, uPointLightDistance4);
+        farolasContrib += calcFarolaDiffuse(uPointLightPos5, N_farolas, uPointLightColor5, uPointLightIntensity5, uPointLightDistance5);
+        outgoingLight += farolasContrib * diffuseColor.rgb;
+    }
+`;
+
+function construirUniformsFarolas() {
+    return {
+        uPointLightPos0: phongUniformsGlobales.uPointLightPos0,
+        uPointLightPos1: phongUniformsGlobales.uPointLightPos1,
+        uPointLightPos2: phongUniformsGlobales.uPointLightPos2,
+        uPointLightPos3: phongUniformsGlobales.uPointLightPos3,
+        uPointLightPos4: phongUniformsGlobales.uPointLightPos4,
+        uPointLightPos5: phongUniformsGlobales.uPointLightPos5,
+
+        uPointLightColor0: phongUniformsGlobales.uPointLightColor0,
+        uPointLightColor1: phongUniformsGlobales.uPointLightColor1,
+        uPointLightColor2: phongUniformsGlobales.uPointLightColor2,
+        uPointLightColor3: phongUniformsGlobales.uPointLightColor3,
+        uPointLightColor4: phongUniformsGlobales.uPointLightColor4,
+        uPointLightColor5: phongUniformsGlobales.uPointLightColor5,
+
+        uPointLightIntensity0: phongUniformsGlobales.uPointLightIntensity0,
+        uPointLightIntensity1: phongUniformsGlobales.uPointLightIntensity1,
+        uPointLightIntensity2: phongUniformsGlobales.uPointLightIntensity2,
+        uPointLightIntensity3: phongUniformsGlobales.uPointLightIntensity3,
+        uPointLightIntensity4: phongUniformsGlobales.uPointLightIntensity4,
+        uPointLightIntensity5: phongUniformsGlobales.uPointLightIntensity5,
+
+        uPointLightDistance0: phongUniformsGlobales.uPointLightDistance0,
+        uPointLightDistance1: phongUniformsGlobales.uPointLightDistance1,
+        uPointLightDistance2: phongUniformsGlobales.uPointLightDistance2,
+        uPointLightDistance3: phongUniformsGlobales.uPointLightDistance3,
+        uPointLightDistance4: phongUniformsGlobales.uPointLightDistance4,
+        uPointLightDistance5: phongUniformsGlobales.uPointLightDistance5,
+    };
+}
+
 function crearMaterialPhong(originalMaterial, nombreMalla = '', nombreModelo = '') {
-    // Extraer textura y color originales del material GLTF
+    // Extraer propiedades del material GLTF
     const {
         map: texturaOriginal = null,
         color,
@@ -78,15 +159,13 @@ function crearMaterialPhong(originalMaterial, nombreMalla = '', nombreModelo = '
         ? color.clone()
         : new THREE.Color(0xffffff);
 
-    // Normalizar nombres para hacer la comprobación de contexto
+    // Normalizar nombres para el filtro de contexto
     const nombreMallaLower = nombreMalla.toLowerCase();
     const nombreMatLower = (originalMaterial.name || '').toLowerCase();
     const nombreModeloLower = nombreModelo.toLowerCase();
-
-    // Unificar nombres de malla, material y archivo de modelo para evitar fallos de filtro
     const contextoCompleto = nombreMallaLower + '_' + nombreMatLower + '_' + nombreModeloLower;
 
-    // Detectar si la malla pertenece a elementos arquitectónicos que deben ser 100% sólidos y visibles por ambos lados
+    // Detectar arquitectura sólida
     const esArquitecturaSolida = contextoCompleto.includes('casa') ||
         contextoCompleto.includes('casita') ||
         contextoCompleto.includes('tradicional') ||
@@ -107,96 +186,107 @@ function crearMaterialPhong(originalMaterial, nombreMalla = '', nombreModelo = '
         contextoCompleto.includes('estructura') ||
         contextoCompleto.includes('building');
 
-    // Identificar si explícitamente se trata de elementos transparentes de vidrio/ventanas
+    // Detectar vidrio/transparencias
     const esVidrio = contextoCompleto.includes('cristal') ||
         contextoCompleto.includes('glass') ||
         contextoCompleto.includes('vidrio') ||
         contextoCompleto.includes('ventana') ||
         contextoCompleto.includes('window');
 
-    // Determinar los estados finales de renderizado
+    // Detectar vegetación
+    const esFolaje = contextoCompleto.includes('bamboo') ||
+        contextoCompleto.includes('bambu') ||
+        contextoCompleto.includes('bamb') ||
+        contextoCompleto.includes('hoja') ||
+        contextoCompleto.includes('leaf') ||
+        contextoCompleto.includes('leaves') ||
+        contextoCompleto.includes('follaje') ||
+        contextoCompleto.includes('foliage') ||
+        contextoCompleto.includes('arbusto') ||
+        contextoCompleto.includes('bush') ||
+        contextoCompleto.includes('copa') ||
+        contextoCompleto.includes('crown') ||
+        contextoCompleto.includes('grass') ||
+        contextoCompleto.includes('hierba');
+
+    const esPiso = contextoCompleto.includes('piso') ||
+        contextoCompleto.includes('floor') ||
+        contextoCompleto.includes('suelo') ||
+        contextoCompleto.includes('ground') ||
+        contextoCompleto.includes('plaza') ||
+        contextoCompleto.includes('pavimento') ||
+        contextoCompleto.includes('pavement') ||
+        contextoCompleto.includes('tatami') ||
+        contextoCompleto.includes('path') ||
+        contextoCompleto.includes('camino');
+
+    // Estados finales de renderizado
     let esTransparente = transparent || opacidadOriginal < 1.0;
     let depthWriteFinal = depthWrite !== undefined ? depthWrite : true;
     let sideFinal = side !== undefined ? side : THREE.FrontSide;
     let opacidadFinal = opacidadOriginal;
 
-    // Si es arquitectura y no es vidrio, forzamos para que sea 100% sólido y visible por ambos lados
+    // Forzar sólido en arquitectura
     if (esArquitecturaSolida && !esVidrio) {
         esTransparente = false;
         depthWriteFinal = true;
         sideFinal = THREE.DoubleSide;
-        opacidadFinal = 1.0; // Ignorar cualquier valor de opacidad parcial proveniente de Blender
+        opacidadFinal = 1.0;
     }
 
-    // Si el original tiene alphaTest configurado
-    const alphaTestOriginal = alphaTest !== undefined && alphaTest > 0
+    let alphaTestFinal = alphaTest !== undefined && alphaTest > 0
         ? alphaTest
         : (esTransparente ? 0.05 : 0.0);
 
-    const depthWriteOriginal = depthWriteFinal;
+    if (esFolaje && !esVidrio) {
+        esTransparente = false;
+        depthWriteFinal = true;
+        sideFinal = THREE.DoubleSide;
+        if (alphaTestFinal < 0.15) alphaTestFinal = 0.15;
+    }
 
-    const blendingOriginal = blending !== undefined
+    const blendingFinal = blending !== undefined
         ? blending
         : THREE.NormalBlending;
 
-    // Crear una instancia nueva de ShaderMaterial
-    const nuevoMaterial = new THREE.ShaderMaterial({
-        vertexShader,
-        fragmentShader,
+    // MeshPhongMaterial
+    const nuevoMaterial = new THREE.MeshPhongMaterial({
+        color: colorOriginal,
+        map: texturaOriginal,
+        shininess: esPiso ? 2 : 30,
+        specular: esPiso ? new THREE.Color(0x000000) : new THREE.Color(0x111111),
         transparent: esTransparente,
-        alphaTest: alphaTestOriginal,
-        depthWrite: depthWriteOriginal,
+        alphaTest: alphaTestFinal,
+        depthWrite: depthWriteFinal,
         depthTest: true,
-        blending: blendingOriginal,
+        blending: blendingFinal,
         side: sideFinal,
-        uniforms: {
-            // Globales compartidos por referencia
-            uAmbientColor: phongUniformsGlobales.uAmbientColor,
-            uAmbientIntensity: phongUniformsGlobales.uAmbientIntensity,
-            uLightColor: phongUniformsGlobales.uLightColor,
-            uLightIntensity: phongUniformsGlobales.uLightIntensity,
-            uLightPosition: phongUniformsGlobales.uLightPosition,
-            uSpecularColor: phongUniformsGlobales.uSpecularColor,
-            uSpecularIntensity: phongUniformsGlobales.uSpecularIntensity,
-            uShininess: phongUniformsGlobales.uShininess,
-            uCameraPosition: phongUniformsGlobales.uCameraPosition,
-            
-            uPointLightPos0: phongUniformsGlobales.uPointLightPos0,
-            uPointLightPos1: phongUniformsGlobales.uPointLightPos1,
-            uPointLightPos2: phongUniformsGlobales.uPointLightPos2,
-            uPointLightPos3: phongUniformsGlobales.uPointLightPos3,
-            uPointLightPos4: phongUniformsGlobales.uPointLightPos4,
-            uPointLightPos5: phongUniformsGlobales.uPointLightPos5,
-            
-            uPointLightColor0: phongUniformsGlobales.uPointLightColor0,
-            uPointLightColor1: phongUniformsGlobales.uPointLightColor1,
-            uPointLightColor2: phongUniformsGlobales.uPointLightColor2,
-            uPointLightColor3: phongUniformsGlobales.uPointLightColor3,
-            uPointLightColor4: phongUniformsGlobales.uPointLightColor4,
-            uPointLightColor5: phongUniformsGlobales.uPointLightColor5,
-            
-            uPointLightIntensity0: phongUniformsGlobales.uPointLightIntensity0,
-            uPointLightIntensity1: phongUniformsGlobales.uPointLightIntensity1,
-            uPointLightIntensity2: phongUniformsGlobales.uPointLightIntensity2,
-            uPointLightIntensity3: phongUniformsGlobales.uPointLightIntensity3,
-            uPointLightIntensity4: phongUniformsGlobales.uPointLightIntensity4,
-            uPointLightIntensity5: phongUniformsGlobales.uPointLightIntensity5,
-            
-            uPointLightDistance0: phongUniformsGlobales.uPointLightDistance0,
-            uPointLightDistance1: phongUniformsGlobales.uPointLightDistance1,
-            uPointLightDistance2: phongUniformsGlobales.uPointLightDistance2,
-            uPointLightDistance3: phongUniformsGlobales.uPointLightDistance3,
-            uPointLightDistance4: phongUniformsGlobales.uPointLightDistance4,
-            uPointLightDistance5: phongUniformsGlobales.uPointLightDistance5,
-            
-            // Cada malla tiene su propia textura y color
-            uMap: { value: texturaOriginal },
-            uHasTexture: { value: texturaOriginal ? 1.0 : 0.0 },
-            uBaseColor: { value: colorOriginal },
-            uOpacity: { value: opacidadFinal },
-            uAlphaTest: { value: alphaTestOriginal }
-        }
+        opacity: opacidadFinal,
     });
+
+    // Farolas
+    nuevoMaterial.onBeforeCompile = (shader) => {
+        Object.assign(shader.uniforms, construirUniformsFarolas());
+
+        shader.fragmentShader = shader.fragmentShader.replace(
+            '#include <lights_phong_pars_fragment>',
+            '#include <lights_phong_pars_fragment>\n' + FAROLAS_GLSL_DECLARATIONS
+        );
+
+        shader.fragmentShader = shader.fragmentShader.replace(
+            '#include <output_fragment>',
+            FAROLAS_GLSL_CONTRIBUTION + '\n    #include <output_fragment>'
+        );
+    };
+
+    // Distinguir variantes de compilación
+    nuevoMaterial.customProgramCacheKey = () => {
+        const t = nuevoMaterial.transparent ? 't' : 'o';
+        const a = nuevoMaterial.alphaTest > 0 ? `a${nuevoMaterial.alphaTest.toFixed(2)}` : 'na';
+        const s = nuevoMaterial.side;
+        const m = nuevoMaterial.map ? 'map' : 'nomap';
+        return `farolas_v1_${t}_${a}_${s}_${m}`;
+    };
 
     return nuevoMaterial;
 }
@@ -211,7 +301,6 @@ function aplicarMaterialPhong(model) {
     const esModeloExcluido = nombreModelo.includes('muñeca') || nombreModelo.includes('muneca');
 
     if (esModeloExcluido) {
-        // Asegurar que el material original tenga transparencia configurada
         model.traverse((child) => {
             if (!child.isMesh || !child.material) return;
             const mats = Array.isArray(child.material) ? child.material : [child.material];
@@ -241,22 +330,21 @@ function aplicarMaterialPhong(model) {
             return;
         }
 
-        // Omitir mallas con materiales emisivos
+        // Omitir materiales emisivos
         const materialesOriginales = Array.isArray(child.material)
             ? child.material
             : [child.material];
 
         const tieneEmisivo = materialesOriginales.some(
-            mat => mat.emissive && (mat.emissive.r > 0 || mat.emissive.g > 0 || mat.emissive.b > 0)
+            mat => mat.emissiveMap ||
+                (mat.emissive && (mat.emissive.r > 0 || mat.emissive.g > 0 || mat.emissive.b > 0))
         );
         if (tieneEmisivo) return;
 
-        // Crear material Phong individual para cada material original
+        // MeshPhongMaterial con farolas
         if (Array.isArray(child.material)) {
-            // Multi-material: crear un ShaderMaterial por cada sub-material
             child.material = child.material.map(mat => crearMaterialPhong(mat, child.name, model.name));
         } else {
-            // Material único: crear un ShaderMaterial nuevo con su textura preservada
             child.material = crearMaterialPhong(child.material, child.name, model.name);
         }
     });
@@ -340,13 +428,13 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
                             }
                             child.frustumCulled = true;
 
-                            // Optimización de Back-Face Culling 
+                            // Culling
                             const nombreHijo = child.name.toLowerCase();
                             const nombreArchivo = item.archivo.toLowerCase();
                             const esPlanoSinGrosor = nombreHijo.includes('sakura') ||
-                                nombreHijo.includes('hoja') ||
+                                /*nombreHijo.includes('hoja') ||
                                 nombreHijo.includes('leaf') ||
-                                nombreHijo.includes('leaves') ||
+                                nombreHijo.includes('leaves') ||*/
                                 nombreHijo.includes('follaje') ||
                                 nombreHijo.includes('muñeca') ||
                                 nombreHijo.includes('muneca') ||
@@ -415,19 +503,71 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
                                 });
                             }
 
-                            // Configurar sombras óptimas
-                            const esCriticoParaSombras = nombreHijo.includes('jugador') ||
+                            // Configurar sombras
+                            const esCastShadow =
+                                nombreHijo.includes('jugador') ||
                                 nombreHijo.includes('player') ||
                                 nombreHijo.includes('estatua') ||
                                 nombreHijo.includes('torii') ||
-                                nombreHijo.includes('puente');
+                                nombreHijo.includes('puente') ||
+                                nombreHijo.includes('arbol') ||
+                                nombreHijo.includes('tree') ||
+                                nombreHijo.includes('cerezo') ||
+                                nombreHijo.includes('bonsai') ||
+                                nombreHijo.includes('farola') ||
+                                nombreHijo.includes('lampara') ||
+                                nombreHijo.includes('lantern') ||
+                                nombreHijo.includes('banca') ||
+                                nombreHijo.includes('bench') ||
+                                nombreHijo.includes('muro') ||
+                                nombreHijo.includes('fence') ||
+                                nombreHijo.includes('valla') ||
+                                nombreHijo.includes('piedra') ||
+                                nombreHijo.includes('stone') ||
+                                nombreHijo.includes('roca') ||
+                                nombreHijo.includes('rock') ||
+                                nombreHijo.includes('columna') ||
+                                nombreHijo.includes('column') ||
+                                nombreArchivo.includes('torii') ||
+                                nombreArchivo.includes('arbol') ||
+                                nombreArchivo.includes('tree') ||
+                                nombreArchivo.includes('cerezo') ||
+                                nombreArchivo.includes('bonsai') ||
+                                nombreArchivo.includes('farola') ||
+                                nombreArchivo.includes('lampara') ||
+                                nombreArchivo.includes('lantern') ||
+                                nombreArchivo.includes('banca') ||
+                                nombreArchivo.includes('bench') ||
+                                nombreArchivo.includes('estatua') ||
+                                nombreArchivo.includes('puente') ||
+                                nombreArchivo.includes('bamboo') ||
+                                nombreArchivo.includes('bambu');
 
-                            child.castShadow = esCriticoParaSombras;
-                            child.receiveShadow = !esCriticoParaSombras; // Suelo, farolas lejanas y paredes solo reciben o no proyectan
+                            // Vegetación pequeña - no proyecta sombra
+                            const esVegetacionPequeno =
+                                nombreHijo.includes('sakura') ||
+                                nombreHijo.includes('follaje') ||
+                                nombreHijo.includes('petalo') ||
+                                nombreHijo.includes('pasto') ||
+                                nombreHijo.includes('grass') ||
+                                nombreHijo.includes('cesped');
+
+                            child.castShadow = esCastShadow && !esVegetacionPequeno;
+
+                            // Suelo, plazas y paredes reciben sombras
+                            const esSuelo =
+                                nombreHijo.includes('suelo') ||
+                                nombreHijo.includes('piso') ||
+                                nombreHijo.includes('floor') ||
+                                nombreHijo.includes('ground') ||
+                                nombreArchivo.includes('plaza') ||
+                                nombreArchivo.includes('suelo');
+
+                            child.receiveShadow = true; // Todos reciben sombras con MeshPhongMaterial
                         }
                     });
 
-                    // Detectar si se procesa el modelo de colisiones
+                    // Modelo de colisiones
                     const esModeloCollisions = item.archivo.toLowerCase().includes('collisions') || item.archivo.toLowerCase().includes('colisiones');
 
                     if (esModeloCollisions) {
@@ -527,7 +667,7 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
                         });
                     }
 
-                    //  Aplicar shader Phong solo a mallas estáticas
+                    // Aplicar MeshPhongMaterial con farolas
                     aplicarMaterialPhong(clon);
 
                     const { posicion, rotacion, rotacionY, escala } = instancia;

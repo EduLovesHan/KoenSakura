@@ -24,52 +24,52 @@ export const configuracionFarolas = {
 export function registrarMaterialEmisivo(material) {
     if (material && !materialesEmisivos.includes(material)) {
         materialesEmisivos.push(material);
-        // Establecer el estado inicial basándose en si es de noche o no
-        material.emissiveIntensity = !esDeDia ? 5.0 : 0.0;
+        material.emissiveIntensity = !esDeDia ? 10.0 : 0.0;
     }
 }
 
 // Instanciar las luces en la escena
 export function inicializarLighting(scene) {
-    // Luz ambiental inicial 
+    // Luz ambiental inicial
     ambientLight = new THREE.AmbientLight();
-    ambientLight.color.setRGB((0xd8 + 0.001) / 255, (0xe2 + 0.001) / 255, (0xf0 + 0.001) / 255);
-    ambientLight.intensity = 0.6;
+    ambientLight.color.setRGB(0.90, 0.92, 0.98);
+    ambientLight.intensity = 0.35;
     scene.add(ambientLight);
 
     // Luz direccional inicial
     directionalLight = new THREE.DirectionalLight();
-    directionalLight.color.setRGB(1.0, (0xf5 + 0.001) / 255, (0xe6 + 0.001) / 255);
-    directionalLight.intensity = 1.5;
+    directionalLight.color.setRGB(1.0, 0.95, 0.85);
+    directionalLight.intensity = 1.2;
     directionalLight.position.set(10, 20, 10);
     directionalLight.castShadow = true;
 
-    // Configurar cámara de sombras optimizada
-    directionalLight.shadow.camera.left = -120;
-    directionalLight.shadow.camera.right = 120;
-    directionalLight.shadow.camera.top = 120;
-    directionalLight.shadow.camera.bottom = -120;
+    // Configuracion de cámara de sombras
+    directionalLight.shadow.camera.left = -80;
+    directionalLight.shadow.camera.right = 80;
+    directionalLight.shadow.camera.top = 80;
+    directionalLight.shadow.camera.bottom = -80;
     directionalLight.shadow.camera.near = 0.5;
     directionalLight.shadow.camera.far = 150;
     directionalLight.shadow.bias = -0.0005;
+    directionalLight.shadow.normalBias = 0.02;
 
     // Limitar resolución de sombras en móviles
     const esMovil = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || ('ontouchstart' in window);
-    directionalLight.shadow.mapSize.width = esMovil ? 256 : 1024;
-    directionalLight.shadow.mapSize.height = esMovil ? 256 : 1024;
+    directionalLight.shadow.mapSize.width = esMovil ? 256 : 2048;
+    directionalLight.shadow.mapSize.height = esMovil ? 256 : 2048;
 
     scene.add(directionalLight);
 
-    // Inicializar PointLights para farolas (apagadas por defecto)
+    // Inicializar PointLights para farolas
     for (let i = 0; i < NUM_LUCES_POOL; i++) {
-        const luz = new THREE.PointLight(0xffaa00, 0, 20); // color cálido, intensidad 0, distancia 20
-        luz.position.set(0, -100, 0); // fuera de vista hasta asignación
+        const luz = new THREE.PointLight(0xffaa00, 0, 20, 0);
+        luz.position.set(0, -100, 0);
         scene.add(luz);
         lucesPool.push(luz);
     }
 }
 
-// Función auxiliar para refrescar el panel lil-gui de manera recursiva
+// Función para refrescar panel lil-gui
 function refrescarGUI() {
     const gui = obtenerDebugGUI();
     if (gui) {
@@ -221,22 +221,22 @@ export function cambiarClimaSuave(esDeDiaTarget, skybox, duracion = 3.5) {
 
     // Configuración exacta para los modos dia-noche
     const targetSolColor = {
-        r: esDeDiaTarget ? 1.0 : (0x1e + 0.001) / 255,
-        g: esDeDiaTarget ? (0xf5 + 0.001) / 255 : (0x23 + 0.001) / 255,
-        b: esDeDiaTarget ? (0xe6 + 0.001) / 255 : (0x33 + 0.001) / 255
+        r: esDeDiaTarget ? 1.0 : 0.25,
+        g: esDeDiaTarget ? 0.95 : 0.30,
+        b: esDeDiaTarget ? 0.85 : 0.45
     };
     const targetAmbientColor = {
-        r: esDeDiaTarget ? (0xd8 + 0.001) / 255 : (0x1e + 0.001) / 255,
-        g: esDeDiaTarget ? (0xe2 + 0.001) / 255 : (0x23 + 0.001) / 255,
-        b: esDeDiaTarget ? (0xf0 + 0.001) / 255 : (0x33 + 0.001) / 255
+        r: esDeDiaTarget ? 0.90 : 0.18,
+        g: esDeDiaTarget ? 0.92 : 0.22,
+        b: esDeDiaTarget ? 0.98 : 0.38
     };
-    const targetSolIntensity = esDeDiaTarget ? 1.5 : 2.0;
-    const targetAmbientIntensity = esDeDiaTarget ? 0.6 : 2.0;
-    const targetSolPosition = { x: 10, y: 20, z: 10 }; // se mantiene igual para ambos 
+    const targetSolIntensity = esDeDiaTarget ? 1.2 : 0.6;
+    const targetAmbientIntensity = esDeDiaTarget ? 0.35 : 2.1;
+    const targetSolPosition = { x: 10, y: 20, z: 10 };
     const targetShininess = 30.0;
     const targetSpecularIntensity = 0.0;
     const targetSkyboxOpacity = esDeDiaTarget ? 0.0 : 1.0;
-    const targetEmissiveIntensity = esDeDiaTarget ? 0.0 : 5.0;
+    const targetEmissiveIntensity = esDeDiaTarget ? 0.0 : 10.0;
 
     // Animar Luz Ambiental
     gsap.to(ambientLight, {
@@ -408,7 +408,9 @@ broker.on('modeloCargado', ({ modelo, datosJSON }) => {
             const mats = Array.isArray(child.material) ? child.material : [child.material];
             mats.forEach((mat) => {
                 const { emissive } = mat;
-                if (emissive && (emissive.r > 0 || emissive.g > 0 || emissive.b > 0)) {
+                const tieneEmisivoOMap = mat.emissiveMap ||
+                    (emissive && (emissive.r > 0 || emissive.g > 0 || emissive.b > 0));
+                if (tieneEmisivoOMap) {
                     registrarMaterialEmisivo(mat);
                 }
             });

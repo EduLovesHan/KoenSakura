@@ -18,7 +18,12 @@ export function inicializarengine() {
         powerPreference: "high-performance" // Fuerza el uso de la GPU dedicada si existe
     });
     renderizador.shadowMap.enabled = true;
-    renderizador.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderizador.shadowMap.type = THREE.PCFShadowMap;
+
+    // Tone mapping y corrección de espacio de color para colores naturales
+    renderizador.toneMapping = THREE.ACESFilmicToneMapping;
+    renderizador.toneMappingExposure = 1.0;
+    renderizador.outputColorSpace = THREE.SRGBColorSpace;
 
     // Limita a un máximo de 1.5 pixel ratio en PC y 1.0 en móvil para compensar el antialias
     renderizador.setPixelRatio(esMovil ? 1.0 : Math.min(window.devicePixelRatio, 1.5));

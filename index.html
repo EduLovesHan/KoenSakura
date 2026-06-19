@@ -50,19 +50,42 @@
             <img src="assets/textures/others/sakura.png" class="icono-sakura" alt="Abrir menú">
         </button>
 
-        <div id="ui-interaccion" class="oculto" data-i18n="ui_interactuar">
-            Interactuar
+        <div id="ui-interaccion" class="oculto">
+            <span class="interaccion-tecla">E</span>
+            <span data-i18n="ui_interactuar">Interactuar</span>
         </div>
 
         <div id="modal-dialogo" class="oculto">
-            <div class="dialogo-contenido">
-                <h3 id="dialogo-titulo">Letrero</h3>
-                <p id="dialogo-texto">Aquí va la información del modelo...</p>
-                <div id="dialogo-opciones-musica" class="oculto">
-                    <button class="btn-musica" data-song="assets/audio/MusicaFondo.mp3" data-i18n="musica_defecto">Defecto</button>
-                    <button class="btn-musica" data-song="assets/audio/arirang.mp3">Arirang</button>
-                    <button class="btn-musica" data-song="assets/audio/sakura.mp3">Sakura</button>
+            <div class="dialogo-barra">
+                <div class="dialogo-nombre-contenedor">
+                    <span class="dialogo-decorador">━━</span>
+                    <span id="dialogo-titulo" class="dialogo-nombre">Letrero</span>
+                    <span class="dialogo-decorador">━━</span>
                 </div>
+                <p id="dialogo-texto" class="dialogo-cuerpo">Aquí va la información del modelo...</p>
+                <div class="dialogo-indicador">
+                    <span class="dialogo-flecha">▶</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel-musica" class="oculto">
+            <div class="panel-musica-contenido">
+                <div class="panel-musica-titulo">
+                    <span data-i18n="musica_seleccionar">Seleccionar melodía</span>
+                </div>
+                <button class="btn-musica" data-song="assets/audio/MusicaFondo.mp3">
+                    <span class="musica-icono">♫</span>
+                    <span data-i18n="musica_defecto">Defecto</span>
+                </button>
+                <button class="btn-musica" data-song="assets/audio/arirang.mp3">
+                    <span class="musica-icono">♫</span>
+                    <span>Arirang</span>
+                </button>
+                <button class="btn-musica" data-song="assets/audio/sakura.mp3">
+                    <span class="musica-icono">♫</span>
+                    <span>Sakura</span>
+                </button>
             </div>
         </div>
 
@@ -76,7 +99,6 @@
             <div class="menu-scroll-container">
                 <div class="contenedor-botones-grid">
                     <button class="btn-opcion" data-tab="general" data-i18n="btn_general">General</button>
-                    <button class="btn-opcion" data-tab="ayuda" data-i18n="btn_ayuda">Ayuda</button>
                     <button class="btn-opcion" data-tab="controls" data-i18n="btn_controles">Controles</button>
                     <button class="btn-opcion" data-tab="ajustes" data-i18n="btn_ajustes">Ajustes</button>
                     <button class="btn-opcion" data-tab="creditos" data-i18n="btn_creditos">Créditos</button>
@@ -84,10 +106,6 @@
 
                 <div id="tab-general" class="tab-contenido oculto">
                     <p data-i18n="texto_general">Una experiencia web interactiva en 3D desarrollada como proyecto final de Programación Gráfica. Consiste en un recorrido virtual inmersivo en primera persona a través de una plaza con estética japonesa al estilo low-poly.</p>
-                </div>
-
-                <div id="tab-ayuda" class="tab-contenido oculto">
-                    <p data-i18n="texto_ayuda">En construcción</p>
                 </div>
 
                 <div id="tab-controls" class="tab-contenido oculto">
@@ -180,6 +198,15 @@
                                     </label>
                                 </div>
                             </div>
+                            <div class="control-grupo" style="margin-bottom: 15px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 10px;">
+                                    <span data-i18n="ajustes_fps" style="font-size: 16px;">Mostrar FPS</span>
+                                    <label style="margin: 0; display: flex; align-items: center; white-space: nowrap;">
+                                        <input type="checkbox" id="fps-checkbox" style="margin-right: 8px;">
+                                        <span data-i18n="btn_activar">Activar</span>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="control-slide" data-index="2">
@@ -203,7 +230,7 @@
                 </div>
 
                 <div id="tab-creditos" class="tab-contenido oculto">
-                    <p><strong data-i18n="texto_creditos_titulo">Desarrollado por:</strong> ...</p>
+                    <p><strong data-i18n="texto_creditos_titulo">Desarrollado por:</strong> María Altamirano y Javiera Molina</p>
                 </div>
             </div>
         </div>

@@ -15,7 +15,96 @@
       { "posicion": [-25, 0, 95], "escala": 1.5, "rotacion": [0, 1.52, 0] },
       { "posicion": [-27, 0, 37], "escala": 1.5, "rotacion": [0, -1.52, 0] },
       { "posicion": [26, 0, 35], "escala": 1.5, "rotacion": [0, -1.52, 0] },
-      { "posicion": [35, 0, 95], "escala": 1.5, "rotacion": [0, 1.52, 0] }
+      { "posicion": [35, 0, 95], "escala": 1.5, "rotacion": [0, 1.52, 0] },
+      { "posicion": [35, 0, 125], "escala": 1.5, "rotacion": [0, -1.52, 0] },
+      { "posicion": [13, 0, 187], "escala": 1.5, "rotacion": [0, 1.52, 0] }
+      
+    ]
+  },
+    {
+    "archivo": "assets/models/stand.glb",
+    "interactivo": {
+      "titulo": {
+          "es": "Zonas del Parque",
+          "en": "Park Zones"
+      },
+      "texto": {
+        "es": "¡Embárcate en una nueva aventura en cada una de las zonas que el parque tiene por ofrecer!",
+        "en": "Embark on a new adventure in each of the areas the park has to offer!"
+      },
+      "distancia": 3
+    },
+    "instancias": [
+      { "posicion": [0,0,112.5], "escala": 3, "rotacion": [0, -3.14, 0] }
+      
+    ]
+  },
+   {
+    "archivo": "assets/models/fresco.glb",
+    "instancias": [
+      { "posicion": [-77, 3, 172], "escala": 0.35, "rotacion": [0, 0, 0] }
+    ]
+  },
+    {
+    "archivo": "assets/models/naruto1.glb",
+    "instancias": [
+      { "posicion": [-93, 2.5, 136.5], "escala": 10, "rotacion": [0, 0, 0] }
+    ]
+  },
+    {
+    "archivo": "assets/models/monedero.glb",
+    "interactivo": {
+      "titulo": {
+          "es": "Monedero",
+          "en": "Wallet"
+      },
+      "texto": {
+        "es": "Alguien debió haberlo olvidado...",
+        "en": "Someone must have forgotten it..."
+      },
+      "distancia": 3
+    },
+    "instancias": [
+     { "posicion": [-96.5, 2.5, 137], "escala": 2, "rotacion": [0, 0, 0] }
+ 
+    ]
+  },
+    {
+    "archivo": "assets/models/naruto2.glb",
+    "instancias": [
+      { "posicion": [-100, 2.6, 136.5], "escala": 9, "rotacion": [0, 0, 0] }
+    ]
+  },
+   {
+    "archivo": "assets/models/ramen.glb",
+    "instancias": [
+      { "posicion": [-75, 2.8, 172], "escala": 3.2, "rotacion": [0, -1.52, 0] }
+    ]
+  },
+   {
+    "archivo": "assets/models/guoba.glb",
+    "instancias": [
+      { "posicion": [-80, 0, 161.5], "escala": 1, "rotacion": [0, 1.52, 0] }
+    ]
+  },
+{
+    "archivo": "assets/models/ichirakuRamen.glb",
+    "instancias": [
+      {
+        "posicion": [ -96, 0, 133],
+        "escala": 38,
+        "interactivo": {
+          "titulo": {
+            "es": "Ichiraku Ramen",
+            "en": "Ichiraku Ramen"
+          },
+          "texto": {
+            "es": "El puesto de ramen favorito de Naruto.",
+            "en": "Naruto's favorite ramen stand."
+          },
+          "distancia": 12
+        }
+      }
     ]
   },
   {
@@ -44,6 +133,17 @@
   },
   {
     "archivo": "assets/models/pisoHiroshima.glb",
+    "interactivo": {
+      "titulo": {
+          "es": "Bombardeos de Hiroshima y Nagazaki",
+          "en": "Hiroshima and Nagazaki Bombings"
+      },
+      "texto": {
+        "es": "Ambas explosiones causaron la muerte de más de 200.000 personas. Provocaron la rendición de Japón lo que dió fin a la Segunda Guerra Mundial",
+        "en": "Both explosions caused the death of more than 200,000 people. They caused Japan's surrender, which ended World War II"
+      },
+      "distancia": 5
+    },
     "instancias": [
       { "posicion": [-77, 0.5, 52], "escala": 1, "rotacion": [0, -3.14, 0] }
     ]
@@ -78,7 +178,16 @@
       { "posicion": [-105, 6.7, 60], "escala": 2, "rotacion": [0, 3.14, 0] },
       { "posicion": [-110, 6.7, 60], "escala": 2, "rotacion": [0, 3.14, 0] },
       { "posicion": [-105, 6.8, 80], "escala": 2, "rotacion": [0, 3.14, 0] },
-      { "posicion": [-110, 6.8, 80], "escala": 2, "rotacion": [0, 3.14, 0] }
+      { "posicion": [-110, 6.8, 80], "escala": 2, "rotacion": [0, 3.14, 0] },
+
+      { "posicion": [-80, 6.7, 175], "escala": 2, "rotacion": [0, 3.14, 0] },
+      { "posicion": [-74, 6.7, 175], "escala": 2, "rotacion": [0, 3.14, 0] },
+      { "posicion": [-67, 6.7, 175], "escala": 2, "rotacion": [0, 3.14, 0] },
+
+      { "posicion": [-98, 6.7, 135], "escala": 2, "rotacion": [0, 3.14, 0] },
+      { "posicion": [-92, 6.7, 135], "escala": 2, "rotacion": [0, 3.14, 0] }
+
+
     ]
   },
   {
@@ -111,7 +220,10 @@
     "farolaDistancia": 25,
     "instancias": [
       { "posicion": [-88, 1.5, 92.5], "escala": 0.5, "rotacion": [0, 3.14, 0] },
-      { "posicion": [-60, 1.5, 92.5], "escala": 0.5, "rotacion": [0, 3.14, 0] }
+      { "posicion": [-60, 1.5, 92.5], "escala": 0.5, "rotacion": [0, 3.14, 0] },
+      { "posicion": [83, 1.5, 187], "escala": 0.5, "rotacion": [0, 3.14, 0] },
+      { "posicion": [83, 1.5, 172.5], "escala": 0.5, "rotacion": [0, 3.14, 0] }
+      
     ]
   },
   {
@@ -213,7 +325,7 @@
             "es": "Son típicos de los templos budistas y se extendieron con esta religión a lo largo del periodo Nara. Decoran escaleras, jardines y paseos para guiar el camino de los espíritus y dioses y que no se pierdan.",
             "en": "They are typical of Buddhist temples and spread with this religion throughout the Nara period. They decorate stairs, gardens, and pathways to guide the path of spirits and gods so they do not get lost."
           },
-          "distancia": 4
+          "distancia": 6
         }
       },
       { "posicion": [53.5, 0, 183], "escala": 6, "rotacion": [0, 3.14, 0] },
@@ -244,8 +356,10 @@
 
       { "posicion": [-65, 0, 120], "escala": 3.5, "rotacion": [0, 3.14, 0] },
       { "posicion": [-40, 0, 120], "escala": 3.5, "rotacion": [0, 3.14, 0] },
-      
       { "posicion": [-90, 0, 120], "escala": 3.5, "rotacion": [0, 3.14, 0] }
+      
+
+      
     ],
     "esFarola": true,
     "farolaColor": "#F3DC91",
@@ -324,8 +438,7 @@
     "archivo": "assets/models/letreroBasico.glb",
     "instancias": [
       {
-        "posicion": [70, 0, 45],
-        "rotacion": [0, 3.141593, 0],
+        "posicion": [70, 0, 45],"rotacion": [0, 3.141593, 0],"escala": 0.8,
         "interactivo": {
           "titulo": {
             "es": "Monte Fuji",
@@ -334,12 +447,12 @@
           "texto": {
             "es": "Es la montaña más alta de Japón. En el pasado, la ascensión al monte Fuji era considerada una peregrinación religiosa para honrar al espíritu de uno de los picos más bonitos e icónicos del mundo..",
             "en": "It is the highest mountain in Japan. In the past, climbing Mount Fuji was considered a religious pilgrimage to honor the spirit of one of the most beautiful and iconic peaks in the world."
-          }
+          },
+          "distancia": 6
         }
       },
         {
-        "posicion": [-95, 0, 170],
-        "rotacion": [0, -4.66, 0],
+        "posicion": [-95, 0, 170],"rotacion": [0, -4.66, 0],"escala": 0.8,
         "interactivo": {
           "titulo": {
             "es": "Estacion de tren Shibuya",
@@ -349,8 +462,36 @@
             "es": "La estacion de  tren Shibuya es una de las estaciones de tren más transitadas del mundo.",
             "en": "Shibuya train station is one of the busiest train stations in the world."
           },
+          "distancia": 6,
         "audio": "assets/audio/tren.mp3",
         "delayAudio": 200
+        }
+      },
+      {
+        "posicion": [-40, 0, 60],"rotacion": [0, 6.28, 0], "escala": 0.8, "interactivo": {
+          "titulo": {
+            "es": "Zona de Museo Tradicional",
+            "en": "Traditional Museum Zone"
+          },
+          "texto": {
+            "es": "Una zona llena de historia y monumentos únicos.",
+            "en": "A zone full of history and unique monuments."
+          },
+          "distancia": 6
+        }
+      },
+      {
+        "posicion": [42, 0, 165],"rotacion": [0, 3.14, 0],"escala": 0.8,
+        "interactivo": {
+          "titulo": {
+            "es": "Zona del Estanque",
+            "en": "Pond Zone"
+          },
+          "texto": {
+            "es": "Disfruta de la tranquilidad de este hermoso estanque con peces koi.",
+            "en": "Enjoy the tranquility of this beautiful pond with koi fish."
+          },
+          "distancia": 6
         }
       }
     ]
@@ -361,8 +502,8 @@
     "colisionPadding": [1.5, 1.5],
     "farolaColor": "#FFC354",
     "farolaAltura": 6,
-    "farolaIntensidad": 3,
-    "farolaDistancia": 25,
+    "farolaIntensidad": 3.5,
+    "farolaDistancia": 30,
     "instancias": [
       { "posicion": [8, -1, 35] },
       { "posicion": [-8, -1, 35] },
@@ -516,70 +657,109 @@
   {
     "archivo": "assets/models/gatoNegroMov.glb",
     "tieneanimations": true,
+    "hitboxEscala": [2, 5, 1.5],
+    "interactivo": {
+      "titulo": {
+        "es": "Gato negro",
+        "en": "Black Cat"
+      },
+      "texto": {
+        "es": "Miau",
+        "en": "Meow"
+      },
+      "distancia": 5,
+      "audio": "assets/audio/gato.mp3",
+      "delayAudio": 200
+    },
     "instancias": [
       {
         "posicion": [-95, -0.3, 88],
         "escala": 0.1,
-        "hitboxEscala": [2, 5, 1.5],
-        "interactivo": {
-          "titulo": {
-            "es": "Gato negro",
-            "en": "Black Cat"
-          },
-          "texto": {
-            "es": "Miau",
-            "en": "Meow"
-          },
-          "distancia": 5,
-          "audio": "assets/audio/gato.mp3",
-          "delayAudio": 200
-        }
+        "rotacion": [0, 4.66, 0]
+      },
+       {
+        "posicion": [-15, -0.3, 35],
+        "escala": 0.1,
+        "rotacion": [0, 4.66, 0]
+      },
+       {
+        "posicion": [50, -0.3, 35],
+        "escala": 0.1,
+        "rotacion": [0, 4.66, 0]
       }
     ]
   },
   {
     "archivo": "assets/models/gatoGrisMov.glb",
     "tieneanimations": true,
-    "animacionInicial": 4,
+    "hitboxEscala": [2, 5, 1.5],
+    "interactivo": {
+      "titulo": {
+        "es": "Gato gris",
+        "en": "Gray Cat"
+      },
+      "texto": {
+        "es": "Miau",
+        "en": "Meow"
+      },
+      "distancia": 5,
+      "audio": "assets/audio/gato.mp3",
+      "delayAudio": 200
+    },
     "instancias": [
       {
         "posicion": [-48.5, -0.3, 57],
         "escala": 1.5,
-        "hitboxEscala": [2, 5, 1.5],
-        "interactivo": {
-          "titulo": {
-            "es": "Gato gris",
-            "en": "Gray Cat"
-          },
-          "texto": {
-            "es": "Miau",
-            "en": "Meow"
-          },
-          "distancia": 5,
-           "audio": "assets/audio/gato.mp3",
-          "delayAudio": 200
-        }
+        "animacionInicial": 4
       },
       {
         "posicion": [-50, -0.3, 85],
         "rotacion": [0, -1.57, 0],
         "escala": 1.5,
-        "animacionInicial": 6,
-        "hitboxEscala": [2, 5, 1.5],
-        "interactivo": {
-          "titulo": {
-            "es": "Gato gris",
-            "en": "Gray Cat"
-          },
-          "texto": {
-            "es": "Miau",
-            "en": "Meow"
-          },
-          "distancia": 5,
-           "audio": "assets/audio/gato.mp3",
-          "delayAudio": 200
-        }
+        "animacionInicial": 6
+      },
+      { 
+        "posicion": [30,  -0.3,95], 
+        "rotacion": [0, 3.14, 0], 
+        "escala": 1.5 ,
+        "animacionInicial": 4
+      },
+      
+      { 
+        "posicion": [70,  -0.3,80], 
+        "rotacion": [0, 4.66, 0], 
+        "escala": 1.5 ,
+        "animacionInicial": 3
+      },
+      
+      { 
+        "posicion": [50,  -0.3,130], 
+        "rotacion": [0, 3.14, 0], 
+        "escala": 1.5 ,
+        "animacionInicial": 2
+      },
+      
+      { 
+        "posicion": [40, -0.3,170], 
+        "rotacion": [0, 4.66, 0], 
+        "escala": 1.5 ,
+        "animacionInicial": 3
+      },
+      
+      { 
+        "posicion": [-25, -0.3,125], 
+        "rotacion": [0, 3.14, 0], 
+        "escala": 1.5 ,
+        "animacionInicial": 5
+      },
+      
+      { 
+        "posicion": [-30, -0.3,95], 
+        "rotacion": [0, 3.14, 0], 
+        "escala": 1.5 ,
+        "animacionInicial": 1
       }
+
     ]
   },
   {
@@ -714,7 +894,7 @@
     "instancias": [
       {
         "posicion": [-115, 0, 150],
-        "escala": 1.25,
+        "escala": 1.2,
         "rotacion": [0, -4.66, 0],
         "interactivo": {
           "titulo": {
@@ -738,7 +918,7 @@
       {
         "posicion": [-50, 0, 175],
         "escala": 5,
-        "rotacion": [0, -4.66, 0],
+        "rotacion": [0, -6.18, 0],
         "interactivo": {
           "titulo": {
             "es": "Zona de Comida",

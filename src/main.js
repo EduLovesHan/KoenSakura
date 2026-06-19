@@ -105,10 +105,11 @@ const { scene, camara, renderizador } = inicializarengine();
 const objetosColision = [];
 const timer = new THREE.Timer();
 
-// Inicializar el panel de FPS (Stats)
+// Inicializar el panel de FPS
 const stats = new Stats();
-stats.showPanel(0); // 0: fps
+stats.showPanel(0);
 stats.dom.style.zIndex = '10000';
+stats.dom.style.display = 'none';
 document.body.appendChild(stats.dom);
 
 // Configuración del audio y controles de movimiento
@@ -141,6 +142,14 @@ cargarEscenario(scene, objetosColision, loadingManager);
 // Configuración de la UI y las interacciones
 inicializarinteractions();
 inicializarUI(reproducirClick);
+
+// Listener para el checkbox de FPS
+const fpsCheckbox = document.getElementById('fps-checkbox');
+if (fpsCheckbox) {
+    fpsCheckbox.addEventListener('change', () => {
+        stats.dom.style.display = fpsCheckbox.checked ? 'block' : 'none';
+    });
+}
 
 // Bucle de renderizado
 function animar(timestamp) {

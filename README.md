@@ -114,7 +114,8 @@ npm run build
 
 ## Demo (Video Presentation)
 
-Watch the full walkthrough and explanation of the project here:
+[PC version](https://youtu.be/ebkxyZC6B1o)
+[Mobile version](https://youtu.be/SdE6xIHILms)
 
 ## License
 

@@ -9,7 +9,8 @@ export function inicializarengine() {
     const scene = new THREE.Scene();
 
     // Crear Cámara
-    const camara = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const farCamera = esMovil ? 300 : 1000;
+    const camara = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, farCamera);
     camara.position.set(0.8, 3.5, 20);
 
     // Crear Renderizador

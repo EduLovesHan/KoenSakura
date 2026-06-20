@@ -142,6 +142,7 @@ function construirUniformsFarolas() {
         uPointLightDistance5: phongUniformsGlobales.uPointLightDistance5,
     };
 }
+const materialCache = new Map();
 
 function crearMaterialPhong(originalMaterial, nombreMalla = '', nombreModelo = '') {
     // Extraer propiedades del material GLTF
@@ -250,6 +251,13 @@ function crearMaterialPhong(originalMaterial, nombreMalla = '', nombreModelo = '
         ? blending
         : THREE.NormalBlending;
 
+    // Generar la clave de caché única basada en los parámetros que definen el material
+    const cacheKey = `${texturaOriginal ? texturaOriginal.uuid : 'nomap'}_${colorOriginal.getHexString()}_${opacidadFinal.toFixed(3)}_${esTransparente?'1':'0'}_${alphaTestFinal.toFixed(3)}_${depthWriteFinal?'1':'0'}_${sideFinal}_${blendingFinal}_${esPiso?'floor':'object'}`;
+
+    if (materialCache.has(cacheKey)) {
+        return materialCache.get(cacheKey);
+    }
+
     // MeshPhongMaterial
     const nuevoMaterial = new THREE.MeshPhongMaterial({
         color: colorOriginal,
@@ -265,21 +273,6 @@ function crearMaterialPhong(originalMaterial, nombreMalla = '', nombreModelo = '
         opacity: opacidadFinal,
     });
 
-    // Farolas
-    // nuevoMaterial.onBeforeCompile = (shader) => {
-    //     Object.assign(shader.uniforms, construirUniformsFarolas());
-
-    //     shader.fragmentShader = shader.fragmentShader.replace(
-    //         '#include <lights_phong_pars_fragment>',
-    //         '#include <lights_phong_pars_fragment>\n' + FAROLAS_GLSL_DECLARATIONS
-    //     );
-
-    //     shader.fragmentShader = shader.fragmentShader.replace(
-    //         '#include <output_fragment>',
-    //         FAROLAS_GLSL_CONTRIBUTION + '\n    #include <output_fragment>'
-    //     );
-    // };
-
     // Distinguir variantes de compilación
     nuevoMaterial.customProgramCacheKey = () => {
         const t = nuevoMaterial.transparent ? 't' : 'o';
@@ -289,6 +282,7 @@ function crearMaterialPhong(originalMaterial, nombreMalla = '', nombreModelo = '
         return `farolas_v1_${t}_${a}_${s}_${m}`;
     };
 
+    materialCache.set(cacheKey, nuevoMaterial);
     return nuevoMaterial;
 }
 
@@ -384,7 +378,271 @@ function crearGLTFLoader(mgr = null) {
 }
 
 
-export async function cargarEscenario(scene, objetosColision, loadingManager = null) {
+
+// Estados globales para la carga
+let globalScene = null;
+let globalObjetosColision = null;
+let globalLoadingManager = null;
+let globalRenderizador = null;
+let globalCamara = null;
+let contadorPrincipal = 0;
+
+const MAX_REINTENTOS = 2;
+const TIMEOUT_MS = window.esMovil ? 30000 : 45000;
+
+// Estados de zonas para carga por proximidad
+const zonasCargando = new Set();
+const zonasCargadas = new Set();
+let zonasPendientes = null;
+let totalZonasSecundarias = 0;
+let zonasCompletadasCount = 0;
+let loaderBg = null;
+
+async function cargarModeloConRetry(item, loader, esTrackeado, intento = 0) {
+    try {
+        await cargarModelo(item, loader, esTrackeado);
+    } catch (err) {
+        if (intento < MAX_REINTENTOS) {
+            const espera = Math.pow(2, intento) * 1000; // 1s, 2s
+            console.warn(`[ModelLoader] Reintentando ${item.archivo} (intento ${intento + 1}/${MAX_REINTENTOS}) en ${espera}ms...`);
+            await new Promise(r => setTimeout(r, espera));
+            await cargarModeloConRetry(item, loader, esTrackeado, intento + 1);
+        } else {
+            console.error(`[ModelLoader] Falló definitivamente ${item.archivo} tras ${MAX_REINTENTOS} reintentos`);
+            // Liberar los items del loadingManager para no bloquear la barra
+            if (esTrackeado && globalLoadingManager) {
+                const n = item.instancias?.length ?? 0;
+                for (let i = 0; i < n; i++) {
+                    contadorPrincipal++;
+                    globalLoadingManager.itemEnd(`ip_${contadorPrincipal}`);
+                }
+            }
+        }
+    }
+}
+
+async function cargarModelo(item, loader, esTrackeado) {
+    const gltfPromise = loader.loadAsync(item.archivo);
+    
+    // Timeout para evitar que un modelo bloquee todo
+    const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error(`Timeout cargando ${item.archivo}`)), TIMEOUT_MS)
+    );
+
+    const gltf = await Promise.race([gltfPromise, timeoutPromise]);
+    const modeloBase = gltf.scene;
+    modeloBase.name = item.archivo;
+
+    const usarSkeletonUtils = tieneSkinnedMesh(modeloBase);
+    const na = item.archivo.toLowerCase();
+    const esColision = na.includes('collisions') || na.includes('colisiones');
+
+    if (!esColision) {
+        // Aplicar materiales Phong con farolas al modelo base
+        aplicarMaterialPhong(modeloBase);
+
+        // Configurar culling, sombras y propiedades de renderizado
+        modeloBase.traverse((child) => {
+            if (!child.isMesh) return;
+
+            child.frustumCulled = true;
+
+            const nh = child.name.toLowerCase();
+            const na = item.archivo.toLowerCase();
+
+            // lógica de DoubleSide
+            const esDoubleSide =
+                nh.includes('sakura') || na.includes('bandera') || nh.includes('bandera') ||
+                nh.includes('follaje') || nh.includes('flor') || nh.includes('petalo') ||
+                nh.includes('muñeca') || nh.includes('muneca') || nh.includes('agua') ||
+                nh.includes('museo') || nh.includes('pared') || nh.includes('wall') ||
+                nh.includes('techo') || nh.includes('roof') || nh.includes('ceiling') ||
+                nh.includes('columna') || nh.includes('column') || nh.includes('puerta') ||
+                nh.includes('door') || nh.includes('cristal') || nh.includes('glass') ||
+                nh.includes('vidrio') || nh.includes('marco') || nh.includes('ventana') ||
+                nh.includes('window') || na.includes('museo') ||
+                nh.includes('casa') || nh.includes('casita') || nh.includes('tradicional') ||
+                nh.includes('stand') || na.includes('stand') || nh.includes('puesto') ||
+                nh.includes('tienda') || nh.includes('mesa') || nh.includes('table') ||
+                nh.includes('mostrador') || nh.includes('puestito');
+
+            if (child.material) {
+                const mats = Array.isArray(child.material) ? child.material : [child.material];
+                mats.forEach(mat => {
+                    if (!mat) return;
+                    mat.side = esDoubleSide ? THREE.DoubleSide : THREE.FrontSide;
+
+                    const esSolido =
+                        nh.includes('casa') || nh.includes('casita') || nh.includes('tradicional') ||
+                        nh.includes('pared') || nh.includes('wall') || nh.includes('techo') ||
+                        nh.includes('roof') || nh.includes('ceiling') || nh.includes('columna') ||
+                        nh.includes('column') || nh.includes('puerta') || nh.includes('door') ||
+                        nh.includes('piso') || nh.includes('floor') || nh.includes('suelo') ||
+                        na.includes('museo') || nh.includes('stand') || na.includes('stand') ||
+                        nh.includes('puesto') || nh.includes('tienda') || nh.includes('mesa') ||
+                        nh.includes('table') || nh.includes('mostrador') || nh.includes('puestito');
+                    const esVidrio =
+                        nh.includes('cristal') || nh.includes('glass') || nh.includes('vidrio') ||
+                        nh.includes('ventana') || nh.includes('window');
+
+                    if (esSolido && !esVidrio && mat.alphaTest === 0) {
+                        mat.transparent = false;
+                        mat.depthWrite = true;
+                        mat.depthTest = true;
+                        mat.needsUpdate = true;
+                    }
+                });
+            }
+
+            const castShadow =
+                nh.includes('jugador') || nh.includes('player') || nh.includes('estatua') ||
+                nh.includes('torii') || nh.includes('puente') || nh.includes('arbol') ||
+                nh.includes('tree') || nh.includes('cerezo') || nh.includes('bonsai') ||
+                nh.includes('farola') || nh.includes('lampara') || nh.includes('lantern') ||
+                nh.includes('banca') || nh.includes('bench') || nh.includes('muro') ||
+                nh.includes('fence') || nh.includes('valla') || nh.includes('piedra') ||
+                nh.includes('stone') || nh.includes('roca') || nh.includes('rock') ||
+                nh.includes('columna') || nh.includes('column') ||
+                na.includes('torii') || na.includes('arbol') || na.includes('tree') ||
+                na.includes('cerezo') || na.includes('bonsai') || na.includes('farola') ||
+                na.includes('lampara') || na.includes('lantern') || na.includes('banca') ||
+                na.includes('bench') || na.includes('estatua') || na.includes('puente') ||
+                na.includes('bamboo') || na.includes('bambu');
+
+            const esVegetacionPequeña =
+                nh.includes('sakura') || nh.includes('follaje') || nh.includes('petalo') ||
+                nh.includes('pasto') || nh.includes('grass') || nh.includes('cesped');
+
+            child.castShadow = castShadow && !esVegetacionPequeña;
+            child.receiveShadow = true;
+        });
+    }
+
+    for (const instancia of (item.instancias || [])) {
+
+        const clon = usarSkeletonUtils
+            ? SkeletonUtils.clone(modeloBase)
+            : modeloBase.clone();
+
+        // Modelo de colisiones
+        if (esColision) {
+            const { posicion, rotacion, rotacionY, escala } = instancia;
+            if (posicion) clon.position.set(posicion[0], posicion[1], posicion[2]);
+            if (rotacion) clon.rotation.set(rotacion[0], rotacion[1], rotacion[2]);
+            else if (rotacionY !== undefined) clon.rotation.y = rotacionY;
+            if (escala) {
+                if (Array.isArray(escala)) clon.scale.set(escala[0], escala[1], escala[2]);
+                else clon.scale.setScalar(escala);
+            }
+            globalScene.add(clon);
+            clon.updateMatrixWorld(true);
+            clon.traverse((hijo) => {
+                if (!hijo.isMesh) return;
+                const nl = hijo.name.toLowerCase();
+                if (!nl.includes('colision')) return;
+                if (hijo.material) hijo.material.visible = false;
+                globalObjetosColision.push(hijo);
+                if (nl.includes('suelo') || nl.includes('rampa') ||
+                    nl.includes('escalera') || nl.includes('piso')) {
+                    mallasSuelo.push(hijo);
+                } else {
+                    registrarBoxColision(new THREE.Box3().setFromObject(hijo));
+                }
+            });
+            if (esTrackeado && globalLoadingManager) {
+                contadorPrincipal++;
+                globalLoadingManager.itemEnd(`ip_${contadorPrincipal}`);
+            }
+            if (esTrackeado && contadorPrincipal % BATCH_SIZE === 0) {
+                await esperarSiguienteTick();
+            }
+            continue;
+        }
+
+        if (item.tieneAgua) {
+            const aguasMallas = [];
+            clon.traverse((hijo) => {
+                if (hijo.isMesh && hijo.name.toLowerCase().includes('agua')) {
+                    aguasMallas.push(hijo);
+                }
+            });
+            aguasMallas.forEach((hijo) => {
+                const textura = hijo.material.normalMap || hijo.material.map;
+                if (textura) {
+                    registrarTexturaAgua(textura);
+                    console.log('[Agua] Textura registrada desde:', hijo.name);
+                }
+                const water = new Water(hijo.geometry, {
+                    textureWidth: window.esMovil ? 64 : 128,
+                    textureHeight: window.esMovil ? 64 : 128,
+                    waterNormals,
+                    sunDirection: new THREE.Vector3(10, 20, 10).normalize(),
+                    sunColor: 0xffffff,
+                    waterColor: 0x001e0f,
+                    distortionScale: 3.7,
+                    fog: globalScene.fog !== undefined,
+                });
+                water.position.copy(hijo.position);
+                water.rotation.copy(hijo.rotation);
+                water.scale.copy(hijo.scale);
+                water.name = hijo.name;
+                const parent = hijo.parent;
+                if (parent) { parent.remove(hijo); parent.add(water); }
+                aguasInstanciadas.push(water);
+            });
+        }
+
+        const { posicion, rotacion, rotacionY } = instancia;
+        const escala = instancia.escala !== undefined ? instancia.escala : item.escala;
+        if (posicion) clon.position.set(posicion[0], posicion[1], posicion[2]);
+        if (rotacion) clon.rotation.set(rotacion[0], rotacion[1], rotacion[2]);
+        else if (rotacionY !== undefined) clon.rotation.y = rotacionY;
+        if (escala) {
+            if (Array.isArray(escala)) clon.scale.set(escala[0], escala[1], escala[2]);
+            else clon.scale.setScalar(escala);
+        }
+
+        const esFolaje = na.includes('bamboo') || na.includes('bambu');
+        if (esFolaje) {
+            clon.scale.y *= (0.8 + Math.random() * 0.4);
+            clon.scale.x *= (0.9 + Math.random() * 0.2);
+            clon.scale.z *= (0.9 + Math.random() * 0.2);
+        }
+
+        globalScene.add(clon);
+
+        const esPlaza = na.includes('plaza');
+        const esMuseo = na.includes('museo');
+        if (!esPlaza && !esMuseo) clon.userData.generarHitboxAutomata = true;
+
+        const datosJSON = { ...item, ...instancia };
+        delete datosJSON.instancias;
+        broker.emit('modeloCargado', { modelo: clon, datosJSON, scene: globalScene, objetosColision: globalObjetosColision });
+
+        if ((item.tieneanimations || item.tieneAnimations) && gltf.animations?.length > 0) {
+            const animIdx = instancia.animacionInicial ?? item.animacionInicial ?? 0;
+            registraranimations(clon, gltf.animations, animIdx);
+        }
+
+        if (esTrackeado && globalLoadingManager) {
+            contadorPrincipal++;
+            globalLoadingManager.itemEnd(`ip_${contadorPrincipal}`);
+        }
+        if (esTrackeado && contadorPrincipal % BATCH_SIZE === 0) {
+            await esperarSiguienteTick();
+        }
+    }
+
+    console.log(`[${item.zona || 'principal'}] OK ${item.archivo} (${item.instancias?.length ?? 0} inst.)`);
+}
+
+export async function cargarEscenario(scene, objetosColision, loadingManager = null, renderizador = null, camara = null) {
+    globalScene = scene;
+    globalObjetosColision = objetosColision;
+    globalLoadingManager = loadingManager;
+    globalRenderizador = renderizador;
+    globalCamara = camara;
+    contadorPrincipal = 0;
     aguasInstanciadas.length = 0;
 
     let configuracion;
@@ -397,260 +655,187 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
         return;
     }
 
-    const itemsPrincipal = configuracion.filter(i => (i.zona || 'principal') === 'principal');
-    const itemsSecundarios = configuracion.filter(i => (i.zona || 'principal') !== 'principal');
+    //carga de modelos base con mayor prioridad para empezar el recorrido
+    const MODELOS_CRITICOS = ['plazaprincipal_optimizado.glb', 'plazaprincipal_colisiones.glb'];
 
-    let totalInstanciasPrincipal = 0;
-    for (const item of itemsPrincipal) {
-        if (item.instancias) totalInstanciasPrincipal += item.instancias.length;
-    }
-    if (loadingManager) {
-        for (let i = 1; i <= totalInstanciasPrincipal; i++) {
-            loadingManager.itemStart(`ip_${i}`);
+    const itemsCriticos = [];
+    const itemsPrincipalResto = [];
+    const itemsSecundarios = [];
+
+    for (const item of configuracion) {
+        const zona = item.zona || 'principal';
+        const na = item.archivo.toLowerCase();
+        const baseName = na.split('/').pop();
+
+        if (zona === 'principal' && MODELOS_CRITICOS.includes(baseName)) {
+            itemsCriticos.push(item);
+        } else if (zona === 'principal') {
+            itemsPrincipalResto.push(item);
+        } else {
+            itemsSecundarios.push(item);
         }
     }
 
-    let contadorPrincipal = 0;
-
-    async function cargarModelo(item, loader, esZonaPrincipal) {
-        try {
-            const gltf = await loader.loadAsync(item.archivo);
-            const modeloBase = gltf.scene;
-            modeloBase.name = item.archivo;
-
-            const usarSkeletonUtils = tieneSkinnedMesh(modeloBase);
-            const na = item.archivo.toLowerCase();
-            const esColision = na.includes('collisions') || na.includes('colisiones');
-
-            if (!esColision) {
-                // Aplicar materiales Phong con farolas al modelo base
-                aplicarMaterialPhong(modeloBase);
-
-                // Configurar culling, sombras y propiedades de renderizado
-                modeloBase.traverse((child) => {
-                    if (!child.isMesh) return;
-
-                    child.frustumCulled = true;
-
-                    const nh = child.name.toLowerCase();
-                    const na = item.archivo.toLowerCase();
-
-                    // lógica de DoubleSide
-                    const esDoubleSide =
-                        nh.includes('sakura') || na.includes('bandera') || nh.includes('bandera') ||
-                        nh.includes('follaje') || nh.includes('flor') || nh.includes('petalo') ||
-                        nh.includes('muñeca') || nh.includes('muneca') || nh.includes('agua') ||
-                        nh.includes('museo') || nh.includes('pared') || nh.includes('wall') ||
-                        nh.includes('techo') || nh.includes('roof') || nh.includes('ceiling') ||
-                        nh.includes('columna') || nh.includes('column') || nh.includes('puerta') ||
-                        nh.includes('door') || nh.includes('cristal') || nh.includes('glass') ||
-                        nh.includes('vidrio') || nh.includes('marco') || nh.includes('ventana') ||
-                        nh.includes('window') || na.includes('museo') ||
-                        nh.includes('casa') || nh.includes('casita') || nh.includes('tradicional') ||
-                        nh.includes('stand') || na.includes('stand') || nh.includes('puesto') ||
-                        nh.includes('tienda') || nh.includes('mesa') || nh.includes('table') ||
-                        nh.includes('mostrador') || nh.includes('puestito');
-
-                    if (child.material) {
-                        const mats = Array.isArray(child.material) ? child.material : [child.material];
-                        mats.forEach(mat => {
-                            if (!mat) return;
-                            mat.side = esDoubleSide ? THREE.DoubleSide : THREE.FrontSide;
-
-                            const esSolido =
-                                nh.includes('casa') || nh.includes('casita') || nh.includes('tradicional') ||
-                                nh.includes('pared') || nh.includes('wall') || nh.includes('techo') ||
-                                nh.includes('roof') || nh.includes('ceiling') || nh.includes('columna') ||
-                                nh.includes('column') || nh.includes('puerta') || nh.includes('door') ||
-                                nh.includes('piso') || nh.includes('floor') || nh.includes('suelo') ||
-                                na.includes('museo') || nh.includes('stand') || na.includes('stand') ||
-                                nh.includes('puesto') || nh.includes('tienda') || nh.includes('mesa') ||
-                                nh.includes('table') || nh.includes('mostrador') || nh.includes('puestito');
-                            const esVidrio =
-                                nh.includes('cristal') || nh.includes('glass') || nh.includes('vidrio') ||
-                                nh.includes('ventana') || nh.includes('window');
-
-                            if (esSolido && !esVidrio && mat.alphaTest === 0) {
-                                mat.transparent = false;
-                                mat.depthWrite = true;
-                                mat.depthTest = true;
-                                mat.needsUpdate = true;
-                            }
-                        });
-                    }
-
-                    const castShadow =
-                        nh.includes('jugador') || nh.includes('player') || nh.includes('estatua') ||
-                        nh.includes('torii') || nh.includes('puente') || nh.includes('arbol') ||
-                        nh.includes('tree') || nh.includes('cerezo') || nh.includes('bonsai') ||
-                        nh.includes('farola') || nh.includes('lampara') || nh.includes('lantern') ||
-                        nh.includes('banca') || nh.includes('bench') || nh.includes('muro') ||
-                        nh.includes('fence') || nh.includes('valla') || nh.includes('piedra') ||
-                        nh.includes('stone') || nh.includes('roca') || nh.includes('rock') ||
-                        nh.includes('columna') || nh.includes('column') ||
-                        na.includes('torii') || na.includes('arbol') || na.includes('tree') ||
-                        na.includes('cerezo') || na.includes('bonsai') || na.includes('farola') ||
-                        na.includes('lampara') || na.includes('lantern') || na.includes('banca') ||
-                        na.includes('bench') || na.includes('estatua') || na.includes('puente') ||
-                        na.includes('bamboo') || na.includes('bambu');
-
-                    const esVegetacionPequeña =
-                        nh.includes('sakura') || nh.includes('follaje') || nh.includes('petalo') ||
-                        nh.includes('pasto') || nh.includes('grass') || nh.includes('cesped');
-
-                    child.castShadow = castShadow && !esVegetacionPequeña;
-                    child.receiveShadow = true;
-                });
-            }
-
-            for (const instancia of (item.instancias || [])) {
-
-                const clon = usarSkeletonUtils
-                    ? SkeletonUtils.clone(modeloBase)
-                    : modeloBase.clone();
-
-                // Modelo de colisiones
-                if (esColision) {
-                    const { posicion, rotacion, rotacionY, escala } = instancia;
-                    if (posicion) clon.position.set(posicion[0], posicion[1], posicion[2]);
-                    if (rotacion) clon.rotation.set(rotacion[0], rotacion[1], rotacion[2]);
-                    else if (rotacionY !== undefined) clon.rotation.y = rotacionY;
-                    if (escala) {
-                        if (Array.isArray(escala)) clon.scale.set(escala[0], escala[1], escala[2]);
-                        else clon.scale.setScalar(escala);
-                    }
-                    scene.add(clon);
-                    clon.updateMatrixWorld(true);
-                    clon.traverse((hijo) => {
-                        if (!hijo.isMesh) return;
-                        const nl = hijo.name.toLowerCase();
-                        if (!nl.includes('colision')) return;
-                        if (hijo.material) hijo.material.visible = false;
-                        objetosColision.push(hijo);
-                        if (nl.includes('suelo') || nl.includes('rampa') ||
-                            nl.includes('escalera') || nl.includes('piso')) {
-                            mallasSuelo.push(hijo);
-                        } else {
-                            registrarBoxColision(new THREE.Box3().setFromObject(hijo));
-                        }
-                    });
-                    if (esZonaPrincipal && loadingManager) {
-                        contadorPrincipal++;
-                        loadingManager.itemEnd(`ip_${contadorPrincipal}`);
-                    }
-                    if (esZonaPrincipal && contadorPrincipal % BATCH_SIZE === 0) {
-                        await esperarSiguienteTick();
-                    }
-                    continue;
-                }
-
-                if (item.tieneAgua) {
-                    const aguasMallas = [];
-                    clon.traverse((hijo) => {
-                        if (hijo.isMesh && hijo.name.toLowerCase().includes('agua')) {
-                            aguasMallas.push(hijo);
-                        }
-                    });
-                    aguasMallas.forEach((hijo) => {
-                        const textura = hijo.material.normalMap || hijo.material.map;
-                        if (textura) {
-                            registrarTexturaAgua(textura);
-                            console.log('[Agua] Textura registrada desde:', hijo.name);
-                        }
-                        const water = new Water(hijo.geometry, {
-                            textureWidth: window.esMovil ? 64 : 128,
-                            textureHeight: window.esMovil ? 64 : 128,
-                            waterNormals,
-                            sunDirection: new THREE.Vector3(10, 20, 10).normalize(),
-                            sunColor: 0xffffff,
-                            waterColor: 0x001e0f,
-                            distortionScale: 3.7,
-                            fog: scene.fog !== undefined,
-                        });
-                        water.position.copy(hijo.position);
-                        water.rotation.copy(hijo.rotation);
-                        water.scale.copy(hijo.scale);
-                        water.name = hijo.name;
-                        const parent = hijo.parent;
-                        if (parent) { parent.remove(hijo); parent.add(water); }
-                        aguasInstanciadas.push(water);
-                    });
-                }
-
-                const { posicion, rotacion, rotacionY } = instancia;
-                const escala = instancia.escala !== undefined ? instancia.escala : item.escala;
-                if (posicion) clon.position.set(posicion[0], posicion[1], posicion[2]);
-                if (rotacion) clon.rotation.set(rotacion[0], rotacion[1], rotacion[2]);
-                else if (rotacionY !== undefined) clon.rotation.y = rotacionY;
-                if (escala) {
-                    if (Array.isArray(escala)) clon.scale.set(escala[0], escala[1], escala[2]);
-                    else clon.scale.setScalar(escala);
-                }
-
-                const esFolaje = na.includes('bamboo') || na.includes('bambu');
-                if (esFolaje) {
-                    clon.scale.y *= (0.8 + Math.random() * 0.4);
-                    clon.scale.x *= (0.9 + Math.random() * 0.2);
-                    clon.scale.z *= (0.9 + Math.random() * 0.2);
-                }
-
-                scene.add(clon);
-
-                const esPlaza = na.includes('plaza');
-                const esMuseo = na.includes('museo');
-                if (!esPlaza && !esMuseo) clon.userData.generarHitboxAutomata = true;
-
-                const datosJSON = { ...item, ...instancia };
-                delete datosJSON.instancias;
-                broker.emit('modeloCargado', { modelo: clon, datosJSON, scene, objetosColision });
-
-                if ((item.tieneanimations || item.tieneAnimations) && gltf.animations?.length > 0) {
-                    const animIdx = instancia.animacionInicial ?? item.animacionInicial ?? 0;
-                    registraranimations(clon, gltf.animations, animIdx);
-                }
-
-                if (esZonaPrincipal && loadingManager) {
-                    contadorPrincipal++;
-                    loadingManager.itemEnd(`ip_${contadorPrincipal}`);
-                }
-                if (esZonaPrincipal && contadorPrincipal % BATCH_SIZE === 0) {
-                    await esperarSiguienteTick();
-                }
-            }
-
-            console.log(`[${item.zona || 'principal'}] OK ${item.archivo} (${item.instancias?.length ?? 0} inst.)`);
-
-        } catch (err) {
-            console.error(`[ModelLoader] Error en ${item.archivo}:`, err);
-            if (esZonaPrincipal && loadingManager) {
-                const n = item.instancias?.length ?? 0;
-                for (let i = 0; i < n; i++) {
-                    contadorPrincipal++;
-                    loadingManager.itemEnd(`ip_${contadorPrincipal}`);
-                }
-            }
+    // Carga de instancias totales para la barra de progreso
+    let totalInstanciasTrackeadas = 0;
+    for (const item of [...itemsCriticos, ...itemsPrincipalResto]) {
+        if (item.instancias) totalInstanciasTrackeadas += item.instancias.length;
+    }
+    if (globalLoadingManager) {
+        for (let i = 1; i <= totalInstanciasTrackeadas; i++) {
+            globalLoadingManager.itemStart(`ip_${i}`);
         }
     }
 
-    const loaderPrincipal = crearGLTFLoader(loadingManager);
-    console.log(`[Zonas] Principal: ${itemsPrincipal.length} modelos, ${totalInstanciasPrincipal} instancias`);
-    await Promise.all(itemsPrincipal.map(item => cargarModelo(item, loaderPrincipal, true)));
-    console.log('[Zonas] Zona principal completa');
-    const loaderBg = crearGLTFLoader(null);
-    (async () => {
-        const porZona = {};
-        for (const item of itemsSecundarios) {
-            const z = item.zona || 'otro';
-            if (!porZona[z]) porZona[z] = [];
-            porZona[z].push(item);
-        }
-        for (const zona of ZONAS_SECUNDARIAS) {
-            const items = porZona[zona];
-            if (!items?.length) continue;
-            console.log(`[Zonas] '${zona}' en background: ${items.length} modelos`);
-            await Promise.all(items.map(item => cargarModelo(item, loaderBg, false)));
-            console.log(`[Zonas] '${zona}' completa`);
-        }
-        console.log('[Zonas] Todas las zonas cargadas');
-    })();
+    //Carga de modelos base
+    const loaderTrackeado = crearGLTFLoader(globalLoadingManager);
+
+    console.log(`[Carga] CRÍTICOS: ${itemsCriticos.length} modelos`);
+    for (const item of itemsCriticos) {
+        await cargarModeloConRetry(item, loaderTrackeado, true);
+    }
+    console.log('[Carga] Modelos críticos listos ✓');
+
+    // Carga del resto de modelos de la zona principal en lotes secuenciales
+    const CONCURRENT_BATCH = 3;
+    console.log(`[Carga] PRINCIPAL: ${itemsPrincipalResto.length} modelos (en lotes de ${CONCURRENT_BATCH})`);
+
+    for (let i = 0; i < itemsPrincipalResto.length; i += CONCURRENT_BATCH) {
+        const lote = itemsPrincipalResto.slice(i, i + CONCURRENT_BATCH);
+        await Promise.all(lote.map(item => cargarModeloConRetry(item, loaderTrackeado, true)));
+    }
+    console.log('[Carga] Zona principal completa ✓');
+
+    // Preparar zonas secundarias para carga por proximidad
+    const porZona = {};
+    for (const item of itemsSecundarios) {
+        const z = item.zona || 'otro';
+        if (!porZona[z]) porZona[z] = [];
+        porZona[z].push(item);
+    }
+
+    zonasCargando.clear();
+    zonasCargadas.clear();
+    zonasPendientes = porZona;
+    totalZonasSecundarias = ZONAS_SECUNDARIAS.filter(z => porZona[z]?.length).length;
+    zonasCompletadasCount = 0;
+    loaderBg = null;
+
+    if (!window.esMovil) {
+        // En PC cargamos las zonas secundarias en background de inmediato de forma secuencial
+        cargarTodasLasZonasSecundariasDeInmediato(porZona);
+    }
 }
+
+async function cargarTodasLasZonasSecundariasDeInmediato(porZona) {
+    if (!loaderBg) {
+        loaderBg = crearGLTFLoader(null);
+    }
+    for (const zona of ZONAS_SECUNDARIAS) {
+        const items = porZona[zona];
+        if (!items?.length) continue;
+
+        zonasCargando.add(zona);
+        broker.emit('zonaCargando', { zona, progreso: zonasCompletadasCount, total: totalZonasSecundarias });
+
+        const CONCURRENT_BATCH = 3;
+        for (let i = 0; i < items.length; i += CONCURRENT_BATCH) {
+            const lote = items.slice(i, i + CONCURRENT_BATCH);
+            await Promise.all(lote.map(item => cargarModeloConRetry(item, loaderBg, false)));
+        }
+
+        zonasCargando.delete(zona);
+        zonasCargadas.add(zona);
+        zonasCompletadasCount++;
+
+        // Compilar asíncronamente los shaders de los nuevos modelos agregados a la escena
+        if (globalRenderizador && globalCamara) {
+            try {
+                await globalRenderizador.compileAsync(globalScene, globalCamara);
+                console.log(`[Carga BG] Shaders de la zona '${zona}' pre-compilados con éxito`);
+            } catch (e) {
+                console.warn(`[Carga BG] Error en compilación de shaders para '${zona}':`, e);
+            }
+        }
+
+        broker.emit('zonaCompleta', { zona, progreso: zonasCompletadasCount, total: totalZonasSecundarias });
+    }
+
+    broker.emit('todasZonasCargadas');
+    zonasPendientes = null;
+}
+
+export function actualizarCargaPorProximidad(posicionJugador) {
+    if (!window.esMovil) return; // Solo móvil usa proximidad
+    if (!zonasPendientes) return;
+
+    for (const zona of ZONAS_SECUNDARIAS) {
+        if (!zonasPendientes[zona]) continue;
+        if (zonasCargando.has(zona) || zonasCargadas.has(zona)) continue;
+
+        const items = zonasPendientes[zona];
+        let cerca = false;
+        
+        for (const item of items) {
+            for (const inst of (item.instancias || [])) {
+                if (inst.posicion) {
+                    const dx = posicionJugador.x - inst.posicion[0];
+                    const dz = posicionJugador.z - inst.posicion[2];
+                    const distSq = dx * dx + dz * dz;
+                    if (distSq < 60 * 60) { // 60 unidades de distancia (3600 distSq)
+                        cerca = true;
+                        break;
+                    }
+                }
+            }
+            if (cerca) break;
+        }
+
+        if (cerca) {
+            zonasCargando.add(zona);
+            cargarZonaSecundaria(zona, items);
+        }
+    }
+}
+
+async function cargarZonaSecundaria(zona, items) {
+    if (!loaderBg) {
+        loaderBg = crearGLTFLoader(null);
+    }
+    
+    console.log(`[Carga Proximidad] Entrando a zona '${zona}': iniciando carga de ${items.length} modelos`);
+    broker.emit('zonaCargando', { zona, progreso: zonasCompletadasCount, total: totalZonasSecundarias });
+
+    const CONCURRENT_BATCH = 3;
+    for (let i = 0; i < items.length; i += CONCURRENT_BATCH) {
+        const lote = items.slice(i, i + CONCURRENT_BATCH);
+        await Promise.all(lote.map(item => cargarModeloConRetry(item, loaderBg, false)));
+    }
+
+    zonasCargando.delete(zona);
+    zonasCargadas.add(zona);
+    zonasCompletadasCount++;
+
+    // Compilar asíncronamente los shaders de los nuevos modelos agregados a la escena
+    if (globalRenderizador && globalCamara) {
+        try {
+            await globalRenderizador.compileAsync(globalScene, globalCamara);
+            console.log(`[Carga Proximidad] Shaders de la zona '${zona}' pre-compilados con éxito`);
+        } catch (e) {
+            console.warn(`[Carga Proximidad] Error en compilación de shaders para '${zona}':`, e);
+        }
+    }
+
+    console.log(`[Carga Proximidad] Zona '${zona}' completa ✓ (${zonasCompletadasCount}/${totalZonasSecundarias})`);
+    broker.emit('zonaCompleta', { zona, progreso: zonasCompletadasCount, total: totalZonasSecundarias });
+
+    // Eliminar de las pendientes para dejar de comprobar
+    delete zonasPendientes[zona];
+
+    if (zonasCompletadasCount === totalZonasSecundarias) {
+        console.log('[Carga Proximidad] ✓ Todas las zonas secundarias cargadas');
+        broker.emit('todasZonasCargadas');
+        zonasPendientes = null;
+    }
+}
+

@@ -1,51 +1,25 @@
-import { NodeIO } from '@gltf-transform/core';
-import { ALL_EXTENSIONS, EXTMeshoptCompression } from '@gltf-transform/extensions';
-import {
-    meshopt,
-    dedup,
-    weld,
-    quantize,
-    prune,
-    resample,
-} from '@gltf-transform/functions';
-import { MeshoptEncoder, MeshoptDecoder } from 'meshoptimizer';
+import { execSync } from 'child_process';
 import { statSync } from 'fs';
 import { join as pathJoin } from 'path';
 
-await MeshoptEncoder.ready;
-await MeshoptDecoder.ready;
-
-const io = new NodeIO()
-    .registerExtensions(ALL_EXTENSIONS)
-    .registerDependencies({
-        'meshopt.decoder': MeshoptDecoder,
-        'meshopt.encoder': MeshoptEncoder,
-    });
-
 const MODELS_DIR = './public/assets/models';
 
-const MODELOS_PRIORIDAD = [
-    'plazaPrincipal_optimizado.glb',
+// Lista de modelos a optimizar (excluyendo plazaPrincipal_optimizado.glb, museo.glb y ichirakuRamen.glb)
+const MODELOS_A_COMPRIMIR = [
     'foocourt.glb',
     'loboBoy_optimized.glb',
     'loboGirl_optimized.glb',
     'monedero.glb',
-    'toro2.glb',
     'foodLetrero.glb',
-    'museo.glb',
     'stand.glb',
-    'ichirakuRamen.glb',
     'geisha_optimized.glb',
     'perroCat.glb',
     'maquina.glb',
     'vestidor.glb',
-    'toro.glb',
     'yokaiOkiku.glb',
     'yokaiJorogumo.glb',
     'ciervoComiendo.glb',
-    'mesaAmbientada.glb',
     'samurai.glb',
-    'plato.glb',
     'maqHiroshima.glb',
     'monje.glb',
     'ciervoSamba.glb',
@@ -60,15 +34,11 @@ const MODELOS_PRIORIDAD = [
     'hiroshima.glb',
     'disc.glb',
     'estatuaHachiko.glb',
-    'estatua.glb',
-    'mesaMaqueta.glb',
-    'pedestalMuseo.glb',
     'lampara.glb',
     'plazaLago.glb',
     'ramen.glb',
     'foodTable.glb',
     'fresco.glb',
-    'plantaSakura.glb',
     'ciervoViendoAlCielo.glb',
     'banca.glb',
     'bandera.glb',
@@ -78,12 +48,7 @@ const MODELOS_PRIORIDAD = [
     'luzNoche.glb',
     'farolaPrueba.glb',
     'bamboo.glb',
-    'bonsai.glb',
-    'arbolCerezoPequeño.glb',
-    'arbolPino.glb',
     'arbol1.glb',
-    'arbol2.glb',
-    'arbol3.glb',
 ];
 
 let totalAntes = 0;
@@ -99,56 +64,76 @@ function getSizeMB(filepath) {
     }
 }
 
-async function comprimirModelo(nombreArchivo) {
-    const rutaCompleta = pathJoin(MODELS_DIR, nombreArchivo);
-
-    let sizeAntes;
+function runCLI(cmd) {
     try {
-        sizeAntes = getSizeMB(rutaCompleta);
+        execSync(cmd, { stdio: 'ignore' });
+        return true;
     } catch (e) {
-        // console.log(`No encontrado: ${nombreArchivo}`);
-        return;
+        return false;
     }
+}
+
+async function comprimirModelo(nombreArchivo) {
+    const ruta = pathJoin(MODELS_DIR, nombreArchivo);
+    const sizeAntes = getSizeMB(ruta);
+    if (sizeAntes === 0) return; // No existe el archivo
 
     totalAntes += sizeAntes;
-    // console.log(`\n ${nombreArchivo} (${sizeAntes.toFixed(2)} MB)`);
+    console.log(`\n📦 Procesando: ${nombreArchivo} (${sizeAntes.toFixed(2)} MB)`);
 
-    try {
-        const doc = await io.read(rutaCompleta);
+    const nameLower = nombreArchivo.toLowerCase();
+    let ok = true;
 
-        await doc.transform(
-            dedup(),
-            prune(),
-            weld({ tolerance: 0.0001 }),
-            meshopt({ encoder: MeshoptEncoder, level: 'high' })
-        );
+    // 1. Simplificación de geometría para modelos densos y pesados (> 3MB, lobos)
+    if (sizeAntes > 3.0 && (nameLower.includes('lobo') || nameLower.includes('girl') || nameLower.includes('boy'))) {
+        console.log(`  └─ Simplificando geometría (ratio 0.75)...`);
+        ok = ok && runCLI(`npx gltf-transform simplify ${ruta} ${ruta} --ratio 0.75`);
+    }
 
-        await io.write(rutaCompleta, doc);
+    // 2. Redimensionado de texturas para modelos de entorno grandes (> 2MB)
+    if (sizeAntes > 2.0 && (nameLower.includes('court') || nameLower.includes('letrero') || nameLower.includes('stand') || nameLower.includes('monedero'))) {
+        console.log(`  └─ Redimensionando texturas a máx 1024px...`);
+        ok = ok && runCLI(`npx gltf-transform resize ${ruta} ${ruta} --width 1024 --height 1024`);
+    }
 
-        const sizeDespues = getSizeMB(rutaCompleta);
+    // 3. Compresión WebP de texturas (para todos los modelos)
+    console.log(`  └─ Convirtiendo texturas a WebP...`);
+    ok = ok && runCLI(`npx gltf-transform webp ${ruta} ${ruta}`);
+
+    // 4. Re-aplicación de compresión Draco (para asegurar máxima compresión al final)
+    console.log(`  └─ Aplicando compresión Draco...`);
+    ok = ok && runCLI(`npx gltf-transform draco ${ruta} ${ruta}`);
+
+    if (ok) {
+        const sizeDespues = getSizeMB(ruta);
         totalDespues += sizeDespues;
         const reduccion = ((1 - sizeDespues / sizeAntes) * 100).toFixed(1);
-        // console.log(`  ${sizeDespues.toFixed(2)} MB (↓${reduccion}%)`);
+        console.log(`  ✅ Completado: ${sizeAntes.toFixed(2)} MB -> ${sizeDespues.toFixed(2)} MB (↓${reduccion}%)`);
         procesados++;
-    } catch (err) {
-        // console.error(` Error: ${err.message}`);
-        totalDespues += sizeAntes; // Contamos el tamaño original si falla
+    } else {
+        console.log(`  ❌ Error durante la optimización. Se mantendrá el archivo original.`);
+        // Restaurar archivo original usando git para no dejar un archivo corrupto o a medias
+        runCLI(`git restore ${ruta}`);
+        totalDespues += sizeAntes;
         errores++;
     }
 }
 
-// console.log(` Directorio: ${MODELS_DIR}`);
-// console.log(` Modelos a procesar: ${MODELOS_PRIORIDAD.length}\n`);
-// console.log('─'.repeat(50));
+console.log(`=======================================================`);
+console.log(`Directorios de modelos: ${MODELS_DIR}`);
+console.log(`Modelos a optimizar: ${MODELOS_A_COMPRIMIR.length}`);
+console.log(`Excluidos: plazaPrincipal_optimizado.glb, museo.glb, ichirakuRamen.glb`);
+console.log(`=======================================================`);
 
-for (const modelo of MODELOS_PRIORIDAD) {
+for (const modelo of MODELOS_A_COMPRIMIR) {
     await comprimirModelo(modelo);
 }
 
-// console.log('\n' + '═'.repeat(50));
-// console.log('RESUMEN:');
-// console.log(`Procesados: ${procesados}  Errores: ${errores} `);
-// console.log(`Tamaño original:    ${totalAntes.toFixed(2)} MB`);
-// console.log(`Tamaño comprimido:  ${totalDespues.toFixed(2)} MB`);
-// console.log(`Reducción total:    ${((1 - totalDespues / totalAntes) * 100).toFixed(1)}%`);
-// console.log('═'.repeat(50));
+console.log(`\n=======================================================`);
+console.log(`RESUMEN DE OPTIMIZACIÓN:`);
+console.log(`Procesados con éxito: ${procesados}  Errores/Cancelados: ${errores}`);
+console.log(`Tamaño original total: ${totalAntes.toFixed(2)} MB`);
+console.log(`Tamaño optimizado total: ${totalDespues.toFixed(2)} MB`);
+const totalReduccion = ((1 - totalDespues / totalAntes) * 100).toFixed(1);
+console.log(`Reducción total: ${totalReduccion}%`);
+console.log(`=======================================================`);

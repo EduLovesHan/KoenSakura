@@ -34,7 +34,15 @@ export const diccionario = {
         ctrl_camara: "Mover la cámara",
         ajustes_fps: "Mostrar FPS",
         musica_seleccionar: "Seleccionar melodía",
-        ctrl_noche: "Transición Día - Noche"
+        ctrl_noche: "Transición Día - Noche",
+        carga_bg_iniciando: "Cargando áreas secundarias...",
+        carga_bg_zona: "Cargando {zona} ({progreso}/{total})",
+        carga_bg_completa: "Áreas cargadas ✓",
+        zona_hiroshima: "Hiroshima",
+        zona_yokai: "Yokai",
+        zona_museo: "Museo",
+        zona_ramen: "Ramen",
+        zona_lago: "Lago"
     },
     en: {
         menu_titulo: "Menu",
@@ -69,7 +77,15 @@ export const diccionario = {
         ctrl_camara: "Move camera",
         ajustes_fps: "Show FPS",
         musica_seleccionar: "Select melody",
-        ctrl_noche: "Day - Night transition"
+        ctrl_noche: "Day - Night transition",
+        carga_bg_iniciando: "Loading secondary areas...",
+        carga_bg_zona: "Loading {zona} ({progreso}/{total})",
+        carga_bg_completa: "Areas loaded ✓",
+        zona_hiroshima: "Hiroshima",
+        zona_yokai: "Yokai",
+        zona_museo: "Museum",
+        zona_ramen: "Ramen",
+        zona_lago: "Lake"
     }
 };
 

@@ -15,13 +15,12 @@ const ZONA_MAP = {
     'assets/models/cerezo2.glb': 'principal',
     'assets/models/cerezo.glb': 'principal',
     'assets/models/arbol1.glb': 'principal',
-    'assets/models/arbol2.glb': 'principal',
-    'assets/models/arbol3.glb': 'principal',
-    'assets/models/arbolPino.glb': 'principal',
+
+
     'assets/models/arbolCerezoPequeño.glb': 'principal',
     'assets/models/vegetacion.glb': 'principal',
     'assets/models/vegetacion2.glb': 'principal',
-    'assets/models/arbustos.glb': 'principal',
+
     'assets/models/banca.glb': 'principal',
     'assets/models/toroStone.glb': 'principal',
     'assets/models/stand.glb': 'principal',
@@ -30,7 +29,7 @@ const ZONA_MAP = {
     'assets/models/gatoGrisMov.glb': 'principal',
     'assets/models/ciervoSamba.glb': 'principal',
     'assets/models/linterna.glb': 'principal',
-    'assets/models/lamparaPequeña.glb': 'principal',
+
     'assets/models/museo.glb': 'principal',
 
     //  zona museo   
@@ -47,9 +46,9 @@ const ZONA_MAP = {
     'assets/models/disc.glb': 'museo',
     'assets/models/luzNoche.glb': 'museo',
     'assets/models/lampara.glb': 'museo',
-    'assets/models/cuadro.glb': 'museo',
-    'assets/models/pedestalMuseo.glb': 'museo',
-    'assets/models/mesaMaqueta.glb': 'museo',
+
+
+
     'assets/models/infoMuseo.glb': 'museo',
     'assets/models/infoMaqueta.glb': 'museo',
     'assets/models/bonsai.glb': 'museo',
@@ -60,10 +59,10 @@ const ZONA_MAP = {
     'assets/models/maqHiroshima.glb': 'hiroshima',
     'assets/models/perroCat.glb': 'hiroshima',
     'assets/models/estatuaHachiko.glb': 'hiroshima',
-    'assets/models/estatua.glb': 'hiroshima',
+
     'assets/models/mostrador.glb': 'hiroshima',
     'assets/models/fresco.glb': 'hiroshima',
-    'assets/models/pinturaMar.glb': 'hiroshima',
+
 
     //  zona yokai 
     'assets/models/yokaiOkiku.glb': 'yokai',
@@ -74,7 +73,7 @@ const ZONA_MAP = {
 
     //  zona comida
     'assets/models/ichirakuRamen.glb': 'ramen',
-    'assets/models/ichirakuRamenColision.glb': 'ramen',
+
     'assets/models/foocourt.glb': 'ramen',
     'assets/models/foodLetrero.glb': 'ramen',
     'assets/models/foodTable.glb': 'ramen',
@@ -85,8 +84,8 @@ const ZONA_MAP = {
     'assets/models/maquina.glb': 'ramen',
     'assets/models/eva.glb': 'ramen',
     'assets/models/monedero.glb': 'ramen',
-    'assets/models/plato.glb': 'ramen',
-    'assets/models/mesaAmbientada.glb': 'ramen',
+
+
     'assets/models/menta.glb': 'ramen',
 
     //  zona lago
@@ -94,12 +93,10 @@ const ZONA_MAP = {
     'assets/models/plazaLago.glb': 'lago',
     'assets/models/ciervoComiendo.glb': 'lago',
     'assets/models/ciervoViendoAlCielo.glb': 'lago',
-    'assets/models/toro2.glb': 'lago',
-    'assets/models/toro.glb': 'lago',
+
 
     //  principal
-    'assets/models/pedestal.glb': 'principal',
-    'assets/models/plantaSakura.glb': 'principal',
+
 };
 
 const ZONA_FALLBACK = 'principal';

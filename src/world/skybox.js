@@ -39,8 +39,9 @@ class Skybox {
         this.escena.background = this.texturaDia;
 
         // Crear el domo nocturno para el Crossfade
-        const radio = 800;
-        const geometriaEsfera = new THREE.SphereGeometry(radio, 32, 32);
+        const esMovil = window.esMovil;
+        const radio = esMovil ? 270 : 800;
+        const geometriaEsfera = new THREE.SphereGeometry(radio, esMovil ? 16 : 32, esMovil ? 16 : 32);
 
         // Shader para mapear la CubeTexture de Noche con opacidad
         this.materialEsferaNoche = new THREE.ShaderMaterial({

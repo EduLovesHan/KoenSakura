@@ -5,13 +5,15 @@ import { inicializarengine } from './core/engine.js';
 import { controlsPrimeraPersona } from './player/controls.js';
 import { inicializarinteractions, actualizarinteractions } from './player/interactions.js';
 import { Skybox } from './world/skybox.js';
-import { cargarEscenario, phongUniformsGlobales, aguasInstanciadas } from './world/ModelLoader.js';
+import { cargarEscenario, actualizarCargaPorProximidad, phongUniformsGlobales, aguasInstanciadas } from './world/ModelLoader.js';
 import { inicializarDebugCollisions, actualizarPlayerBox } from './world/collisions.js';
 import { inicializarLighting, configurarcontrolsLighting, actualizarLucesFarolas, directionalLight } from './world/lighting.js';
 import { actualizaranimations } from './world/animations.js';
 import { inicializarAudio, reproducirClick, configurarcontrolsAudio } from './audio/AudioManager.js';
 import { inicializarUI } from './ui/menu.js';
 import { idiomaActual, diccionario } from './core/i18n.js';
+import { broker } from './world/EventBroker.js';
+
 
 // Pantalla de carga
 const pantallaCarga = document.getElementById('pantalla-carga');
@@ -100,6 +102,59 @@ if (btnEntrar) {
     });
 }
 
+// Elementos del indicador de carga en background
+const indicadorCargaBg = document.getElementById('indicador-carga-bg');
+const textoCargaBg = document.getElementById('texto-carga-bg');
+const barraProgresoMini = document.getElementById('carga-bg-progreso-mini');
+
+if (indicadorCargaBg) {
+    broker.on('zonaCargando', ({ zona, progreso, total }) => {
+        indicadorCargaBg.classList.remove('oculto');
+        
+        // Obtener el nombre traducido de la zona
+        const keyZona = `zona_${zona}`;
+        const nombreZona = diccionario[idiomaActual][keyZona] || zona;
+        
+        // Carga bg zona string
+        let str = diccionario[idiomaActual].carga_bg_zona || "Cargando {zona}...";
+        str = str.replace('{zona}', nombreZona)
+                 .replace('{progreso}', progreso)
+                 .replace('{total}', total);
+                 
+        textoCargaBg.textContent = str;
+        
+        // Progreso barra mini
+        const pct = Math.round((progreso / total) * 100);
+        if (barraProgresoMini) barraProgresoMini.style.width = `${pct}%`;
+    });
+
+    broker.on('zonaCompleta', ({ zona, progreso, total }) => {
+        const pct = Math.round((progreso / total) * 100);
+        if (barraProgresoMini) barraProgresoMini.style.width = `${pct}%`;
+    });
+
+    broker.on('todasZonasCargadas', () => {
+        if (textoCargaBg) {
+            textoCargaBg.textContent = diccionario[idiomaActual].carga_bg_completa || "Áreas cargadas ✓";
+        }
+        if (barraProgresoMini) {
+            barraProgresoMini.style.width = '100%';
+        }
+        
+        // Desvanecer el indicador lentamente
+        setTimeout(() => {
+            indicadorCargaBg.style.transition = 'opacity 1s ease';
+            indicadorCargaBg.style.opacity = '0';
+            setTimeout(() => {
+                indicadorCargaBg.classList.add('oculto');
+                // Restaurar estilos para futuras cargas si es necesario
+                indicadorCargaBg.style.transition = '';
+                indicadorCargaBg.style.opacity = '';
+            }, 1000);
+        }, 3000);
+    });
+}
+
 // Configuración del motor, escena, cámara y renderizador
 const { scene, camara, renderizador } = inicializarengine();
 const objetosColision = [];
@@ -140,7 +195,7 @@ inicializarDebugCollisions(scene, camara, controls);
 actualizarPlayerBox(camara.position);
 
 // Carga de los models
-cargarEscenario(scene, objetosColision, loadingManager);
+cargarEscenario(scene, objetosColision, loadingManager, renderizador, camara);
 
 // Configuración de la UI y las interacciones
 inicializarinteractions();
@@ -163,6 +218,7 @@ function animar(timestamp) {
     // Actualizar lógica
     actualizaranimations(delta);
     actualizarPlayerBox(camara.position);
+    actualizarCargaPorProximidad(camara.position);
 
     // Actualizar shader del agua implementado con THREE.Water
     if (aguasInstanciadas) {

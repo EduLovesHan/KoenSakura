@@ -12,6 +12,7 @@ export const diccionario = {
         ajustes_musica: "Música",
         ajustes_sfx: "SFX",
         ajustes_iluminacion: "Iluminación",
+        ajustes_sombras: "Sombras",
         ajustes_noche: "Modo Noche",
         ajustes_idioma: "Idioma",
         btn_volver: "Volver",
@@ -32,7 +33,8 @@ export const diccionario = {
         ctrl_cursor: "Mostrar cursor",
         ctrl_camara: "Mover la cámara",
         ajustes_fps: "Mostrar FPS",
-        musica_seleccionar: "Seleccionar melodía"
+        musica_seleccionar: "Seleccionar melodía",
+        ctrl_noche: "Transición Día - Noche"
     },
     en: {
         menu_titulo: "Menu",
@@ -45,6 +47,7 @@ export const diccionario = {
         ajustes_musica: "Music",
         ajustes_sfx: "SFX",
         ajustes_iluminacion: "Lighting",
+        ajustes_sombras: "Shadows",
         ajustes_noche: "Night Mode",
         ajustes_idioma: "Language",
         btn_volver: "Back",
@@ -65,7 +68,8 @@ export const diccionario = {
         ctrl_cursor: "Show cursor",
         ctrl_camara: "Move camera",
         ajustes_fps: "Show FPS",
-        musica_seleccionar: "Select melody"
+        musica_seleccionar: "Select melody",
+        ctrl_noche: "Day - Night transition"
     }
 };
 

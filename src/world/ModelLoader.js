@@ -266,19 +266,19 @@ function crearMaterialPhong(originalMaterial, nombreMalla = '', nombreModelo = '
     });
 
     // Farolas
-    nuevoMaterial.onBeforeCompile = (shader) => {
-        Object.assign(shader.uniforms, construirUniformsFarolas());
+    // nuevoMaterial.onBeforeCompile = (shader) => {
+    //     Object.assign(shader.uniforms, construirUniformsFarolas());
 
-        shader.fragmentShader = shader.fragmentShader.replace(
-            '#include <lights_phong_pars_fragment>',
-            '#include <lights_phong_pars_fragment>\n' + FAROLAS_GLSL_DECLARATIONS
-        );
+    //     shader.fragmentShader = shader.fragmentShader.replace(
+    //         '#include <lights_phong_pars_fragment>',
+    //         '#include <lights_phong_pars_fragment>\n' + FAROLAS_GLSL_DECLARATIONS
+    //     );
 
-        shader.fragmentShader = shader.fragmentShader.replace(
-            '#include <output_fragment>',
-            FAROLAS_GLSL_CONTRIBUTION + '\n    #include <output_fragment>'
-        );
-    };
+    //     shader.fragmentShader = shader.fragmentShader.replace(
+    //         '#include <output_fragment>',
+    //         FAROLAS_GLSL_CONTRIBUTION + '\n    #include <output_fragment>'
+    //     );
+    // };
 
     // Distinguir variantes de compilación
     nuevoMaterial.customProgramCacheKey = () => {
@@ -419,26 +419,23 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
             modeloBase.name = item.archivo;
 
             const usarSkeletonUtils = tieneSkinnedMesh(modeloBase);
+            const na = item.archivo.toLowerCase();
+            const esColision = na.includes('collisions') || na.includes('colisiones');
 
-            for (const instancia of (item.instancias || [])) {
+            if (!esColision) {
+                // Aplicar materiales Phong con farolas al modelo base
+                aplicarMaterialPhong(modeloBase);
 
-                const clon = usarSkeletonUtils
-                    ? SkeletonUtils.clone(modeloBase)
-                    : modeloBase.clone();
-
-                // Culling y sombras
-                clon.traverse((child) => {
+                // Configurar culling, sombras y propiedades de renderizado
+                modeloBase.traverse((child) => {
                     if (!child.isMesh) return;
 
-                    if (child.geometry) {
-                        child.geometry.computeBoundingBox();
-                        child.geometry.computeBoundingSphere();
-                    }
                     child.frustumCulled = true;
 
                     const nh = child.name.toLowerCase();
                     const na = item.archivo.toLowerCase();
 
+                    // lógica de DoubleSide
                     const esDoubleSide =
                         nh.includes('sakura') || na.includes('bandera') || nh.includes('bandera') ||
                         nh.includes('follaje') || nh.includes('flor') || nh.includes('petalo') ||
@@ -449,7 +446,10 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
                         nh.includes('door') || nh.includes('cristal') || nh.includes('glass') ||
                         nh.includes('vidrio') || nh.includes('marco') || nh.includes('ventana') ||
                         nh.includes('window') || na.includes('museo') ||
-                        nh.includes('casa') || nh.includes('casita') || nh.includes('tradicional');
+                        nh.includes('casa') || nh.includes('casita') || nh.includes('tradicional') ||
+                        nh.includes('stand') || na.includes('stand') || nh.includes('puesto') ||
+                        nh.includes('tienda') || nh.includes('mesa') || nh.includes('table') ||
+                        nh.includes('mostrador') || nh.includes('puestito');
 
                     if (child.material) {
                         const mats = Array.isArray(child.material) ? child.material : [child.material];
@@ -463,12 +463,14 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
                                 nh.includes('roof') || nh.includes('ceiling') || nh.includes('columna') ||
                                 nh.includes('column') || nh.includes('puerta') || nh.includes('door') ||
                                 nh.includes('piso') || nh.includes('floor') || nh.includes('suelo') ||
-                                na.includes('museo');
+                                na.includes('museo') || nh.includes('stand') || na.includes('stand') ||
+                                nh.includes('puesto') || nh.includes('tienda') || nh.includes('mesa') ||
+                                nh.includes('table') || nh.includes('mostrador') || nh.includes('puestito');
                             const esVidrio =
                                 nh.includes('cristal') || nh.includes('glass') || nh.includes('vidrio') ||
                                 nh.includes('ventana') || nh.includes('window');
 
-                            if (esSolido && !esVidrio) {
+                            if (esSolido && !esVidrio && mat.alphaTest === 0) {
                                 mat.transparent = false;
                                 mat.depthWrite = true;
                                 mat.depthTest = true;
@@ -499,14 +501,17 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
                     child.castShadow = castShadow && !esVegetacionPequeña;
                     child.receiveShadow = true;
                 });
+            }
+
+            for (const instancia of (item.instancias || [])) {
+
+                const clon = usarSkeletonUtils
+                    ? SkeletonUtils.clone(modeloBase)
+                    : modeloBase.clone();
 
                 // Modelo de colisiones
-                const esColision = item.archivo.toLowerCase().includes('collisions') ||
-                    item.archivo.toLowerCase().includes('colisiones');
-
                 if (esColision) {
-                    const { posicion, rotacion, rotacionY } = instancia;
-                        const escala = instancia.escala !== undefined ? instancia.escala : item.escala;
+                    const { posicion, rotacion, rotacionY, escala } = instancia;
                     if (posicion) clon.position.set(posicion[0], posicion[1], posicion[2]);
                     if (rotacion) clon.rotation.set(rotacion[0], rotacion[1], rotacion[2]);
                     else if (rotacionY !== undefined) clon.rotation.y = rotacionY;
@@ -572,36 +577,27 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
                     });
                 }
 
-                aplicarMaterialPhong(clon);
+                const { posicion, rotacion, rotacionY } = instancia;
+                const escala = instancia.escala !== undefined ? instancia.escala : item.escala;
+                if (posicion) clon.position.set(posicion[0], posicion[1], posicion[2]);
+                if (rotacion) clon.rotation.set(rotacion[0], rotacion[1], rotacion[2]);
+                else if (rotacionY !== undefined) clon.rotation.y = rotacionY;
+                if (escala) {
+                    if (Array.isArray(escala)) clon.scale.set(escala[0], escala[1], escala[2]);
+                    else clon.scale.setScalar(escala);
+                }
 
-                    const { posicion, rotacion, rotacionY } = instancia;
-                    const escala = instancia.escala !== undefined ? instancia.escala : item.escala;
-
-                    // Posición
-                    if (posicion) {
-                        clon.position.set(posicion[0], posicion[1], posicion[2]);
-                    }
-
-                    // Rotación
-                    if (rotacion) {
-                        clon.rotation.set(rotacion[0], rotacion[1], rotacion[2]);
-                    } else if (rotacionY !== undefined) {
-                        clon.rotation.y = rotacionY;
-                    }
-
-                    // Escala
-                    if (escala) {
-                        if (Array.isArray(escala)) {
-                            clon.scale.set(escala[0], escala[1], escala[2]);
-                        } else {
-                            clon.scale.setScalar(escala);
-                        }
-                    }
+                const esFolaje = na.includes('bamboo') || na.includes('bambu');
+                if (esFolaje) {
+                    clon.scale.y *= (0.8 + Math.random() * 0.4);
+                    clon.scale.x *= (0.9 + Math.random() * 0.2);
+                    clon.scale.z *= (0.9 + Math.random() * 0.2);
+                }
 
                 scene.add(clon);
 
-                const esPlaza = item.archivo.toLowerCase().includes('plaza');
-                const esMuseo = item.archivo.toLowerCase().includes('museo');
+                const esPlaza = na.includes('plaza');
+                const esMuseo = na.includes('museo');
                 if (!esPlaza && !esMuseo) clon.userData.generarHitboxAutomata = true;
 
                 const datosJSON = { ...item, ...instancia };

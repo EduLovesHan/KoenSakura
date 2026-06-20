@@ -10,11 +10,11 @@ export function obtenerDebugGUI() {
     if (!gui) {
         gui = new GUI({ title: 'Panel de Depuración' });
 
-        // Por defecto, hacer que el panel aparezca minimizado
         gui.close();
+        gui.hide();
 
         if (window.esMovil) {
-            gui.hide();
+            // gui.hide();
         }
 
     }

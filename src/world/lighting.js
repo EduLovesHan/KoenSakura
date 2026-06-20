@@ -14,17 +14,17 @@ const NUM_LUCES_POOL = 6;
 export const lucesPool = [];
 export const posicionesFarolasGlobal = [];
 export const configuracionFarolas = {
-    color: 0xffaa00,
-    altura: 4.0,
-    intensidad: 2.0,
-    distancia: 20.0
+    color: 0xFFC354,
+    altura: 4.5,
+    intensidad: 3.0,
+    distancia: 25.0
 };
 
 // Registrar material para brillar en la noche
 export function registrarMaterialEmisivo(material) {
     if (material && !materialesEmisivos.includes(material)) {
         materialesEmisivos.push(material);
-        material.emissiveIntensity = !esDeDia ? 10.0 : 0.0;
+        material.emissiveIntensity = !esDeDia ? 5.0 : 0.0;
     }
 }
 
@@ -55,21 +55,22 @@ export function inicializarLighting(scene) {
 
     // Limitar resolución de sombras en móviles
     const esMovil = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || ('ontouchstart' in window);
-    directionalLight.shadow.mapSize.width = esMovil ? 256 : 2048;
-    directionalLight.shadow.mapSize.height = esMovil ? 256 : 2048;
+    directionalLight.shadow.mapSize.width = esMovil ? 256 : 1024;
+    directionalLight.shadow.mapSize.height = esMovil ? 256 : 1024;
 
     scene.add(directionalLight);
+    scene.add(directionalLight.target); 
 
     // Inicializar PointLights para farolas
     for (let i = 0; i < NUM_LUCES_POOL; i++) {
-        const luz = new THREE.PointLight(0xffaa00, 0, 20, 0);
+        const luz = new THREE.PointLight(0xFFC354, 0, 20, 0);
         luz.position.set(0, -100, 0);
         scene.add(luz);
         lucesPool.push(luz);
     }
 }
 
-// Función para refrescar panel lil-gui
+// Función para actualizar panel de debug
 function refrescarGUI() {
     const gui = obtenerDebugGUI();
     if (gui) {
@@ -110,9 +111,9 @@ export function registrarPosicionFarola(posicion, datosJSON = {}) {
     posicionesFarolasGlobal.push({
         posicion: posicion.clone(),
         color: sanitizarColor(datosJSON.farolaColor),
-        altura: datosJSON.farolaAltura !== undefined ? Number(datosJSON.farolaAltura) : 4.0,
-        intensidad: datosJSON.farolaIntensidad !== undefined ? Number(datosJSON.farolaIntensidad) : 2.0,
-        distancia: datosJSON.farolaDistancia !== undefined ? Number(datosJSON.farolaDistancia) : 20.0
+        altura: datosJSON.farolaAltura !== undefined ? Number(datosJSON.farolaAltura) : 4.5,
+        intensidad: datosJSON.farolaIntensidad !== undefined ? Number(datosJSON.farolaIntensidad) : 1.0,
+        distancia: datosJSON.farolaDistancia !== undefined ? Number(datosJSON.farolaDistancia) : 25.0
     });
 }
 
@@ -236,14 +237,14 @@ export function cambiarClimaSuave(esDeDiaTarget, skybox, duracion = 3.5) {
     const targetShininess = 30.0;
     const targetSpecularIntensity = 0.0;
     const targetSkyboxOpacity = esDeDiaTarget ? 0.0 : 1.0;
-    const targetEmissiveIntensity = esDeDiaTarget ? 0.0 : 10.0;
+    const targetEmissiveIntensity = esDeDiaTarget ? 0.0 : 1.0;
 
     // Animar Luz Ambiental
     gsap.to(ambientLight, {
         intensity: targetAmbientIntensity,
         duration: duracion,
         ease: ease,
-        onUpdate: refrescarGUI
+        onComplete: refrescarGUI
     });
 
     gsap.to(ambientLight.color, {
@@ -311,7 +312,7 @@ export function cambiarClimaSuave(esDeDiaTarget, skybox, duracion = 3.5) {
 
     // Animar luces de farolas
     const targetPoolIntensityFactor = esDeDiaTarget ? 0.0 : 1.0;
-    // Animar el uniform compartido del shader (las luces físicas del pool se sincronizan automáticamente en el frame loop)
+    // Animar el uniform compartido del shader 
     gsap.killTweensOf(phongUniformsGlobales.uPointLightIntensityFactor);
     gsap.to(phongUniformsGlobales.uPointLightIntensityFactor, {
         value: targetPoolIntensityFactor,
@@ -327,7 +328,6 @@ export function cambiarClimaSuave(esDeDiaTarget, skybox, duracion = 3.5) {
     }
 }
 
-// Función compatible con la UI antigua que alterna el estado
 export function alternarDiaNoche(skybox) {
     alternarCicloDiaNoche(skybox);
     return { ambInt: ambientLight.intensity, dirInt: directionalLight.intensity };
@@ -339,8 +339,9 @@ export function alternarCicloDiaNoche(skybox) {
 }
 
 // Conectar sliders con las luces y controlar eventos de cambio de clima
-export function configurarcontrolsLighting(skybox) {
+export function configurarcontrolsLighting(skybox, renderizador, scene) {
     const modoNocheCheckbox = document.getElementById('modo-noche-checkbox');
+    const sombrasCheckbox = document.getElementById('sombras-checkbox');
 
     // Alternancia con tecla N
     document.addEventListener('keydown', (e) => {
@@ -389,8 +390,23 @@ export function configurarcontrolsLighting(skybox) {
     if (modoNocheCheckbox) {
         modoNocheCheckbox.addEventListener('change', () => {
             alternarDiaNoche(skybox);
-            cerrarMenuSuperior(); // Cerrar el menú superior para ver la escena limpia
+            cerrarMenuSuperior(); 
         });
+    }
+
+    if (sombrasCheckbox && renderizador) {
+        if (window.esMovil) {
+            // Ocultar opcion de sombras en moviles
+            const controlGrupo = sombrasCheckbox.closest('.control-grupo');
+            if (controlGrupo) controlGrupo.style.display = 'none';
+        } else {
+            // Inicializar el checkbox según el estado actual del renderizador
+            sombrasCheckbox.checked = renderizador.shadowMap.enabled;
+            
+            sombrasCheckbox.addEventListener('change', (e) => {
+                renderizador.shadowMap.enabled = e.target.checked;
+            });
+        }
     }
 }
 

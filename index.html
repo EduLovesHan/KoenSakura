@@ -51,7 +51,6 @@
         </button>
 
         <div id="ui-interaccion" class="oculto">
-            <span class="interaccion-tecla">E</span>
             <span data-i18n="ui_interactuar">Interactuar</span>
         </div>
 
@@ -105,7 +104,7 @@
                 </div>
 
                 <div id="tab-general" class="tab-contenido oculto">
-                    <p data-i18n="texto_general">Una experiencia web interactiva en 3D desarrollada como proyecto final de Programación Gráfica. Consiste en un recorrido virtual inmersivo en primera persona a través de una plaza con estética japonesa al estilo low-poly.</p>
+                    <p data-i18n="texto_general" style="text-align: justify;">Una experiencia web interactiva en 3D desarrollada como proyecto final de Programación Gráfica. Consiste en un recorrido virtual inmersivo en primera persona a través de una plaza con estética japonesa al estilo low-poly.</p>
                 </div>
 
                 <div id="tab-controls" class="tab-contenido oculto">
@@ -154,12 +153,19 @@
                                 <span class="etiqueta-tecla" data-i18n="ctrl_camara">Mover la cámara</span>
                             </div>
                         </div>
+                        <div class="control-slide" data-index="3">
+                            <div class="tecla-grupo">
+                                <span class="tecla-3d">N</span>
+                                <span class="etiqueta-tecla" data-i18n="ctrl_noche">Día / Noche</span>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="carrusel-nav">
                         <button class="btn-nav" id="prev-control">◀</button>
                         <div class="indicador-puntos">
                             <span class="punto active"></span>
+                            <span class="punto"></span>
                             <span class="punto"></span>
                             <span class="punto"></span>
                         </div>
@@ -200,6 +206,15 @@
                             </div>
                             <div class="control-grupo" style="margin-bottom: 15px;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 10px;">
+                                    <span data-i18n="ajustes_sombras" style="font-size: 16px;">Sombras</span>
+                                    <label style="margin: 0; display: flex; align-items: center; white-space: nowrap;">
+                                        <input type="checkbox" id="sombras-checkbox" style="margin-right: 8px;">
+                                        <span data-i18n="btn_activar">Activar</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="control-grupo" style="margin-bottom: 15px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 10px;">
                                     <span data-i18n="ajustes_fps" style="font-size: 16px;">Mostrar FPS</span>
                                     <label style="margin: 0; display: flex; align-items: center; white-space: nowrap;">
                                         <input type="checkbox" id="fps-checkbox" style="margin-right: 8px;">
@@ -229,8 +244,12 @@
                     </div>
                 </div>
 
-                <div id="tab-creditos" class="tab-contenido oculto">
-                    <p><strong data-i18n="texto_creditos_titulo">Desarrollado por:</strong> María Altamirano y Javiera Molina</p>
+                <div id="tab-creditos" class="tab-contenido oculto" style="text-align: center;">
+                    <p style="margin-bottom: 15px;"><strong data-i18n="texto_creditos_titulo"></strong></p>
+                    <div style="display: flex; flex-direction: column; gap: 10px; align-items: center;">
+                        <div class="btn-opcion" style="cursor: default; pointer-events: none; width: 80%; padding: 10px; display: flex; justify-content: center; align-items: center;">María Altamirano</div>
+                        <div class="btn-opcion" style="cursor: default; pointer-events: none; width: 80%; padding: 10px; display: flex; justify-content: center; align-items: center;">Javiera Molina</div>
+                    </div>
                 </div>
             </div>
         </div>

@@ -7,7 +7,7 @@ import { inicializarinteractions, actualizarinteractions } from './player/intera
 import { Skybox } from './world/skybox.js';
 import { cargarEscenario, phongUniformsGlobales, aguasInstanciadas } from './world/ModelLoader.js';
 import { inicializarDebugCollisions, actualizarPlayerBox } from './world/collisions.js';
-import { inicializarLighting, configurarcontrolsLighting, actualizarLucesFarolas } from './world/lighting.js';
+import { inicializarLighting, configurarcontrolsLighting, actualizarLucesFarolas, directionalLight } from './world/lighting.js';
 import { actualizaranimations } from './world/animations.js';
 import { inicializarAudio, reproducirClick, configurarcontrolsAudio } from './audio/AudioManager.js';
 import { inicializarUI } from './ui/menu.js';
@@ -110,6 +110,9 @@ const stats = new Stats();
 stats.showPanel(0);
 stats.dom.style.zIndex = '10000';
 stats.dom.style.display = 'none';
+stats.dom.style.position = 'absolute';
+stats.dom.style.right = '0px';
+stats.dom.style.left = 'auto';
 document.body.appendChild(stats.dom);
 
 // Configuración del audio y controles de movimiento
@@ -117,7 +120,7 @@ inicializarAudio(camara);
 const controls = new controlsPrimeraPersona(camara, document.body, objetosColision);
 configurarcontrolsAudio();
 
-// Bloquear clicks hasta que la pantalla de carga desaparezca, excepto para el botón de entrar
+// Bloquear clicks excepto para el botón de entrar
 document.addEventListener('click', (e) => {
     if (document.getElementById('pantalla-carga')) {
         if (e.target && e.target.id === 'btn-entrar') {
@@ -130,7 +133,7 @@ document.addEventListener('click', (e) => {
 // Configuración de la iluminación y el skybox
 const skybox = new Skybox(scene, loadingManager);
 inicializarLighting(scene);
-configurarcontrolsLighting(skybox);
+configurarcontrolsLighting(skybox, renderizador, scene);
 
 // Inicializar depuración de colisiones y hitbox del jugador
 inicializarDebugCollisions(scene, camara, controls);
@@ -172,6 +175,13 @@ function animar(timestamp) {
 
     // Asignar las 6 PointLights a las farolas más cercanas
     actualizarLucesFarolas(camara);
+
+    // La luz direccional sigue a la cámara
+    if (directionalLight) {
+        directionalLight.position.set(camara.position.x + 30, camara.position.y + 45, camara.position.z + 30);
+        directionalLight.target.position.copy(camara.position);
+        directionalLight.target.updateMatrixWorld();
+    }
 
     // Mantener la esfera de noche centrada en la cámara
     if (skybox && typeof skybox.actualizar === 'function') {

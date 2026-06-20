@@ -1,168 +1,172 @@
 [
-    {
-      "archivo": "assets/models/arbol1.glb",
-      "instancias": [
-        { "posicion": [10, 0, 30], "escala": 1.5 },
-        { "posicion": [-10, 0, 30], "escala": 1.5 },
-        { "posicion": [60, 0, 135], "escala": 2 }
+  {
+    "archivo": "assets/models/arbol1.glb",
+    "zona": "principal",
+    "instancias": [
+       { "posicion": [10, -0.2, 30], "escala": 1.5 },
+        { "posicion": [-10, -0.2, 30], "escala": 1.5 },
+        { "posicion": [60, -0.2, 135], "escala": 2 }
       ]
-    },
-    {
-      "archivo": "assets/models/banca.glb",
-      "instancias": [
-        { "posicion": [-25, 0, 95], "escala": 1.5, "rotacion": [0, 1.52, 0] },
-        { "posicion": [-27, 0, 37], "escala": 1.5, "rotacion": [0, -1.52, 0] },
-        { "posicion": [26, 0, 35], "escala": 1.5, "rotacion": [0, -1.52, 0] },
-        { "posicion": [35, 0, 95], "escala": 1.5, "rotacion": [0, 1.52, 0] },
-        { "posicion": [35, 0, 125], "escala": 1.5, "rotacion": [0, -1.52, 0] },
-        { "posicion": [13, 0, 187], "escala": 1.5, "rotacion": [0, 1.52, 0] }
+  },
+  {
+    "archivo": "assets/models/banca.glb",
+    "zona": "principal",
+    "instancias": [
+        { "posicion": [-25, -0.6, 95], "escala": 1.5, "rotacion": [0, 1.52, 0] },
+        { "posicion": [-27, -0.6, 37], "escala": 1.5, "rotacion": [0, -1.52, 0] },
+        { "posicion": [26, -0.6, 35], "escala": 1.5, "rotacion": [0, -1.52, 0] },
+        { "posicion": [35, -0.6, 95], "escala": 1.5, "rotacion": [0, 1.52, 0] },
+        { "posicion": [35, -0.6, 125], "escala": 1.5, "rotacion": [0, -1.52, 0] },
+        { "posicion": [13, -0.6, 187], "escala": 1.5, "rotacion": [0, 1.52, 0] }
       ]
-    },
-    {
-      "archivo": "assets/models/stand.glb",
-      "interactivo": {
-        "titulo": {
-          "es": "Zonas del Parque",
-          "en": "Park Zones"
-        },
-        "texto": {
-          "es": "¡Embárcate en una nueva aventura en cada una de las zonas que el parque tiene por ofrecer!",
-          "en": "Embark on a new adventure in each of the areas the park has to offer!"
-        },
-        "distancia": 3
+  },
+  {
+    "archivo": "assets/models/stand.glb",
+    "interactivo": {
+      "titulo": {
+        "es": "Zonas del Parque",
+        "en": "Park Zones"
       },
-      "instancias": [
-        { "posicion": [0, 0, 112.5], "escala": 3, "rotacion": [0, -3.14, 0] }
-      ]
+      "texto": {
+        "es": "¡Embárcate en una nueva aventura en cada una de las zonas que el parque tiene por ofrecer!",
+        "en": "Embark on a new adventure in each of the areas the park has to offer!"
+      },
+      "distancia": 12
     },
-    {
-      "archivo": "assets/models/fresco.glb",
-      "instancias": [
+    "zona": "principal",
+    "instancias": [
+        { "posicion": [0, -0.7, 112.5], "escala": 3, "rotacion": [0, -3.14, 0] }
+      ]
+  },
+  {
+    "archivo": "assets/models/fresco.glb",
+    "zona": "hiroshima",
+    "instancias": [
         { "posicion": [-77, 3, 172], "escala": 0.35, "rotacion": [0, 0, 0] }
       ]
-    },
-    {
-      "archivo": "assets/models/naruto1.glb",
-      "instancias": [
+  },
+  {
+    "archivo": "assets/models/naruto1.glb",
+    "zona": "ramen",
+    "instancias": [
         { "posicion": [-93, 2.5, 136.5], "escala": 10, "rotacion": [0, 0, 0] }
       ]
-    },
-    {
-      "archivo": "assets/models/monedero.glb",
-      "interactivo": {
-        "titulo": {
-          "es": "Monedero",
-          "en": "Wallet"
-        },
-        "texto": {
-          "es": "Alguien debió haberlo olvidado...",
-          "en": "Someone must have forgotten it..."
-        },
-        "distancia": 3
+  },
+  {
+    "archivo": "assets/models/monedero.glb",
+    "interactivo": {
+      "titulo": {
+        "es": "Monedero",
+        "en": "Wallet"
       },
-      "instancias": [
+      "texto": {
+        "es": "Alguien debió haberlo olvidado...",
+        "en": "Someone must have forgotten it..."
+      },
+      "distancia": 4
+    },
+    "zona": "ramen",
+    "instancias": [
         { "posicion": [-96.5, 2.5, 137], "escala": 2, "rotacion": [0, 0, 0] }
       ]
-    },
-    {
-      "archivo": "assets/models/naruto2.glb",
-      "instancias": [
+  },
+  {
+    "archivo": "assets/models/naruto2.glb",
+    "zona": "ramen",
+    "instancias": [
         { "posicion": [-100, 2.6, 136.5], "escala": 9, "rotacion": [0, 0, 0] }
       ]
-    },
-    {
-      "archivo": "assets/models/ramen.glb",
-      "instancias": [
+  },
+  {
+    "archivo": "assets/models/ramen.glb",
+    "zona": "ramen",
+    "instancias": [
         { "posicion": [-75, 2.8, 172], "escala": 3.2, "rotacion": [0, -1.52, 0] }
       ]
-    },
-    {
-      "archivo": "assets/models/guoba.glb",
-      "instancias": [
-        { "posicion": [-80, 0, 161.5], "escala": 1, "rotacion": [0, 1.52, 0] }
+  },
+  {
+    "archivo": "assets/models/guoba.glb",
+    "zona": "ramen",
+    "instancias": [
+        { "posicion": [-80, -0.5, 161.5], "escala": 1, "rotacion": [0, 1.52, 0] }
       ]
-    },
-    {
-      "archivo": "assets/models/ichirakuRamen.glb",
-      "instancias": [
-        {
-          "posicion": [-96, 0, 133],
-          "escala": 38,
-          "interactivo": {
-            "titulo": {
-              "es": "Ichiraku Ramen",
-              "en": "Ichiraku Ramen"
-            },
-            "texto": {
-              "es": "El puesto de ramen favorito de Naruto.",
-              "en": "Naruto's favorite ramen stand."
-            },
-            "distancia": 12
-          }
-        }
+  },
+  {
+    "archivo": "assets/models/ichirakuRamen.glb",
+    "zona": "ramen",
+    "instancias": [
+        { "posicion": [-96, 0, 133], "escala": 38, "interactivo": {"titulo":{"es":"Ichiraku Ramen","en":"Ichiraku Ramen"},"texto":{"es":"El puesto de ramen favorito de Naruto.","en":"Naruto's favorite ramen stand."},"distancia":8} }
       ]
-    },
-    {
-      "archivo": "assets/models/estatuaHachiko.glb",
-      "instancias": [
+  },
+  {
+    "archivo": "assets/models/estatuaHachiko.glb",
+    "zona": "hiroshima",
+    "instancias": [
         { "posicion": [-52, -0.25, 93], "escala": 1.5, "rotacion": [0, -1.52, 0] }
       ]
-    },
-    {
-      "archivo": "assets/models/perroCat.glb",
-      "instancias": [
+  },
+  {
+    "archivo": "assets/models/perroCat.glb",
+    "zona": "hiroshima",
+    "instancias": [
         { "posicion": [-52, 0.5, 52], "escala": 2.5, "rotacion": [0, -1.52, 0] }
       ]
-    },
-    {
-      "archivo": "assets/models/loboGirl_optimized.glb",
-      "instancias": [
+  },
+  {
+    "archivo": "assets/models/loboGirl_optimized.glb",
+    "zona": "museo",
+    "instancias": [
         { "posicion": [-100, -1.3, 44], "escala": 18, "rotacion": [0, 7.17, 0] }
       ]
-    },
-    {
-      "archivo": "assets/models/loboBoy_optimized.glb",
-      "instancias": [
+  },
+  {
+    "archivo": "assets/models/loboBoy_optimized.glb",
+    "zona": "museo",
+    "instancias": [
         { "posicion": [-100, -1, 98], "escala": 18, "rotacion": [0, 2.28, 0] }
       ]
-    },
-    {
-      "archivo": "assets/models/pisoHiroshima.glb",
-      "interactivo": {
-        "titulo": {
-          "es": "Bombardeos de Hiroshima y Nagazaki",
-          "en": "Hiroshima and Nagazaki Bombings"
-        },
-        "texto": {
-          "es": "Ambas explosiones causaron la muerte de más de 200.000 personas. Provocaron la rendición de Japón lo que dió fin a la Segunda Guerra Mundial",
-          "en": "Both explosions caused the death of more than 200,000 people. They caused Japan's surrender, which ended World War II"
-        },
-        "distancia": 5
+  },
+  {
+    "archivo": "assets/models/pisoHiroshima.glb",
+    "interactivo": {
+      "titulo": {
+        "es": "Bombardeos de Hiroshima y Nagazaki",
+        "en": "Hiroshima and Nagazaki Bombings"
       },
-      "instancias": [
+      "texto": {
+        "es": "Ambas explosiones causaron la muerte de más de 200.000 personas. Provocaron la rendición de Japón lo que dió fin a la Segunda Guerra Mundial",
+        "en": "Both explosions caused the death of more than 200,000 people. They caused Japan's surrender, which ended World War II"
+      },
+      "distancia": 5
+    },
+    "zona": "hiroshima",
+    "instancias": [
         { "posicion": [-77, 0.5, 52], "escala": 1, "rotacion": [0, -3.14, 0] }
       ]
-    },
-    {
-      "archivo": "assets/models/hiroshima.glb",
-      "instancias": [
+  },
+  {
+    "archivo": "assets/models/hiroshima.glb",
+    "zona": "hiroshima",
+    "instancias": [
         { "posicion": [-77, 0.6, 52], "escala": 1.1, "rotacion": [0, -9.38, 0] }
       ]
-    },
-    {
-      "archivo": "assets/models/maqHiroshima.glb",
-      "instancias": [
+  },
+  {
+    "archivo": "assets/models/maqHiroshima.glb",
+    "zona": "hiroshima",
+    "instancias": [
         { "posicion": [-70, 0.6, 45], "escala": 1.5, "rotacion": [0, 3.14, 0] }
       ]
-    },
-    {
-      "archivo": "assets/models/luzNoche.glb",
-      "esFarola": true,
-      "farolaColor": "#F3DC91",
-      "farolaAltura": 4.5,
-      "farolaIntensidad": 3,
-      "farolaDistancia": 25,
-      "instancias": [
+  },
+  {
+    "archivo": "assets/models/luzNoche.glb",
+    "esFarola": true,
+    "farolaColor": "#F3DC91",
+    "farolaAltura": 4.5,
+    "farolaIntensidad": 1,
+    "farolaDistancia": 25,
+    "zona": "museo",
+    "instancias": [
         { "posicion": [-70, 10, 45], "escala": 2, "rotacion": [0, 3.14, 0] },
         { "posicion": [-75, 10, 45], "escala": 2, "rotacion": [0, 3.14, 0] },
         { "posicion": [-65, 10, 45], "escala": 2, "rotacion": [0, 3.14, 0] },
@@ -178,242 +182,155 @@
         { "posicion": [-98, 6.7, 135], "escala": 2, "rotacion": [0, 3.14, 0] },
         { "posicion": [-92, 6.7, 135], "escala": 2, "rotacion": [0, 3.14, 0] }
       ]
-    },
-    {
-      "archivo": "assets/models/kimono.glb",
-      "instancias": [
-        {
-          "posicion": [-76, 0.5, 38],
-          "escala": 1.5,
-          "rotacion": [0, 4.66, 0],
-          "interactivo": {
-            "titulo": {
-              "es": "Kimono Tradicional",
-              "en": "Traditional Kimono"
-            },
-            "texto": {
-              "es": "El vestido tradicional japonés, conocido por sus hermosos patrones florales y mangas anchas.",
-              "en": "The traditional Japanese dress, known for its beautiful floral patterns and wide sleeves."
-            },
-            "distancia": 4
-          }
-        }
+  },
+  {
+    "archivo": "assets/models/kimono.glb",
+    "zona": "museo",
+    "instancias": [
+        { "posicion": [-76, 0.5, 38], "escala": 1.5, "rotacion": [0, 4.66, 0], "interactivo": {"titulo":{"es":"Kimono Tradicional","en":"Traditional Kimono"},"texto":{"es":"El vestido tradicional japonés, conocido por sus hermosos patrones florales y mangas anchas.","en":"The traditional Japanese dress, known for its beautiful floral patterns and wide sleeves."},"distancia":4} }
       ]
-    },
-    {
-      "archivo": "assets/models/linterna.glb",
-      "esFarola": true,
-      "farolaColor": "#F3DC91",
-      "farolaAltura": 2.5,
-      "farolaIntensidad": 3,
-      "farolaDistancia": 25,
-      "instancias": [
-        { "posicion": [-88, 1.5, 92.5], "escala": 0.5, "rotacion": [0, 3.14, 0] },
-        { "posicion": [-60, 1.5, 92.5], "escala": 0.5, "rotacion": [0, 3.14, 0] },
-        { "posicion": [83, 1.5, 187], "escala": 0.5, "rotacion": [0, 3.14, 0] },
-        { "posicion": [83, 1.5, 172.5], "escala": 0.5, "rotacion": [0, 3.14, 0] }
+  },
+  {
+    "archivo": "assets/models/linterna.glb",
+    "esFarola": true,
+    "farolaColor": "#F3DC91",
+    "farolaAltura": 2.5,
+    "farolaIntensidad": 3,
+    "farolaDistancia": 25,
+    "zona": "principal",
+    "instancias": [
+        { "posicion": [-88, 1, 92.5], "escala": 0.5, "rotacion": [0, 3.14, 0] },
+        { "posicion": [-60, 1, 92.5], "escala": 0.5, "rotacion": [0, 3.14, 0] },
+        { "posicion": [83, 1, 187], "escala": 0.5, "rotacion": [0, 3.14, 0] },
+        { "posicion": [83, 1, 172.5], "escala": 0.5, "rotacion": [0, 3.14, 0] }
       ]
-    },
-    {
-      "archivo": "assets/models/mostrador.glb",
-      "instancias": [
-        {
-          "posicion": [-52, 0, 93.5],
-          "escala": 2.25,
-          "interactivo": {
-            "titulo": {
-              "es": "El perro fiel Hachiko",
-              "en": "The Faithful Dog Hachiko"
-            },
-            "texto": {
-              "es": "Hachiko fue un perro japonés de raza akita, recordado por haber esperado a su dueño, el profesor Hidesaburo Ueno, en la estación Shibuya, cerca de nueve años después de la muerte de este.",
-              "en": "Hachiko was a Japanese Akita dog remembered for waiting for his owner, Professor Hidesaburo Ueno, at Shibuya Station for nearly nine years after his death."
-            },
-            "distancia": 8,
-            "rotacion": [0, 3.14, 0]
-          }
-        },
-        {
-          "posicion": [-100, 0, 99],
-          "escala": 2.25,
-          "interactivo": {
-            "titulo": {
-              "es": "Estatua de Konkon-san",
-              "en": "Konkon-san Statue"
-            },
-            "texto": {
-              "es": "Esta estatua representa principalmente al mensajero sagrado del dios sintoísta Inari, la deidad de la agricultura, la fertilidad y la abundancia de arroz",
-              "en": "This statue primarily represents the sacred messenger of the Shinto god Inari, the deity of agriculture, fertility, and rice abundance."
-            },
-            "distancia": 8,
-            "rotacion": [0, 3.14, 0]
-          }
-        },
-        {
-          "posicion": [-52, 0, 52],
-          "escala": 2.25,
-          "interactivo": {
-            "titulo": {
-              "es": "Estatua de Komainu",
-              "en": "Komainu Statue"
-            },
-            "texto": {
-              "es": "Estatua de perro-león guardián de origen sintoísta. Se sitúan a la entrada de los templos para ahuyentar a los malos espíritus.",
-              "en": "A guardian lion-dog statue of Shinto origin. They are placed at temple entrances to ward off evil spirits."
-            },
-            "distancia": 8,
-            "rotacion": [0, -1.52, 0]
-          }
-        },
-        {
-          "posicion": [-100, 0, 45],
-          "escala": 2.25,
-          "interactivo": {
-            "titulo": {
-              "es": "El Zorro de Mimeguri",
-              "en": "The Fox of Mimeguri"
-            },
-            "texto": {
-              "es": "El santuario que protege la estatua es conocido por venerar a dos de los Siete Dioses de la Fortuna: Daikokushin (dios de la compasión y la prosperidad) y Ebisu (dios de la pesca y el comercio).",
-              "en": "The statue is protected by a shrine known for venerating two of the Seven Lucky Gods: Daikokushin (god of compassion and prosperity) and Ebisu (god of fishing and commerce)."
-            },
-            "distancia": 8
-          }
-        }
+  },
+  {
+    "archivo": "assets/models/mostrador.glb",
+    "zona": "hiroshima",
+    "instancias": [
+        { "posicion": [-52, 0, 93.5], "escala": 2.25, "interactivo": {"titulo":{"es":"El perro fiel Hachiko","en":"The Faithful Dog Hachiko"},"texto":{"es":"Hachiko fue un perro japonés de raza akita, recordado por haber esperado a su dueño, el profesor Hidesaburo Ueno, en la estación Shibuya, cerca de nueve años después de la muerte de este.","en":"Hachiko was a Japanese Akita dog remembered for waiting for his owner, Professor Hidesaburo Ueno, at Shibuya Station for nearly nine years after his death."},"distancia":8,"rotacion":[0,3.14,0]} },
+        { "posicion": [-100, 0, 99], "escala": 2.25, "interactivo": {"titulo":{"es":"Estatua de Konkon-san","en":"Konkon-san Statue"},"texto":{"es":"Esta estatua representa principalmente al mensajero sagrado del dios sintoísta Inari, la deidad de la agricultura, la fertilidad y la abundancia de arroz","en":"This statue primarily represents the sacred messenger of the Shinto god Inari, the deity of agriculture, fertility, and rice abundance."},"distancia":8,"rotacion":[0,3.14,0]} },
+        { "posicion": [-52, 0, 52], "escala": 2.25, "interactivo": {"titulo":{"es":"Estatua de Komainu","en":"Komainu Statue"},"texto":{"es":"Estatua de perro-león guardián de origen sintoísta. Se sitúan a la entrada de los templos para ahuyentar a los malos espíritus.","en":"A guardian lion-dog statue of Shinto origin. They are placed at temple entrances to ward off evil spirits."},"distancia":8,"rotacion":[0,-1.52,0]} },
+        { "posicion": [-100, 0, 45], "escala": 2.25, "interactivo": {"titulo":{"es":"El Zorro de Mimeguri","en":"The Fox of Mimeguri"},"texto":{"es":"El santuario que protege la estatua es conocido por venerar a dos de los Siete Dioses de la Fortuna: Daikokushin (dios de la compasión y la prosperidad) y Ebisu (dios de la pesca y el comercio).","en":"The statue is protected by a shrine known for venerating two of the Seven Lucky Gods: Daikokushin (god of compassion and prosperity) and Ebisu (god of fishing and commerce)."},"distancia":8} }
       ]
-    },
-    {
-      "archivo": "assets/models/cerezo.glb",
-      "instancias": [
-        { "posicion": [18, 0.2, 125], "escala": 5, "rotacion": [0, -3.141593, 0] },
-        { "posicion": [18, 0.2, 95], "escala": 5 },
-        { "posicion": [-18, 0.2, 125], "escala": 5 },
-        { "posicion": [-18, 0.2, 95], "escala": 5, "rotacion": [0, -3.141593, 0] }
+  },
+  {
+    "archivo": "assets/models/cerezo.glb",
+    "zona": "principal",
+    "instancias": [
+        { "posicion": [18, -0.3, 125], "escala": 5, "rotacion": [0, -3.141593, 0] },
+        { "posicion": [18, -0.3, 95], "escala": 5 },
+        { "posicion": [-18, -0.3, 125], "escala": 5 },
+        { "posicion": [-18, -0.3, 95], "escala": 5, "rotacion": [0, -3.141593, 0] }
       ]
-    },
-    {
-      "archivo": "assets/models/toroStone.glb",
-      "instancias": [
-        {
-          "posicion": [53.5, 0, 175],
-          "escala": 6,
-          "rotacion": [0, 3.14, 0],
-          "interactivo": {
-            "titulo": {
-              "es": "Toro o Farolillo Japones",
-              "en": "Toro or Japanese Lantern"
-            },
-            "texto": {
-              "es": "Son típicos de los templos budistas y se extendieron con esta religión a lo largo del periodo Nara. Decoran escaleras, jardines y paseos para guiar el camino de los espíritus y dioses y que no se pierdan.",
-              "en": "They are typical of Buddhist temples and spread with this religion throughout the Nara period. They decorate stairs, gardens, and pathways to guide the path of spirits and gods so they do not get lost."
-            },
-            "distancia": 6
-          }
-        },
+  },
+  {
+    "archivo": "assets/models/toroStone.glb",
+    "esFarola": true,
+    "farolaColor": "#F3DC91",
+    "farolaAltura": 2.5,
+    "farolaIntensidad": 3,
+    "farolaDistancia": 25,
+    "zona": "principal",
+    "instancias": [
+        { "posicion": [53.5, 0, 175], "escala": 6, "rotacion": [0, 3.14, 0], "interactivo": {"titulo":{"es":"Toro o Farolillo Japones","en":"Toro or Japanese Lantern"},"texto":{"es":"Son típicos de los templos budistas y se extendieron con esta religión a lo largo del periodo Nara. Decoran escaleras, jardines y paseos para guiar el camino de los espíritus y dioses y que no se pierdan.","en":"They are typical of Buddhist temples and spread with this religion throughout the Nara period. They decorate stairs, gardens, and pathways to guide the path of spirits and gods so they do not get lost."},"distancia":6} },
         { "posicion": [53.5, 0, 183], "escala": 6, "rotacion": [0, 3.14, 0] },
         { "posicion": [13, 0, 95], "escala": 6, "rotacion": [0, 1.52, 0] },
         { "posicion": [-13, 0, 95], "escala": 6, "rotacion": [0, 1.52, 0] },
         { "posicion": [-15, 0, 125], "escala": 6, "rotacion": [0, 1.52, 0] },
         { "posicion": [15, 0, 125], "escala": 6, "rotacion": [0, 1.52, 0] }
-      ],
-      "esFarola": true,
-      "farolaColor": "#F3DC91",
-      "farolaAltura": 2.5,
-      "farolaIntensidad": 3,
-      "farolaDistancia": 25
-    },
-    {
-      "archivo": "assets/models/vegetacion.glb",
-      "instancias": [
-        { "posicion": [52, 0, 190], "escala": 4, "rotacion": [0, 1.52, 0] },
-        { "posicion": [52, 1, 150], "escala": 4, "rotacion": [0, -1.52, 0] }
       ]
-    },
-    {
-      "archivo": "assets/models/lampara.glb",
-      "instancias": [
-        { "posicion": [50, 0, 95], "escala": 3.5, "rotacion": [0, 3.14, 0] },
-        { "posicion": [-90, 0, 165], "escala": 3.5, "rotacion": [0, 3.14, 0] },
-        { "posicion": [-57, 0, 165], "escala": 3.5, "rotacion": [0, 3.14, 0] },
-        { "posicion": [-65, 0, 120], "escala": 3.5, "rotacion": [0, 3.14, 0] },
-        { "posicion": [-40, 0, 120], "escala": 3.5, "rotacion": [0, 3.14, 0] }
-       ],
-      "esFarola": true,
-      "farolaColor": "#F3DC91",
-      "farolaAltura": 2.5,
-      "farolaIntensidad": 3,
-      "farolaDistancia": 25
-    },
-    {
-      "archivo": "assets/models/cerezo2.glb",
-      "instancias": [
-        { "posicion": [-50, 0, 35], "escala": 3, "rotacion": [0, 3.14, 0] },
-        { "posicion": [-20, 0, 35], "escala": 3, "rotacion": [0, 3.14, 0] },
-        { "posicion": [18, 0, 35], "escala": 3, "rotacion": [0, 3.14, 0] },
-        { "posicion": [45, 0, 35], "escala": 3, "rotacion": [0, 3.14, 0] },
-        { "posicion": [75, 0, 35], "escala": 3, "rotacion": [0, 3.14, 0] },
-        { "posicion": [100, 0, 35], "escala": 3, "rotacion": [0, 3.14, 0] },
-        { "posicion": [115, 0, 60], "escala": 3, "rotacion": [0, 3.14, 0] },
-        { "posicion": [115, 0, 85], "escala": 3, "rotacion": [0, 3.14, 0] },
-        { "posicion": [80, 0, 135], "escala": 3, "rotacion": [0, 3.14, 0] },
-        { "posicion": [-115, 0, 125], "escala": 3.5, "rotacion": [0, 1.52, 0] },
-        { "posicion": [20, 0, 190], "escala": 3, "rotacion": [0, 1.52, 0] },
-        { "posicion": [40, 0, 150], "escala": 3, "rotacion": [0, 1.52, 0] },
-        { "posicion": [-45, 0, 190], "escala": 3, "rotacion": [0, 1.52, 0] }
+  },
+  {
+    "archivo": "assets/models/vegetacion.glb",
+    "zona": "principal",
+    "instancias": [
+        { "posicion": [52, -0.5, 190], "escala": 4, "rotacion": [0, 1.52, 0] },
+        { "posicion": [52, -0.5, 150], "escala": 4, "rotacion": [0, -1.52, 0] }
       ]
-    },
-    {
-      "archivo": "assets/models/muñeca.glb",
-      "instancias": [
-        {
-          "posicion": [-74, 1.5, 91],
-          "escala": 0.4,
-          "rotacion": [0, 3.14, 0],
-          "interactivo": {
-            "titulo": {
-              "es": "Muñeca Kokeshi",
-              "en": "Kokeshi Doll"
-            },
-            "texto": {
-              "es": "Una muñeca tradicional japonesa hecha de madera. Representa la resiliencia, la protección, la buena fortuna y la conexión espiritual",
-              "en": "A traditional Japanese wooden doll. It represents resilience, protection, good fortune, and spiritual connection."
-            },
-            "distancia": 6
-          }
-        }
+  },
+  {
+    "archivo": "assets/models/lampara.glb",
+    "esFarola": true,
+    "farolaColor": "#F3DC91",
+    "farolaAltura": 2.5,
+    "farolaIntensidad": 3,
+    "farolaDistancia": 25,
+    "zona": "museo",
+    "instancias": [
+        { "posicion": [50, -0.5, 95], "escala": 3.5, "rotacion": [0, 3.14, 0] },
+        { "posicion": [-90, -0.5, 165], "escala": 3.5, "rotacion": [0, 3.14, 0] },
+        { "posicion": [-57, -0.5, 165], "escala": 3.5, "rotacion": [0, 3.14, 0] },
+        { "posicion": [-65, -0.5, 120], "escala": 3.5, "rotacion": [0, 3.14, 0] },
+        { "posicion": [-40, -0.5, 120], "escala": 3.5, "rotacion": [0, 3.14, 0] },
+        { "posicion": [-90, -0.5, 120], "escala": 3.5, "rotacion": [0, 3.14, 0] }
       ]
-    },
-    {
-      "archivo": "assets/models/plazaPrincipal_optimizado.glb",
-      "tieneAgua": true,
-      "tieneanimations": true,
-      "instancias": [
+  },
+  {
+    "archivo": "assets/models/cerezo2.glb",
+    "zona": "principal",
+    "instancias": [
+        { "posicion": [-50, -0.5, 35], "escala": 3, "rotacion": [0, 3.14, 0] },
+        { "posicion": [-20, -0.5, 35], "escala": 3, "rotacion": [0, 3.14, 0] },
+        { "posicion": [18, -0.5, 35], "escala": 3, "rotacion": [0, 3.14, 0] },
+        { "posicion": [45, -0.5, 35], "escala": 3, "rotacion": [0, 3.14, 0] },
+        { "posicion": [75, -0.5, 35], "escala": 3, "rotacion": [0, 3.14, 0] },
+        { "posicion": [100, -0.5, 35], "escala": 3, "rotacion": [0, 3.14, 0] },
+        { "posicion": [115, -0.5, 60], "escala": 3, "rotacion": [0, 3.14, 0] },
+        { "posicion": [115, -0.5, 85], "escala": 3, "rotacion": [0, 3.14, 0] },
+        { "posicion": [80, -0.5, 135], "escala": 3, "rotacion": [0, 3.14, 0] },
+        { "posicion": [-115, -0.5, 125], "escala": 3.5, "rotacion": [0, 1.52, 0] },
+        { "posicion": [20, -0.5, 190], "escala": 3, "rotacion": [0, 1.52, 0] },
+        { "posicion": [40, -0.5, 150], "escala": 3, "rotacion": [0, 1.52, 0] },
+        { "posicion": [-45, -0.5, 190], "escala": 3, "rotacion": [0, 1.52, 0] }
+      ]
+  },
+  {
+    "archivo": "assets/models/muñeca.glb",
+    "zona": "yokai",
+    "instancias": [
+        { "posicion": [-74, 1.5, 91], "escala": 0.4, "rotacion": [0, 3.14, 0], "interactivo": {"titulo":{"es":"Muñeca Kokeshi","en":"Kokeshi Doll"},
+        "texto":{"es":"En las casas de atras se encuentra Yōkais, seres fantásticos que han funcionado como una herramienta cultural para dar forma a lo inexplicable. Sé cuidadoso, uno de ellos se comió mi ojo.",
+        "en":"In the houses behind me you can find Yokais, these are fantastic beings that have served as a cultural tool to give shape to the inexplicable. Be careful, one of them ate my eye."},"distancia":6} }
+      ]
+  },
+  {
+    "archivo": "assets/models/plazaPrincipal_optimizado.glb",
+    "tieneAgua": true,
+    "tieneanimations": true,
+    "zona": "principal",
+    "instancias": [
         { "posicion": [0, 0, 0] }
       ]
-    },
-    {
-      "archivo": "assets/models/plazaPrincipal_colisiones.glb",
-      "instancias": [
+  },
+  {
+    "archivo": "assets/models/plazaPrincipal_colisiones.glb",
+    "zona": "principal",
+    "instancias": [
         { "posicion": [0, 0, 0] }
       ]
-    },
-    {
-      "archivo": "assets/models/foodLetrero.glb",
-      "instancias": [
+  },
+  {
+    "archivo": "assets/models/foodLetrero.glb",
+    "zona": "ramen",
+    "instancias": [
         { "posicion": [-45, 0, 170], "escala": 1.8, "rotacion": [0, 1.57, 0] }
       ]
-    },
-    {
-      "archivo": "assets/models/foodTable.glb",
-      "instancias": [
+  },
+  {
+    "archivo": "assets/models/foodTable.glb",
+    "zona": "ramen",
+    "instancias": [
         { "posicion": [-40, 0, 175], "escala": 4, "rotacion": [0, 1.57, 0] }
       ]
-    },
-    {
-      "archivo": "assets/models/letreroBasico.glb",
-      "instancias": [
+  },
+  {
+    "archivo": "assets/models/letreroBasico.glb",
+    "zona": "principal",
+    "instancias": [
         {
-          "posicion": [70, 0, 45],
+          "posicion": [70, -0.3, 45],
           "rotacion": [0, 3.141593, 0],
           "escala": 0.8,
           "interactivo": {
@@ -425,11 +342,11 @@
               "es": "Es la montaña más alta de Japón. En el pasado, la ascensión al monte Fuji era considerada una peregrinación religiosa para honrar al espíritu de uno de los picos más bonitos e icónicos del mundo..",
               "en": "It is the highest mountain in Japan. In the past, climbing Mount Fuji was considered a religious pilgrimage to honor the spirit of one of the most beautiful and iconic peaks in the world."
             },
-            "distancia": 6
+            "distancia": 8
           }
         },
         {
-          "posicion": [-1.5, 0, 127],
+          "posicion": [-1.5, -0.3, 127],
           "interactivo": {
             "titulo": {
               "es": "Área de Comida y Animación Japonesa",
@@ -440,10 +357,10 @@
               "en": "In this area you can find a wide variety of Japanese food and references to iconic characters of anime culture."
             }
           },
-          "distancia": 10
+          "distancia": 8
         },
         {
-          "posicion": [-95, 0, 170],
+          "posicion": [-95, -0.3, 170],
           "rotacion": [0, -4.66, 0],
           "interactivo": {
             "titulo": {
@@ -454,13 +371,13 @@
               "es": "La estacion de  tren Shibuya es una de las estaciones de tren más transitadas del mundo.",
               "en": "Shibuya train station is one of the busiest train stations in the world."
             },
-            "distancia": 6,
+            "distancia": 8,
             "audio": "assets/audio/tren.mp3",
             "delayAudio": 200
           }
         },
         {
-          "posicion": [-40, 0, 60],
+          "posicion": [-40, -0.3, 60],
           "rotacion": [0, 6.28, 0],
           "escala": 0.8,
           "interactivo": {
@@ -472,7 +389,7 @@
               "es": "Una zona llena de historia y monumentos únicos.",
               "en": "A zone full of history and unique monuments."
             },
-            "distancia": 6
+            "distancia": 8
           }
         },
         {
@@ -488,117 +405,77 @@
               "es": "Disfruta de la tranquilidad de este hermoso estanque con peces koi.",
               "en": "Enjoy the tranquility of this beautiful pond with koi fish."
             },
-            "distancia": 6
+            "distancia": 8
           }
         }
       ]
-    },
-    {
-      "archivo": "assets/models/farolaPrueba.glb",
-      "esFarola": true,
-      "colisionPadding": [1.5, 1.5],
-      "farolaColor": "#FFC354",
-      "farolaAltura": 6,
-      "farolaIntensidad": 3.5,
-      "farolaDistancia": 30,
-      "instancias": [
-        { "posicion": [8, -1, 35] },
-        { "posicion": [-8, -1, 35] },
-        { "posicion": [-35, -1, 35] },
-        { "posicion": [-46.5, -1, 52] },
-        { "posicion": [-98, -1, 52] },
-        { "posicion": [-98, -1, 88] },
-        { "posicion": [35, -1, 35] },
-        { "posicion": [60, -1, 35] },
-        { "posicion": [85, -1, 35] },
-        { "posicion": [110, -1, 35] },
-        { "posicion": [116, -1, 75] },
-        { "posicion": [116, -1, 100] },
-        { "posicion": [116, -1, 125] },
-        { "posicion": [95, -1, 134] },
-        { "posicion": [70, -1, 134] },
-        { "posicion": [45, -1, 134] },
-        { "posicion": [42, -1, 160] },
-        { "posicion": [35, -1, 190] },
-        { "posicion": [7, -1, 190] },
-        { "posicion": [-7, -1, 190] },
-        { "posicion": [-30, -1, 190] },
-        { "posicion": [-55, -1, 190] },
-        { "posicion": [-80, -1, 190] },
-        { "posicion": [-105, -1, 190] },
-        { "posicion": [-117, -1, 165] },
-        { "posicion": [-117, -1, 140] },
-        { "posicion": [-117, -1, 115] },
-        { "posicion": [-46.5, -1, 91] }
+  },
+  {
+    "archivo": "assets/models/farolaPrueba.glb",
+    "esFarola": true,
+    "colisionPadding": [1.5, 1.5],
+    "farolaColor": "#FFC354",
+    "farolaAltura": 6,
+    "farolaIntensidad": 3.5,
+    "farolaDistancia": 30,
+    "zona": "principal",
+    "instancias": [
+        { "posicion": [8, -1.2, 35] },
+        { "posicion": [-8, -1.2, 35] },
+        { "posicion": [-35, -1.2, 35] },
+        { "posicion": [-46.5, -1.2, 52] },
+        { "posicion": [-98, -1.2, 52] },
+        { "posicion": [-98, -1.2, 88] },
+        { "posicion": [35, -1.2, 35] },
+        { "posicion": [60, -1.2, 35] },
+        { "posicion": [85, -1.2, 35] },
+        { "posicion": [110, -1.2, 35] },
+        { "posicion": [116, -1.2, 75] },
+        { "posicion": [116, -1.2, 100] },
+        { "posicion": [116, -1.2, 125] },
+        { "posicion": [95, -1.2, 134] },
+        { "posicion": [70, -1.2, 134] },
+        { "posicion": [45, -1.2, 134] },
+        { "posicion": [42, -1.2, 160] },
+        { "posicion": [35, -1.2, 190] },
+        { "posicion": [7, -1.2, 190] },
+        { "posicion": [-7, -1.2, 190] },
+        { "posicion": [-30, -1.2, 190] },
+        { "posicion": [-55, -1.2, 190] },
+        { "posicion": [-80, -1.2, 190] },
+        { "posicion": [-105, -1.2, 190] },
+        { "posicion": [-117, -1.2, 165] },
+        { "posicion": [-117, -1.2, 140] },
+        { "posicion": [-117, -1.2, 115] },
+        { "posicion": [-46.5, -1.2, 91] }
       ]
-    },
-    {
-      "archivo": "assets/models/monje.glb",
-      "instancias": [
-        {
-          "posicion": [-112, 4.5, 80],
-          "escala": 2.7,
-          "rotacion": [0, 3.14, 0],
-          "interactivo": {
-            "titulo": {
-              "es": "Monje",
-              "en": "Monk"
-            },
-            "texto": {
-              "es": "Un practicante de una religión que ha decidido renunciar a los placeres del mundo para dedicarse por completo a la meditación y al servicio de los demás.",
-              "en": "A practitioner of a religion who has decided to renounce the pleasures of the world to dedicate themselves completely to meditation and the service of others."
-            },
-            "distancia": 4
-          }
-        }
+  },
+  {
+    "archivo": "assets/models/monje.glb",
+    "zona": "museo",
+    "instancias": [
+        { "posicion": [-112, 4.5, 80], "escala": 2.7, "rotacion": [0, 3.14, 0], "interactivo": {"titulo":{"es":"Monje","en":"Monk"},"texto":{"es":"Un practicante de una religión que ha decidido renunciar a los placeres del mundo para dedicarse por completo a la meditación y al servicio de los demás.","en":"A practitioner of a religion who has decided to renounce the pleasures of the world to dedicate themselves completely to meditation and the service of others."},"distancia":4} }
       ]
-    },
-    {
-      "archivo": "assets/models/samurai.glb",
-      "instancias": [
-        {
-          "posicion": [-108, 5.6, 80],
-          "escala": 0.09,
-          "rotacion": [0, 3.14, 0],
-          "interactivo": {
-            "titulo": {
-              "es": "Samurai",
-              "en": "Samurai"
-            },
-            "texto": {
-              "es": "Un guerrero japonés que servía a un señor feudal, conocido por su honor, valentía y habilidad con la espada.",
-              "en": "A Japanese warrior who served a feudal lord, known for their honor, bravery, and skill with the sword."
-            },
-            "distancia": 4
-          }
-        }
+  },
+  {
+    "archivo": "assets/models/samurai.glb",
+    "zona": "museo",
+    "instancias": [
+        { "posicion": [-108, 5.6, 80], "escala": 0.09, "rotacion": [0, 3.14, 0], "interactivo": {"titulo":{"es":"Samurai","en":"Samurai"},"texto":{"es":"Un guerrero japonés que servía a un señor feudal, conocido por su honor, valentía y habilidad con la espada.","en":"A Japanese warrior who served a feudal lord, known for their honor, bravery, and skill with the sword."},"distancia":4} }
       ]
-    },
-    {
-      "archivo": "assets/models/geisha_optimized.glb",
-      "instancias": [
-        {
-          "posicion": [-103, 1.6, 81],
-          "escala": 1.8,
-          "rotacion": [0, -4.66, 0],
-          "interactivo": {
-            "titulo": {
-              "es": "Geisha",
-              "en": "Geisha"
-            },
-            "texto": {
-              "es": " Una mujer japonesa que se dedica al entretenimiento de personas mediante danzas, música y conversaciones",
-              "en": " A Japanese woman who is dedicated to entertaining people through dances, music, and conversations."
-            },
-            "distancia": 5
-          }
-        }
+  },
+  {
+    "archivo": "assets/models/geisha_optimized.glb",
+    "zona": "museo",
+    "instancias": [
+        { "posicion": [-103, 1.6, 81], "escala": 1.8, "rotacion": [0, -4.66, 0], "interactivo": {"titulo":{"es":"Geisha","en":"Geisha"},"texto":{"es":" Una mujer japonesa que se dedica al entretenimiento de personas mediante danzas, música y conversaciones","en":" A Japanese woman who is dedicated to entertaining people through dances, music, and conversations."},"distancia":5.5} }
       ]
-    },
-    {
-      "archivo": "assets/models/pezKoi.glb",
-      "tieneanimations": true,
-      "instancias": [
+  },
+  {
+    "archivo": "assets/models/pezKoi.glb",
+    "tieneanimations": true,
+    "zona": "lago",
+    "instancias": [
         { "posicion": [61.868, 0, 189.552], "escala": 0.602 },
         { "posicion": [59.701, -0.225, 186.612], "escala": 0.602 },
         { "posicion": [65.324, -0.225, 184.084], "escala": 0.602 },
@@ -606,275 +483,134 @@
         { "posicion": [64.699, -0.225, 166.968], "escala": 0.602 },
         { "posicion": [59.076, -0.225, 169.495], "escala": 0.602 }
       ]
-    },
-    {
-      "archivo": "assets/models/museo.glb",
-      "instancias": [
-        {
-          "posicion": [-70.9, 0, 48.2],
-          "escala": 1.9,
-          "rotacion": [0, 3.14, 0],
-          "tieneAnimations": false,
-          "interactivo": {
-            "titulo": {
-              "es": "Museo Cultural",
-              "en": "Cultural Museum"
-            },
-            "texto": {
-              "es": "Espacio dedicado a la preservación de la historia y el arte tradicional japonés.",
-              "en": "A space dedicated to the preservation of history and traditional Japanese art."
-            },
-            "distancia": 5
-          }
-        }
+  },
+  {
+    "archivo": "assets/models/museo.glb",
+    "zona": "museo",
+    "instancias": [
+        { "posicion": [-70.9, 0, 48.2], "escala": 1.9, "rotacion": [0, 3.14, 0], "tieneAnimations": false, "interactivo": {"titulo":{"es":"Museo Cultural","en":"Cultural Museum"},"texto":{"es":"Espacio dedicado a la preservación de la historia y el arte tradicional japonés.","en":"A space dedicated to the preservation of history and traditional Japanese art."},"distancia":5} }
       ]
-    },
-    {
-      "archivo": "assets/models/plazaLago.glb",
-      "instancias": [
-        {
-          "posicion": [86, 2, 180],
-          "escala": 2,
-          "rotacion": [0, -1.57, 0],
-          "tieneAnimations": false,
-          "interactivo": {
-            "titulo": {
-              "es": "Plaza Lago",
-              "en": "Lake Plaza"
-            },
-            "texto": {
-              "es": "Es un lugar de encuentro para la comunidad, donde las personas pueden relajarse, pasear y disfrutar de la naturaleza.",
-              "en": "It is a meeting place for the community, where people can relax, walk and enjoy nature."
-            },
-            "distancia": 5
-          }
-        }
+  },
+  {
+    "archivo": "assets/models/plazaLago.glb",
+    "zona": "lago",
+    "instancias": [
+        { "posicion": [86, 2, 180], "escala": 2, "rotacion": [0, -1.57, 0], "tieneAnimations": false, "interactivo": {"titulo":{"es":"Plaza Lago","en":"Lake Plaza"},"texto":{"es":"Es un lugar de encuentro para la comunidad, donde las personas pueden relajarse, pasear y disfrutar de la naturaleza.","en":"It is a meeting place for the community, where people can relax, walk and enjoy nature."},"distancia":5} }
       ]
-    },
-    {
-      "archivo": "assets/models/gatoNegroMov.glb",
-      "tieneanimations": true,
-      "hitboxEscala": [2, 5, 1.5],
-      "interactivo": {
-        "titulo": {
-          "es": "Gato negro",
-          "en": "Black Cat"
-        },
-        "texto": {
-          "es": "Miau",
-          "en": "Meow"
-        },
-        "distancia": 5,
-        "audio": "assets/audio/gato.mp3",
-        "delayAudio": 200
+  },
+  {
+    "archivo": "assets/models/gatoNegroMov.glb",
+    "tieneanimations": true,
+    "hitboxEscala": [2, 5, 1.5],
+    "interactivo": {
+      "titulo": {
+        "es": "Gato negro",
+        "en": "Black Cat"
       },
-      "instancias": [
+      "texto": {
+        "es": "Miau",
+        "en": "Meow"
+      },
+      "distancia": 5,
+      "audio": "assets/audio/gato.mp3",
+      "delayAudio": 200
+    },
+    "zona": "principal",
+    "instancias": [
         { "posicion": [-95, -0.3, 88], "escala": 0.1, "rotacion": [0, 4.66, 0] },
         { "posicion": [-15, -0.3, 35], "escala": 0.1, "rotacion": [0, 4.66, 0] },
         { "posicion": [50, -0.3, 35], "escala": 0.1, "rotacion": [0, 4.66, 0] }
       ]
-    },
-    {
-      "archivo": "assets/models/gatoGrisMov.glb",
-      "tieneanimations": true,
-      "hitboxEscala": [2, 5, 1.5],
-      "interactivo": {
-        "titulo": {
-          "es": "Gato gris",
-          "en": "Gray Cat"
-        },
-        "texto": {
-          "es": "Miau",
-          "en": "Meow"
-        },
-        "distancia": 5,
-        "audio": "assets/audio/gato.mp3",
-        "delayAudio": 200
+  },
+  {
+    "archivo": "assets/models/gatoGrisMov.glb",
+    "tieneanimations": true,
+    "hitboxEscala": [2, 5, 1.5],
+    "interactivo": {
+      "titulo": {
+        "es": "Gato gris",
+        "en": "Gray Cat"
       },
-      "instancias": [
+      "texto": {
+        "es": "Miau",
+        "en": "Meow"
+      },
+      "distancia": 5,
+      "audio": "assets/audio/gato.mp3",
+      "delayAudio": 200
+    },
+    "zona": "principal",
+    "instancias": [
         { "posicion": [-48.5, -0.3, 57], "escala": 1.5, "animacionInicial": 4 },
         { "posicion": [-50, -0.3, 85], "rotacion": [0, -1.57, 0], "escala": 1.5, "animacionInicial": 6 },
         { "posicion": [30, -0.3, 95], "rotacion": [0, 3.14, 0], "escala": 1.5, "animacionInicial": 4 },
         { "posicion": [70, -0.3, 80], "rotacion": [0, 4.66, 0], "escala": 1.5, "animacionInicial": 3 },
-        { "posicion": [50, -0.3, 130], "rotacion": [0, 3.14, 0], "escala": 1.5, "animacionInicial": 2 },
+        { "posicion": [50, -0.3, 130], "rotacion": [0, 3.14, 0], "escala": 1.5, "animacionInicial": 4 },
         { "posicion": [40, -0.3, 170], "rotacion": [0, 4.66, 0], "escala": 1.5, "animacionInicial": 3 },
-        { "posicion": [-25, -0.3, 125], "rotacion": [0, 3.14, 0], "escala": 1.5, "animacionInicial": 5 },
-        { "posicion": [-30, -0.3, 95], "rotacion": [0, 3.14, 0], "escala": 1.5, "animacionInicial": 1 }
+        { "posicion": [-25, -0.3, 125], "rotacion": [0, 3.14, 0], "escala": 1.5, "animacionInicial": 6 },
+        { "posicion": [-30, -0.3, 95], "rotacion": [0, 3.14, 0], "escala": 1.5, "animacionInicial": 3 }
       ]
-    },
-    {
-      "archivo": "assets/models/utah.glb",
-      "instancias": [
-        {
-          "posicion": [-80, 0, 40],
-          "escala": 2.25,
-          "rotacion": [0, 4.71, 0],
-          "interactivo": {
-            "titulo": {
-              "es": "Tetera de Utah",
-              "en": "Utah Teapot"
-            },
-            "texto": {
-              "es": "Un objeto icónico en la historia de los gráficos 3D, utilizado como modelo de referencia para pruebas de renderizado.",
-              "en": "An iconic object in the history of 3D computer graphics, used as a reference model for rendering tests."
-            },
-            "distancia": 4
-          }
-        }
+  },
+  {
+    "archivo": "assets/models/utah.glb",
+    "zona": "museo",
+    "instancias": [
+        { "posicion": [-80, 0, 40], "escala": 2.25, "rotacion": [0, 4.71, 0], "interactivo": {"titulo":{"es":"Tetera de Utah","en":"Utah Teapot"},"texto":{"es":"Un objeto icónico en la historia de los gráficos 3D, utilizado como modelo de referencia para pruebas de renderizado.","en":"An iconic object in the history of 3D computer graphics, used as a reference model for rendering tests."},"distancia":5} }
       ]
-    },
-    {
-      "archivo": "assets/models/walk.glb",
-      "instancias": [
-        {
-          "posicion": [-60, 0, 52],
-          "escala": 2.25,
-          "rotacion": [0, 1.52, 0],
-          "interactivo": {
-            "titulo": {
-              "es": "Walkman",
-              "en": "Walkman"
-            },
-            "texto": {
-              "es": "Un reproductor de casetes portátil revolucionario de los años 80, creado en Japón.",
-              "en": "A revolutionary portable cassette player from the 80s, created in Japan."
-            },
-            "distancia": 4
-          }
-        }
+  },
+  {
+    "archivo": "assets/models/walk.glb",
+    "zona": "museo",
+    "instancias": [
+        { "posicion": [-60, 0, 52], "escala": 2.25, "rotacion": [0, 1.52, 0], "interactivo": {"titulo":{"es":"Walkman","en":"Walkman"},"texto":{"es":"Un reproductor de casetes portátil revolucionario de los años 80, creado en Japón.","en":"A revolutionary portable cassette player from the 80s, created in Japan."},"distancia":5} }
       ]
-    },
-    {
-      "archivo": "assets/models/disc.glb",
-      "instancias": [
-        {
-          "posicion": [-80, 0, 45],
-          "escala": 2.25,
-          "rotacion": [0, -4.71, 0],
-          "interactivo": {
-            "titulo": {
-              "es": "Discman",
-              "en": "Discman"
-            },
-            "texto": {
-              "es": "Un reproductor de CD portátil clásico que revolucionó la forma de escuchar música en los años 90.",
-              "en": "A classic portable CD player that revolutionized the way people listened to music in the 90s."
-            },
-            "distancia": 4
-          }
-        }
+  },
+  {
+    "archivo": "assets/models/disc.glb",
+    "zona": "museo",
+    "instancias": [
+        { "posicion": [-80, 0, 45], "escala": 2.25, "rotacion": [0, -4.71, 0], "interactivo": {"titulo":{"es":"Discman","en":"Discman"},"texto":{"es":"Un reproductor de CD portátil clásico que revolucionó la forma de escuchar música en los años 90.","en":"A classic portable CD player that revolutionized the way people listened to music in the 90s."},"distancia":5} }
       ]
-    },
-    {
-      "archivo": "assets/models/mesitaMusica.glb",
-      "instancias": [
-        {
-          "posicion": [-103, 1.5, 61],
-          "escala": 0.8,
-          "rotacion": [0, -4.66, 0],
-          "interactivo": {
-            "esMusica": true,
-            "titulo": {
-              "es": "Reproductor de Música",
-              "en": "Music Player"
-            },
-            "texto": {
-              "es": "Un antiguo reproductor de música. Interactúa para seleccionar la melodía de fondo.",
-              "en": "An ancient music player. Interact to select the background melody."
-            },
-            "distancia": 6
-          }
-        }
+  },
+  {
+    "archivo": "assets/models/mesitaMusica.glb",
+    "zona": "museo",
+    "instancias": [
+        { "posicion": [-103, 1.5, 61], "escala": 0.8, "rotacion": [0, -4.66, 0], "interactivo": {"esMusica":true,"titulo":{"es":"Reproductor de Música","en":"Music Player"},"texto":{"es":"Un antiguo reproductor de música. Interactúa para seleccionar la melodía de fondo.","en":"An ancient music player. Interact to select the background melody."},"distancia":6} }
       ]
-    },
-    {
-      "archivo": "assets/models/vestidor.glb",
-      "instancias": [
-        {
-          "posicion": [-109, 1.5, 60],
-          "escala": 1.7,
-          "rotacion": [0, 4.66, 0],
-          "interactivo": {
-            "titulo": {
-              "es": "Biombo o Vestidor",
-              "en": "Dressing Screen"
-            },
-            "texto": {
-              "es": "Un biombo tradicional utilizado para dividir espacios y proporcionar privacidad.",
-              "en": "A traditional folding screen used to divide spaces and provide privacy."
-            },
-            "distancia": 6
-          }
-        }
+  },
+  {
+    "archivo": "assets/models/vestidor.glb",
+    "zona": "museo",
+    "instancias": [
+        { "posicion": [-109, 1.5, 60], "escala": 1.7, "rotacion": [0, 4.66, 0], "interactivo": {"titulo":{"es":"Biombo o Vestidor","en":"Dressing Screen"},"texto":{"es":"Un biombo tradicional utilizado para dividir espacios y proporcionar privacidad.","en":"A traditional folding screen used to divide spaces and provide privacy."},"distancia":6} }
       ]
-    },
-    {
-      "archivo": "assets/models/maquina.glb",
-      "instancias": [
-        {
-          "posicion": [-115, 0, 157],
-          "escala": 5,
-          "rotacion": [0, -4.66, 0],
-          "interactivo": {
-            "titulo": {
-              "es": "Maquina Expendedora",
-              "en": "Vending Machine"
-            },
-            "texto": {
-              "es": "Una maquina expendedora de los años 90.",
-              "en": "A vending machine from the 90s."
-            },
-            "distancia": 4
-          }
-        }
+  },
+  {
+    "archivo": "assets/models/maquina.glb",
+    "zona": "ramen",
+    "instancias": [
+        { "posicion": [-115, 0, 157], "escala": 5, "rotacion": [0, -4.66, 0], "interactivo": {"titulo":{"es":"Maquina Expendedora","en":"Vending Machine"},"texto":{"es":"Una maquina expendedora de los años 90.","en":"A vending machine from the 90s."},"distancia":4} }
       ]
-    },
-    {
-      "archivo": "assets/models/eva.glb",
-      "instancias": [
-        {
-          "posicion": [-115, 0, 150],
-          "escala": 1.2,
-          "rotacion": [0, -4.66, 0],
-          "interactivo": {
-            "titulo": {
-              "es": "Eva 00",
-              "en": "Eva 00"
-            },
-            "texto": {
-              "es": "Parece que fue su ultimo rugido.",
-              "en": "It seems this was its last roar."
-            },
-            "distancia": 8,
-            "audio": "assets/audio/eva.mp3",
-            "delayAudio": 500
-          }
-        }
+  },
+  {
+    "archivo": "assets/models/eva.glb",
+    "zona": "ramen",
+    "instancias": [
+        { "posicion": [-115, 0, 150], "escala": 1.2, "rotacion": [0, -4.66, 0], "interactivo": {"titulo":{"es":"Eva 00","en":"Eva 00"},"texto":{"es":"Parece que fue su ultimo rugido.","en":"It seems this was its last roar."},"distancia":8,"audio":"assets/audio/eva.mp3","delayAudio":500} }
       ]
-    },
-    {
-      "archivo": "assets/models/foocourt.glb",
-      "instancias": [
-        {
-          "posicion": [-50, 0, 175],
-          "escala": 5,
-          "rotacion": [0, -6.18, 0],
-          "interactivo": {
-            "titulo": {
-              "es": "Zona de Comida",
-              "en": "Food Court"
-            },
-            "texto": {
-              "es": "Aquí la gente puede sentarse a comer y beber.",
-              "en": "Here people can sit to eat and drink."
-            },
-            "distancia": 8
-          }
-        }
+  },
+  {
+    "archivo": "assets/models/foocourt.glb",
+    "zona": "ramen",
+    "instancias": [
+        { "posicion": [-50, -0.5, 175], "escala": 5, "rotacion": [0, -6.18, 0], "interactivo": {"titulo":{"es":"Zona de Comida","en":"Food Court"},"texto":{"es":"Aquí la gente puede sentarse a comer y beber.","en":"Here people can sit to eat and drink."},"distancia":8} }
       ]
-    },
+  },
+  
     {
       "archivo": "assets/models/bamboo.glb",
+      "zona": "principal",
       "escala": 2.5,
       "instancias": [
         { "posicion": [-118.5, -1, 118] },
@@ -914,5 +650,60 @@
         { "posicion": [-5.5, -1, 172.8], "rotacion": [0, 1.57, 0] },
         { "posicion": [-5.5, -1, 182.8], "rotacion": [0, 1.57, 0] }
      ]
-    }
-  ]
+    },
+  {
+    "archivo": "assets/models/yokaiOkiku.glb",
+    "zona": "yokai",
+    "instancias": [
+        { "posicion": [-65.8, 1, 97], "escala": 0.4, "rotacion": [0, -3.14, 0], "interactivo": {"titulo":{"es":"Okiku","en":"Okiku"},"texto":{"es":"Es el espíritu de una mujer, cuentan que fue una criada que fue asesinada y que su espíritu vaga por el pozo.","en":"It's the spirit of a woman, they say she was a maid who was murdered and her spirit wanders around the well."},"distancia":6} }
+      ]
+  },
+  {
+    "archivo": "assets/models/yokaiJorogumo.glb",
+    "zona": "yokai",
+    "instancias": [
+        { "posicion": [-82.5, 1.5, 97], "escala": 1, "rotacion": [0, -3.14, 0], "interactivo": {"titulo":{"es":"Jorogumo","en":"Jorogumo"},"texto":{"es":"Yokai araña que atrapa a sus presas con su telaraña.","en":"spider yokai that traps its prey with its web"},"distancia":6} }
+      ]
+  },
+  {
+    "archivo": "assets/models/altar.glb",
+    "zona": "yokai",
+    "instancias": [
+        { "posicion": [115, -0.5, 112], "rotacion": [0, 4.66, 0], "escala": 4, "interactivo": {"titulo":{"es":"Altar","en":"Altar"},"texto":{"es":"Este altar es un espacio sagrado donde las personas pueden honrar a las deidades, espíritus y ancestros. Tradicionalmente, se colocan ofrendas como comida, bebida, incienso y flores para mostrar respeto, pedir protección, salud, prosperidad y expresar gratitud.","en":"This altar is a sacred space where people can honor deities, spirits, and ancestors. Traditionally, offerings such as food, drink, incense, and flowers are placed to show respect, ask for protection, health, prosperity, and express gratitude."},"distancia":10} }
+      ]
+  },
+  {
+    "archivo": "assets/models/ciervoComiendo.glb",
+    "tieneAnimations": true,
+    "zona": "lago",
+    "instancias": [
+        { "hitboxEscala": [6, 3, 6],"posicion": [57, -0.2, 132], "escala": 2.5, "rotacion": [0, 0.8, 0], "interactivo": {"titulo":{"es":"Ciervo","en":"Deer"},"texto":{"es":"Se cree que los ciervos son mensajeros de los dioses y se les considera animales sagrados en la cultura japonesa. En muchos santuarios, los ciervos deambulan libremente.","en":"Deer are believed to be messengers of the gods and are considered sacred animals in Japanese culture. In many shrines, deer roam freely."},"distancia":8} }
+        ,{ "hitboxEscala": [6, 3, 6],"posicion": [110, -0.2, 87], "escala": 2.5, "rotacion": [0, 0.8, 0], "interactivo": {"titulo":{"es":"Ciervo","en":"Deer"},"texto":{"es":"Se cree que los ciervos son mensajeros de los dioses y se les considera animales sagrados en la cultura japonesa. En muchos santuarios, los ciervos deambulan libremente.","en":"Deer are believed to be messengers of the gods and are considered sacred animals in Japanese culture. In many shrines, deer roam freely."},"distancia":8} }
+   
+      ]
+  },
+  {
+    "archivo": "assets/models/ciervoSamba.glb",
+    "tieneAnimations": true,
+    "zona": "principal",
+    "instancias": [
+        { "hitboxEscala": [6, 3, 6],"posicion": [-36, -0.5, 43], "escala": 1, "interactivo": {"titulo":{"es":"Ciervo","en":"Deer"},"texto":{"es":"Se cree que los ciervos son mensajeros de los dioses y se les considera animales sagrados en la cultura japonesa. En muchos santuarios, los ciervos deambulan libremente.","en":"Deer are believed to be messengers of the gods and are considered sacred animals in Japanese culture. In many shrines, deer roam freely."},"distancia":8} }
+      ]
+  },
+  {
+    "archivo": "assets/models/ciervoViendoAlCielo.glb",
+    "tieneAnimations": true,
+    "zona": "lago",
+    "instancias": [
+        { "hitboxEscala": [6, 3, 6], "posicion": [-20, 0, 183], "escala": 1, "rotacion": [0, 3.14, 0], "interactivo": {"titulo":{"es":"Ciervo","en":"Deer"},"texto":{"es":"Se cree que los ciervos son mensajeros de los dioses y se les considera animales sagrados en la cultura japonesa. En muchos santuarios, los ciervos deambulan libremente.","en":"Deer are believed to be messengers of the gods and are considered sacred animals in Japanese culture. In many shrines, deer roam freely."},"distancia":8} }
+      ]
+  },
+  {
+    "archivo": "assets/models/bandera.glb",
+    "tieneAnimations": true,
+    "zona": "principal",
+    "instancias": [
+        {"posicion": [-6, 0, 29.5], "escala": 1.5, "rotacion": [0, 3.14, 0] }
+      ]
+  }
+]

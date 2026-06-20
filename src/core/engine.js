@@ -10,14 +10,14 @@ export function inicializarengine() {
 
     // Crear Cámara
     const camara = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camara.position.set(0.8, 3.5, 25);
+    camara.position.set(0.8, 3.5, 20);
 
     // Crear Renderizador
     const renderizador = new THREE.WebGLRenderer({
-        antialias: true, // Activado para suavizar los dientes de sierra
-        powerPreference: "high-performance" // Fuerza el uso de la GPU dedicada si existe
+        antialias: true,
+        powerPreference: "high-performance"
     });
-    renderizador.shadowMap.enabled = true;
+    renderizador.shadowMap.enabled = !esMovil;
     renderizador.shadowMap.type = THREE.PCFShadowMap;
 
     // Tone mapping y corrección de espacio de color para colores naturales

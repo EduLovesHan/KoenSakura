@@ -304,7 +304,7 @@
       ]
   },
   {
-    "archivo": "assets/models/plazaPrincipal_optimizado.glb",
+    "archivo": "assets/models/plazaPrincipal_optimizado_editable.glb",
     "archivoMovil": "assets/models/plazaPrincipal_mobile.glb",
     "tieneAgua": true,
     "tieneanimations": true,

@@ -609,6 +609,8 @@ function distanciaMinimaZona(posicionJugador, items) {
 const MODELOS_PRIORITARIOS = [
     'ichirakuramen.glb',
     'foocourt.glb',
+    'foodletrero.glb',
+    'letrerobasico.glb',
     'museo.glb',
     'plazalago.glb',
     'hiroshima.glb',
@@ -646,7 +648,7 @@ async function cargarModelo(item, loader, esTrackeado) {
         modeloBase.traverse((child) => {
             if (!child.isMesh) return;
 
-            child.frustumCulled = true;
+            child.frustumCulled = !item.archivo.toLowerCase().includes('letrero');
 
             const nh = child.name.toLowerCase();
             const na = item.archivo.toLowerCase();
@@ -654,6 +656,8 @@ async function cargarModelo(item, loader, esTrackeado) {
             // lógica de DoubleSide
             const esDoubleSide =
                 nh.includes('sakura') || na.includes('bandera') || nh.includes('bandera') ||
+                na.includes('letrero') || nh.includes('letrero') ||
+                na.includes('sign') || nh.includes('sign') ||
                 nh.includes('follaje') || nh.includes('flor') || nh.includes('petalo') ||
                 nh.includes('muñeca') || nh.includes('muneca') || nh.includes('agua') ||
                 nh.includes('museo') || nh.includes('pared') || nh.includes('wall') ||
@@ -745,11 +749,19 @@ async function cargarModelo(item, loader, esTrackeado) {
             clon.traverse((hijo) => {
                 if (!hijo.isMesh) return;
                 const nl = hijo.name.toLowerCase();
-                if (!nl.includes('colision')) return;
-                if (hijo.material) hijo.material.visible = false;
+                const nombreJerarquia = `${nl} ${hijo.parent?.name?.toLowerCase() || ''}`;
+                const materiales = Array.isArray(hijo.material) ? hijo.material : [hijo.material];
+                materiales.filter(Boolean).forEach((material) => {
+                    material.visible = false;
+                    material.depthWrite = false;
+                    material.colorWrite = false;
+                });
+                hijo.castShadow = false;
+                hijo.receiveShadow = false;
                 globalObjetosColision.push(hijo);
-                if (nl.includes('suelo') || nl.includes('rampa') ||
-                    nl.includes('escalera') || nl.includes('piso')) {
+                if (nombreJerarquia.includes('suelo') || nombreJerarquia.includes('ground') ||
+                    nombreJerarquia.includes('rampa') || nombreJerarquia.includes('escalera') ||
+                    nombreJerarquia.includes('piso') || nombreJerarquia.includes('floor')) {
                     mallasSuelo.push(hijo);
                 } else {
                     registrarBoxColision(new THREE.Box3().setFromObject(hijo), zonaCarga);
@@ -866,7 +878,7 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
     }
 
     //carga de modelos base con mayor prioridad para empezar el recorrido
-    const MODELOS_CRITICOS = ['plazaprincipal_optimizado.glb', 'plazaprincipal_colisiones.glb'];
+    const MODELOS_CRITICOS = ['plazaprincipal_optimizado_editable.glb', 'plazaprincipal_colisiones.glb'];
 
     const itemsCriticos = [];
     const itemsPrincipalResto = [];

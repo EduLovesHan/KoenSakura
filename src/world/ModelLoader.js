@@ -18,7 +18,6 @@ const configuracionRendimientoPredeterminada = {
     concurrenciaSecundaria: 1,
     distanciaCargaZona: 60,
     distanciaDescargaZona: 100,
-    distanciaLODLejano: 45,
     maxZonasCache: 8,
 };
 const configuracionRendimiento = new Proxy(configuracionRendimientoPredeterminada, {
@@ -524,7 +523,7 @@ function diagnosticarModelo(item, modeloBase) {
 }
 
 function obtenerArchivoModelo(item) {
-    return (configuracionRendimiento.usarModelosReducidos || item._usarLODLejano) && item.archivoMovil
+    return configuracionRendimiento.usarModelosReducidos && item.archivoMovil
         ? item.archivoMovil
         : item.archivo;
 }
@@ -1063,14 +1062,14 @@ export function actualizarCargaPorProximidad(posicionJugador) {
         .filter(({ distancia, prioritario }) =>
             distancia <= configuracionRendimiento.distanciaCargaZona + (prioritario ? 15 : 0)
         )
-        .sort((a, b) =>
-            (a.distancia - (a.prioritario ? 20 : 0)) -
-            (b.distancia - (b.prioritario ? 20 : 0))
-        )[0];
+        .sort((a, b) => {
+            if (a.prioritario !== b.prioritario) return a.prioritario ? -1 : 1;
+            return a.distancia - b.distancia;
+        })[0];
 
     if (!siguiente) return;
     zonasCargando.add(siguiente.clave);
-    cargarZonaSecundaria(siguiente.clave, siguiente.grupo, siguiente.distancia).catch((error) => {
+    cargarZonaSecundaria(siguiente.clave, siguiente.grupo).catch((error) => {
         zonasCargando.delete(siguiente.clave);
         descargarZona(siguiente.clave, false);
         reintentoGrupoDespues.set(siguiente.clave, performance.now() + 15000);
@@ -1082,17 +1081,12 @@ export function actualizarCargaPorProximidad(posicionJugador) {
     });
 }
 
-async function cargarZonaSecundaria(clave, grupo, distanciaInicial = 0) {
+async function cargarZonaSecundaria(clave, grupo) {
     if (!loaderBg) {
         loaderBg = crearGLTFLoader(null);
     }
 
     const { zona, items } = grupo;
-    const usarLODLejano = !configuracionRendimiento.esMovil &&
-        distanciaInicial >= configuracionRendimiento.distanciaLODLejano;
-    const itemsCarga = usarLODLejano
-        ? items.map((item) => ({ ...item, _usarLODLejano: Boolean(item.archivoMovil) }))
-        : items;
     const archivo = items[0]?.archivo || clave;
     console.log(`[Streaming] Cargando '${archivo}' (${zona})`);
     broker.emit('zonaCargando', { zona, progreso: zonasCompletadasCount, total: totalZonasSecundarias });
@@ -1100,8 +1094,8 @@ async function cargarZonaSecundaria(clave, grupo, distanciaInicial = 0) {
     let exito = true;
     try {
         const CONCURRENT_BATCH = configuracionRendimiento.concurrenciaSecundaria;
-        for (let i = 0; i < itemsCarga.length; i += CONCURRENT_BATCH) {
-            const lote = itemsCarga.slice(i, i + CONCURRENT_BATCH);
+        for (let i = 0; i < items.length; i += CONCURRENT_BATCH) {
+            const lote = items.slice(i, i + CONCURRENT_BATCH);
             await esperarSiguienteTick();
             const resultados = await Promise.all(lote.map(item => cargarModeloConRetry(item, loaderBg, false)));
             if (resultados.some(resultado => !resultado)) exito = false;

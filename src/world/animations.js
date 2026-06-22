@@ -50,3 +50,14 @@ export function actualizaranimations(delta) {
         tex.offset.y += velAgua1.v;
     });
 }
+
+export function eliminarAnimacionesZona(zona) {
+    for (let i = mixers.length - 1; i >= 0; i--) {
+        const mixer = mixers[i];
+        const root = mixer.getRoot();
+        if (root?.userData?.zonaCarga !== zona) continue;
+        mixer.stopAllAction();
+        mixer.uncacheRoot(root);
+        mixers.splice(i, 1);
+    }
+}

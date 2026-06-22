@@ -23,10 +23,12 @@ const spinnerCarga = document.querySelector('.carga-spinner');
 const btnEntrar = document.getElementById('btn-entrar');
 
 const loadingManager = new THREE.LoadingManager();
+const { scene, camara, renderizador } = inicializarengine();
 const configuracionRendimiento = window.configuracionRendimiento || {
-    precompilarShaders: true,
+    precompilarShaders: false,
     usarAguaAvanzada: true,
     cargarAudioEnArranque: true,
+    fpsMaximos: 0,
 };
 const overlayDiagnostico = document.getElementById('overlay-diagnostico');
 const diagnosticoTexto = document.getElementById('diagnostico-texto');
@@ -68,16 +70,8 @@ loadingManager.onProgress = (_url, cargados, total) => {
     textoPorcentaje.textContent = `${prefijo} ${porcentajeMaximo}%`;
 };
 
-loadingManager.onLoad = async () => {
-    textoPorcentaje.textContent = 'Compilando gráficos...';
-    try {
-    if (configuracionRendimiento.precompilarShaders) {
-        await renderizador.compileAsync(scene, camara);
-    }
-    } catch (err) {
-        console.warn('Error en la pre-compilación', err);
-    }
-
+loadingManager.onLoad = () => {
+    textoPorcentaje.textContent = 'Finalizando carga...';
     timeoutCierre = setTimeout(() => {
         barraRelleno.style.width = '100%';
         textoPorcentaje.textContent = '¡Listo! 100%';
@@ -124,6 +118,8 @@ if (btnEntrar) {
             console.log("Error Fullscreen:", err);
         }
 
+        window.juegoIniciado = true;
+
         // Pasar directo al paseo
         if (pantallaCarga) {
             pantallaCarga.classList.add('fadeout');
@@ -165,6 +161,11 @@ if (indicadorCargaBg) {
         if (barraProgresoMini) barraProgresoMini.style.width = `${pct}%`;
     });
 
+    broker.on('zonaError', ({ zona, archivo }) => {
+        if (textoCargaBg) textoCargaBg.textContent = `Reintentando ${zona}...`;
+        registrarDiagnostico(`Fallo temporal cargando ${archivo}`);
+    });
+
     broker.on('todasZonasCargadas', () => {
         if (textoCargaBg) {
             textoCargaBg.textContent = diccionario[idiomaActual].carga_bg_completa || "Áreas cargadas ✓";
@@ -188,7 +189,6 @@ if (indicadorCargaBg) {
 }
 
 // Configuración del motor, escena, cámara y renderizador
-const { scene, camara, renderizador } = inicializarengine();
 const objetosColision = [];
 const timer = new THREE.Timer();
 const canvas = renderizador.domElement;
@@ -273,8 +273,18 @@ if (fpsCheckbox) {
 }
 
 // Bucle de renderizado
+let ultimoFrameRenderizado = 0;
+let ultimoLogRendimiento = 0;
+
 function animar(timestamp) {
     requestAnimationFrame(animar);
+
+    if (configuracionRendimiento.fpsMaximos > 0) {
+        const intervaloMinimo = 1000 / configuracionRendimiento.fpsMaximos;
+        if (timestamp - ultimoFrameRenderizado < intervaloMinimo) return;
+        ultimoFrameRenderizado = timestamp;
+    }
+
     timer.update(timestamp);
     const delta = timer.getDelta();
 
@@ -307,6 +317,18 @@ function animar(timestamp) {
         skybox.actualizar(camara);
     }
     renderizador.render(scene, camara);
+
+    if (timestamp - ultimoLogRendimiento >= 10000) {
+        ultimoLogRendimiento = timestamp;
+        const info = renderizador.info;
+        const heapMB = performance.memory
+            ? Math.round(performance.memory.usedJSHeapSize / 1048576)
+            : 'n/d';
+        console.info(
+            `[RenderStats] calls=${info.render.calls} | triangulos=${info.render.triangles} | ` +
+            `geometrias=${info.memory.geometries} | texturas=${info.memory.textures} | heapMB=${heapMB}`
+        );
+    }
     stats.update();
 }
 // Iniciar el bucle

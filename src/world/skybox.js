@@ -16,9 +16,11 @@ class Skybox {
             'top.webp', 'bottom.webp',
             'front.webp', 'back.webp'
         ];
+        const esMovil = window.esMovil;
+        const sufijoMovil = esMovil ? '_mobile' : '';
 
         // Skybox de Día
-        this.loader.setPath('assets/textures/SkyBox1/');
+        this.loader.setPath(`assets/textures/SkyBox1${sufijoMovil}/`);
         this.texturaDia = this.loader.load(
             textures,
             undefined,
@@ -27,7 +29,7 @@ class Skybox {
         );
 
         // Skybox de Noche
-        this.loader.setPath('assets/textures/SkyBox2/');
+        this.loader.setPath(`assets/textures/SkyBox2${sufijoMovil}/`);
         this.texturaNoche = this.loader.load(
             textures,
             undefined,
@@ -39,7 +41,6 @@ class Skybox {
         this.escena.background = this.texturaDia;
 
         // Crear el domo nocturno para el Crossfade
-        const esMovil = window.esMovil;
         const radio = esMovil ? 270 : 800;
         const geometriaEsfera = new THREE.SphereGeometry(radio, esMovil ? 16 : 32, esMovil ? 16 : 32);
 

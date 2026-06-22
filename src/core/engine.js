@@ -4,13 +4,19 @@ export function inicializarengine() {
     // Detectar si es móvil
     const esMovil = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || ('ontouchstart' in window);
     window.esMovil = esMovil;
+    window.juegoIniciado = false;
     window.configuracionRendimiento = {
         esMovil,
-        precompilarShaders: !esMovil,
+        usarModelosReducidos: esMovil || (navigator.deviceMemory && navigator.deviceMemory <= 4),
+        // La compilacion global provoca pausas largas en escenas grandes.
+        precompilarShaders: false,
         usarAguaAvanzada: !esMovil,
         cargarAudioEnArranque: !esMovil,
         concurrenciaPrincipal: esMovil ? 1 : 2,
-        concurrenciaSecundaria: esMovil ? 1 : 2,
+        concurrenciaSecundaria: 1,
+        distanciaCargaZona: esMovil ? 45 : 55,
+        distanciaDescargaZona: esMovil ? 75 : 100,
+        fpsMaximos: esMovil ? 30 : 0,
     };
 
     // Crear Escena

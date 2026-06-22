@@ -158,3 +158,12 @@ broker.on('modeloCargado', ({ modelo, datosJSON }) => {
         );
     }
 });
+
+broker.on('zonaDescargando', ({ zona }) => {
+    for (let i = objetosInteractivos.length - 1; i >= 0; i--) {
+        if (objetosInteractivos[i].malla.userData?.zonaCarga === zona) {
+            if (objetoCercanoActual === objetosInteractivos[i]) objetoCercanoActual = null;
+            objetosInteractivos.splice(i, 1);
+        }
+    }
+});

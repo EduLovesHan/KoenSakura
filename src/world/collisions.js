@@ -104,10 +104,12 @@ function actualizarHelpersVisibilidad(scene) {
 }
 
 // Registrar un Box3 en la lista y crear su helper si está activo el modo debug
-export function registrarBoxColision(box) {
+export function registrarBoxColision(box, zonaCarga = null) {
+    box.userData = { zonaCarga };
     collidableBoxes.push(box);
     if (escenaGlobal) {
         const helper = new THREE.Box3Helper(box, 0x00ff00); // Líneas verdes
+        helper.userData.zonaCarga = zonaCarga;
         helper.visible = mostrarHitboxes; // Sincronizado con el estado actual del menú
         escenaGlobal.add(helper);
         boxHelpers.push(helper);
@@ -116,6 +118,7 @@ export function registrarBoxColision(box) {
 //colisiones para modelos
 export function procesarCollisions(modelo, scene, objetosColision, configItem = {}) {
     escenaGlobal = scene;
+    const zonaCarga = configItem._grupoCarga || modelo.userData?.zonaCarga || configItem.zona || 'principal';
     let tieneCajaBlender = false;
 
     // Actualizar matrices del modelo
@@ -140,14 +143,14 @@ export function procesarCollisions(modelo, scene, objetosColision, configItem = 
             tieneCajaBlender = true;
 
             const box = new THREE.Box3().setFromObject(hijo);
-            registrarBoxColision(box);
+            registrarBoxColision(box, zonaCarga);
         }
         if (nombreHijo.includes('caja_colision_v')) {
             hijo.material.visible = false; // Cajas ocultas
             objetosColision.push(hijo);
             tieneCajaBlender = true;
             const box = new THREE.Box3().setFromObject(hijo);
-            registrarBoxColision(box);
+            registrarBoxColision(box, zonaCarga);
         }
     });
 
@@ -223,9 +226,11 @@ export function procesarCollisions(modelo, scene, objetosColision, configItem = 
             );
 
             hitbox.position.copy(centro);
+            hitbox.userData.zonaCarga = zonaCarga;
+            hitbox.userData.esHitboxGenerada = true;
             scene.add(hitbox);
             objetosColision.push(hitbox);
-            registrarBoxColision(new THREE.Box3().setFromObject(hitbox));
+            registrarBoxColision(new THREE.Box3().setFromObject(hitbox), zonaCarga);
         }
     }
 }
@@ -374,4 +379,29 @@ function actualizarBoxTemporal(posCamara, targetBox, skin = 0) {
 // Bus de eventos para procesar colisiones
 broker.on('modeloCargado', ({ modelo, datosJSON, scene, objetosColision }) => {
     procesarCollisions(modelo, scene, objetosColision, datosJSON);
+});
+
+broker.on('zonaDescargando', ({ zona }) => {
+    for (let i = collidableBoxes.length - 1; i >= 0; i--) {
+        if (collidableBoxes[i].userData?.zonaCarga === zona) collidableBoxes.splice(i, 1);
+    }
+    for (let i = mallasSuelo.length - 1; i >= 0; i--) {
+        if (mallasSuelo[i].userData?.zonaCarga === zona) mallasSuelo.splice(i, 1);
+    }
+    for (let i = boxHelpers.length - 1; i >= 0; i--) {
+        const helper = boxHelpers[i];
+        if (helper.userData?.zonaCarga !== zona) continue;
+        helper.removeFromParent();
+        helper.geometry?.dispose();
+        helper.material?.dispose();
+        boxHelpers.splice(i, 1);
+    }
+    if (!escenaGlobal) return;
+    for (let i = escenaGlobal.children.length - 1; i >= 0; i--) {
+        const child = escenaGlobal.children[i];
+        if (child.userData?.zonaCarga !== zona || !child.userData?.esHitboxGenerada) continue;
+        child.removeFromParent();
+        child.geometry?.dispose();
+        child.material?.dispose();
+    }
 });

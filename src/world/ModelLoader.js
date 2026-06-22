@@ -5,23 +5,37 @@ import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { Water } from 'three/addons/objects/Water.js';
 import { broker } from './EventBroker.js';
-import { registraranimations, registrarTexturaAgua } from './animations.js';
+import { registraranimations, registrarTexturaAgua, eliminarAnimacionesZona } from './animations.js';
 import { mallasSuelo, registrarBoxColision } from './collisions.js';
 
 export const aguasInstanciadas = [];
-const configuracionRendimiento = window.configuracionRendimiento || {
+const configuracionRendimientoPredeterminada = {
     esMovil: false,
+    usarModelosReducidos: false,
     precompilarShaders: true,
     usarAguaAvanzada: true,
     concurrenciaPrincipal: 2,
-    concurrenciaSecundaria: 2,
+    concurrenciaSecundaria: 1,
+    distanciaCargaZona: 80,
+    distanciaDescargaZona: 115,
 };
-
-// Cargar la textura de normales del agua
-const textureLoader = new THREE.TextureLoader();
-const waterNormals = textureLoader.load('assets/textures/others/waternormals3.webp', (texture) => {
-    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+const configuracionRendimiento = new Proxy(configuracionRendimientoPredeterminada, {
+    get(objetivo, propiedad) {
+        return window.configuracionRendimiento?.[propiedad] ?? objetivo[propiedad];
+    },
 });
+
+const textureLoader = new THREE.TextureLoader();
+let waterNormals = null;
+
+function obtenerNormalesAgua() {
+    if (!waterNormals) {
+        waterNormals = textureLoader.load('assets/textures/others/waternormals3.webp', (texture) => {
+            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+        });
+    }
+    return waterNormals;
+}
 
 export const phongUniformsGlobales = {
     // Point Lights de las farolas, compartidos por todos los materiales
@@ -363,9 +377,6 @@ function tieneSkinnedMesh(model) {
 
 const BATCH_SIZE = 5;
 
-// Orden de carga de zonas secundarias
-const ZONAS_SECUNDARIAS = ['hiroshima', 'yokai', 'museo', 'ramen', 'lago'];
-
 const esperarSiguienteTick = () => {
     if (typeof requestIdleCallback === 'function') {
         return new Promise((resolve) => requestIdleCallback(() => resolve()));
@@ -401,20 +412,25 @@ const modelosDiagnosticados = new Set();
 // Estados de zonas para carga por proximidad
 const zonasCargando = new Set();
 const zonasCargadas = new Set();
+const zonasVisitadas = new Set();
+const objetosPorZona = new Map();
 let zonasPendientes = null;
 let totalZonasSecundarias = 0;
 let zonasCompletadasCount = 0;
 let loaderBg = null;
+let ultimaComprobacionZona = 0;
+const reintentoGrupoDespues = new Map();
 
 async function cargarModeloConRetry(item, loader, esTrackeado, intento = 0) {
     try {
         await cargarModelo(item, loader, esTrackeado);
+        return true;
     } catch (err) {
         if (intento < MAX_REINTENTOS) {
             const espera = Math.pow(2, intento) * 1000; // 1s, 2s
             console.warn(`[ModelLoader] Reintentando ${item.archivo} (intento ${intento + 1}/${MAX_REINTENTOS}) en ${espera}ms...`);
             await new Promise(r => setTimeout(r, espera));
-            await cargarModeloConRetry(item, loader, esTrackeado, intento + 1);
+            return cargarModeloConRetry(item, loader, esTrackeado, intento + 1);
         } else {
             console.error(`[ModelLoader] Falló definitivamente ${item.archivo} tras ${MAX_REINTENTOS} reintentos`);
             // Liberar los items del loadingManager para no bloquear la barra
@@ -425,6 +441,7 @@ async function cargarModeloConRetry(item, loader, esTrackeado, intento = 0) {
                     globalLoadingManager.itemEnd(`ip_${contadorPrincipal}`);
                 }
             }
+            return false;
         }
     }
 }
@@ -490,17 +507,117 @@ function diagnosticarModelo(item, modeloBase) {
     console.groupEnd();
 }
 
+function obtenerArchivoModelo(item) {
+    return configuracionRendimiento.usarModelosReducidos && item.archivoMovil
+        ? item.archivoMovil
+        : item.archivo;
+}
+
+function registrarObjetoZona(zona, objeto) {
+    if (!zona || zona === 'principal') return;
+    if (!objetosPorZona.has(zona)) objetosPorZona.set(zona, new Set());
+    objetosPorZona.get(zona).add(objeto);
+}
+
+function agregarTexturasMaterial(material, texturas) {
+    if (!material) return;
+    for (const valor of Object.values(material)) {
+        if (valor?.isTexture) texturas.add(valor);
+    }
+}
+
+function descargarZona(zona) {
+    const objetos = objetosPorZona.get(zona);
+    if (!objetos?.size) {
+        objetosPorZona.delete(zona);
+        zonasCargadas.delete(zona);
+        return;
+    }
+
+    broker.emit('zonaDescargando', { zona });
+    eliminarAnimacionesZona(zona);
+
+    const geometrias = new Set();
+    const materiales = new Set();
+    const texturas = new Set();
+
+    for (const objeto of objetos) {
+        objeto.traverse((child) => {
+            if (!child.isMesh) return;
+            if (child.geometry) geometrias.add(child.geometry);
+            const mats = Array.isArray(child.material) ? child.material : [child.material];
+            mats.filter(Boolean).forEach((material) => {
+                materiales.add(material);
+                agregarTexturasMaterial(material, texturas);
+            });
+        });
+        objeto.removeFromParent();
+    }
+
+    for (let i = globalObjetosColision.length - 1; i >= 0; i--) {
+        if (globalObjetosColision[i].userData?.zonaCarga === zona) {
+            globalObjetosColision.splice(i, 1);
+        }
+    }
+
+    const geometriasActivas = new Set();
+    const materialesActivos = new Set();
+    const texturasActivas = new Set();
+    globalScene.traverse((child) => {
+        if (!child.isMesh) return;
+        if (child.geometry) geometriasActivas.add(child.geometry);
+        const mats = Array.isArray(child.material) ? child.material : [child.material];
+        mats.filter(Boolean).forEach((material) => {
+            materialesActivos.add(material);
+            agregarTexturasMaterial(material, texturasActivas);
+        });
+    });
+
+    geometrias.forEach((geometry) => {
+        if (!geometriasActivas.has(geometry)) geometry.dispose();
+    });
+    materiales.forEach((material) => {
+        if (materialesActivos.has(material)) return;
+        material.dispose();
+        for (const [key, cached] of materialCache) {
+            if (cached === material) materialCache.delete(key);
+        }
+    });
+    texturas.forEach((texture) => {
+        if (!texturasActivas.has(texture)) texture.dispose();
+    });
+
+    objetosPorZona.delete(zona);
+    zonasCargadas.delete(zona);
+    globalRenderizador?.renderLists?.dispose();
+    console.log(`[Streaming] Zona '${zona}' descargada de memoria`);
+}
+
+function distanciaMinimaZona(posicionJugador, items) {
+    let distanciaSqMinima = Infinity;
+    for (const item of items || []) {
+        for (const instancia of item.instancias || []) {
+            if (!instancia.posicion) continue;
+            const dx = posicionJugador.x - instancia.posicion[0];
+            const dz = posicionJugador.z - instancia.posicion[2];
+            distanciaSqMinima = Math.min(distanciaSqMinima, dx * dx + dz * dz);
+        }
+    }
+    return Math.sqrt(distanciaSqMinima);
+}
+
 async function cargarModelo(item, loader, esTrackeado) {
-    const gltfPromise = loader.loadAsync(item.archivo);
+    const archivoCarga = obtenerArchivoModelo(item);
+    const gltfPromise = loader.loadAsync(archivoCarga);
     
     // Timeout para evitar que un modelo bloquee todo
     const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error(`Timeout cargando ${item.archivo}`)), TIMEOUT_MS)
+        setTimeout(() => reject(new Error(`Timeout cargando ${archivoCarga}`)), TIMEOUT_MS)
     );
 
     const gltf = await Promise.race([gltfPromise, timeoutPromise]);
     const modeloBase = gltf.scene;
-    modeloBase.name = item.archivo;
+    modeloBase.name = archivoCarga;
     diagnosticarModelo(item, modeloBase);
 
     const usarSkeletonUtils = tieneSkinnedMesh(modeloBase);
@@ -593,6 +710,10 @@ async function cargarModelo(item, loader, esTrackeado) {
         const clon = usarSkeletonUtils
             ? SkeletonUtils.clone(modeloBase)
             : modeloBase.clone();
+        const zonaCarga = item._grupoCarga || item.zona || 'principal';
+        clon.traverse((child) => {
+            child.userData.zonaCarga = zonaCarga;
+        });
 
         // Modelo de colisiones
         if (esColision) {
@@ -605,6 +726,7 @@ async function cargarModelo(item, loader, esTrackeado) {
                 else clon.scale.setScalar(escala);
             }
             globalScene.add(clon);
+            registrarObjetoZona(zonaCarga, clon);
             clon.updateMatrixWorld(true);
             clon.traverse((hijo) => {
                 if (!hijo.isMesh) return;
@@ -616,7 +738,7 @@ async function cargarModelo(item, loader, esTrackeado) {
                     nl.includes('escalera') || nl.includes('piso')) {
                     mallasSuelo.push(hijo);
                 } else {
-                    registrarBoxColision(new THREE.Box3().setFromObject(hijo));
+                    registrarBoxColision(new THREE.Box3().setFromObject(hijo), zonaCarga);
                 }
             });
             if (esTrackeado && globalLoadingManager) {
@@ -645,7 +767,7 @@ async function cargarModelo(item, loader, esTrackeado) {
                 const water = new Water(hijo.geometry, {
                     textureWidth: window.esMovil ? 64 : 128,
                     textureHeight: window.esMovil ? 64 : 128,
-                    waterNormals,
+                    waterNormals: obtenerNormalesAgua(),
                     sunDirection: new THREE.Vector3(10, 20, 10).normalize(),
                     sunColor: 0xffffff,
                     waterColor: 0x001e0f,
@@ -680,6 +802,7 @@ async function cargarModelo(item, loader, esTrackeado) {
         }
 
         globalScene.add(clon);
+        registrarObjetoZona(zonaCarga, clon);
 
         const esPlaza = na.includes('plaza');
         const esMuseo = na.includes('museo');
@@ -701,9 +824,12 @@ async function cargarModelo(item, loader, esTrackeado) {
         if (esTrackeado && contadorPrincipal % BATCH_SIZE === 0) {
             await esperarSiguienteTick();
         }
+        if (!esTrackeado && configuracionRendimiento.esMovil) {
+            await esperarSiguienteTick();
+        }
     }
 
-    console.log(`[${item.zona || 'principal'}] OK ${item.archivo} (${item.instancias?.length ?? 0} inst.)`);
+    console.log(`[${item.zona || 'principal'}] OK ${archivoCarga} (${item.instancias?.length ?? 0} inst.)`);
 }
 
 export async function cargarEscenario(scene, objetosColision, loadingManager = null, renderizador = null, camara = null) {
@@ -776,136 +902,116 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
     }
     console.log('[Carga] Zona principal completa ✓');
 
-    // Preparar zonas secundarias para carga por proximidad
-    const porZona = {};
-    for (const item of itemsSecundarios) {
-        const z = item.zona || 'otro';
-        if (!porZona[z]) porZona[z] = [];
-        porZona[z].push(item);
-    }
+    // Cada GLB secundario se transmite de forma independiente. Las zonas del
+    // JSON se superponen espacialmente y no sirven como unidad de streaming.
+    const gruposPorModelo = {};
+    itemsSecundarios.forEach((item, indice) => {
+        const zona = item.zona || 'otro';
+        const clave = `${zona}:${indice}`;
+        gruposPorModelo[clave] = {
+            zona,
+            items: [{ ...item, _grupoCarga: clave }],
+        };
+    });
 
     zonasCargando.clear();
     zonasCargadas.clear();
-    zonasPendientes = porZona;
-    totalZonasSecundarias = ZONAS_SECUNDARIAS.filter(z => porZona[z]?.length).length;
+    zonasVisitadas.clear();
+    objetosPorZona.clear();
+    reintentoGrupoDespues.clear();
+    zonasPendientes = gruposPorModelo;
+    totalZonasSecundarias = Object.keys(gruposPorModelo).length;
     zonasCompletadasCount = 0;
     loaderBg = null;
-
-    if (!window.esMovil) {
-        // En PC cargamos las zonas secundarias en background de inmediato de forma secuencial
-        cargarTodasLasZonasSecundariasDeInmediato(porZona);
-    }
-}
-
-async function cargarTodasLasZonasSecundariasDeInmediato(porZona) {
-    if (!loaderBg) {
-        loaderBg = crearGLTFLoader(null);
-    }
-    for (const zona of ZONAS_SECUNDARIAS) {
-        const items = porZona[zona];
-        if (!items?.length) continue;
-
-        zonasCargando.add(zona);
-        broker.emit('zonaCargando', { zona, progreso: zonasCompletadasCount, total: totalZonasSecundarias });
-
-        const CONCURRENT_BATCH = configuracionRendimiento.concurrenciaSecundaria;
-        for (let i = 0; i < items.length; i += CONCURRENT_BATCH) {
-            const lote = items.slice(i, i + CONCURRENT_BATCH);
-            await Promise.all(lote.map(item => cargarModeloConRetry(item, loaderBg, false)));
-        }
-
-        zonasCargando.delete(zona);
-        zonasCargadas.add(zona);
-        zonasCompletadasCount++;
-
-        // Compilar asíncronamente los shaders de los nuevos modelos agregados a la escena
-        if (configuracionRendimiento.precompilarShaders && globalRenderizador && globalCamara) {
-            try {
-                await globalRenderizador.compileAsync(globalScene, globalCamara);
-                console.log(`[Carga BG] Shaders de la zona '${zona}' pre-compilados con éxito`);
-            } catch (e) {
-                console.warn(`[Carga BG] Error en compilación de shaders para '${zona}':`, e);
-            }
-        }
-
-        broker.emit('zonaCompleta', { zona, progreso: zonasCompletadasCount, total: totalZonasSecundarias });
-    }
-
-    broker.emit('todasZonasCargadas');
-    zonasPendientes = null;
+    ultimaComprobacionZona = 0;
 }
 
 export function actualizarCargaPorProximidad(posicionJugador) {
-    if (!window.esMovil) return; // Solo móvil usa proximidad
+    if (window.juegoIniciado !== true) return;
     if (!zonasPendientes) return;
+    const ahora = performance.now();
+    if (ahora - ultimaComprobacionZona < 400) return;
+    ultimaComprobacionZona = ahora;
 
-    for (const zona of ZONAS_SECUNDARIAS) {
-        if (!zonasPendientes[zona]) continue;
-        if (zonasCargando.has(zona) || zonasCargadas.has(zona)) continue;
-
-        const items = zonasPendientes[zona];
-        let cerca = false;
-        
-        for (const item of items) {
-            for (const inst of (item.instancias || [])) {
-                if (inst.posicion) {
-                    const dx = posicionJugador.x - inst.posicion[0];
-                    const dz = posicionJugador.z - inst.posicion[2];
-                    const distSq = dx * dx + dz * dz;
-                    if (distSq < 60 * 60) { // 60 unidades de distancia (3600 distSq)
-                        cerca = true;
-                        break;
-                    }
-                }
-            }
-            if (cerca) break;
-        }
-
-        if (cerca) {
-            zonasCargando.add(zona);
-            cargarZonaSecundaria(zona, items);
+    // Descargar como maximo un grupo por comprobacion para repartir el trabajo.
+    for (const clave of zonasCargadas) {
+        const grupo = zonasPendientes[clave];
+        const distancia = distanciaMinimaZona(posicionJugador, grupo?.items);
+        if (!grupo || distancia > configuracionRendimiento.distanciaDescargaZona) {
+            descargarZona(clave);
+            return;
         }
     }
+
+    // Una descarga/decodificacion a la vez evita picos largos en el hilo principal.
+    if (zonasCargando.size > 0) return;
+
+    const siguiente = Object.entries(zonasPendientes)
+        .filter(([clave]) => !zonasCargadas.has(clave))
+        .filter(([clave]) => (reintentoGrupoDespues.get(clave) || 0) <= ahora)
+        .map(([clave, grupo]) => ({
+            clave,
+            grupo,
+            distancia: distanciaMinimaZona(posicionJugador, grupo.items),
+        }))
+        .filter(({ distancia }) => distancia <= configuracionRendimiento.distanciaCargaZona)
+        .sort((a, b) => a.distancia - b.distancia)[0];
+
+    if (!siguiente) return;
+    zonasCargando.add(siguiente.clave);
+    cargarZonaSecundaria(siguiente.clave, siguiente.grupo).catch((error) => {
+        zonasCargando.delete(siguiente.clave);
+        descargarZona(siguiente.clave);
+        reintentoGrupoDespues.set(siguiente.clave, performance.now() + 15000);
+        console.error(`[Streaming] Error inesperado en '${siguiente.clave}'`, error);
+        broker.emit('zonaError', {
+            zona: siguiente.grupo.zona,
+            archivo: siguiente.grupo.items[0]?.archivo || siguiente.clave,
+        });
+    });
 }
 
-async function cargarZonaSecundaria(zona, items) {
+async function cargarZonaSecundaria(clave, grupo) {
     if (!loaderBg) {
         loaderBg = crearGLTFLoader(null);
     }
-    
-    console.log(`[Carga Proximidad] Entrando a zona '${zona}': iniciando carga de ${items.length} modelos`);
+
+    const { zona, items } = grupo;
+    const archivo = items[0]?.archivo || clave;
+    console.log(`[Streaming] Cargando '${archivo}' (${zona})`);
     broker.emit('zonaCargando', { zona, progreso: zonasCompletadasCount, total: totalZonasSecundarias });
 
-    const CONCURRENT_BATCH = configuracionRendimiento.concurrenciaSecundaria;
-    for (let i = 0; i < items.length; i += CONCURRENT_BATCH) {
-        const lote = items.slice(i, i + CONCURRENT_BATCH);
-        await Promise.all(lote.map(item => cargarModeloConRetry(item, loaderBg, false)));
-    }
-
-    zonasCargando.delete(zona);
-    zonasCargadas.add(zona);
-    zonasCompletadasCount++;
-
-    // Compilar asíncronamente los shaders de los nuevos modelos agregados a la escena
-    if (configuracionRendimiento.precompilarShaders && globalRenderizador && globalCamara) {
-        try {
-            await globalRenderizador.compileAsync(globalScene, globalCamara);
-            console.log(`[Carga Proximidad] Shaders de la zona '${zona}' pre-compilados con éxito`);
-        } catch (e) {
-            console.warn(`[Carga Proximidad] Error en compilación de shaders para '${zona}':`, e);
+    let exito = true;
+    try {
+        const CONCURRENT_BATCH = configuracionRendimiento.concurrenciaSecundaria;
+        for (let i = 0; i < items.length; i += CONCURRENT_BATCH) {
+            const lote = items.slice(i, i + CONCURRENT_BATCH);
+            await esperarSiguienteTick();
+            const resultados = await Promise.all(lote.map(item => cargarModeloConRetry(item, loaderBg, false)));
+            if (resultados.some(resultado => !resultado)) exito = false;
         }
+    } finally {
+        zonasCargando.delete(clave);
     }
 
-    console.log(`[Carga Proximidad] Zona '${zona}' completa ✓ (${zonasCompletadasCount}/${totalZonasSecundarias})`);
+    if (!exito) {
+        descargarZona(clave);
+        reintentoGrupoDespues.set(clave, performance.now() + 15000);
+        broker.emit('zonaError', { zona, archivo });
+        return;
+    }
+
+    zonasCargadas.add(clave);
+    reintentoGrupoDespues.delete(clave);
+    const primeraVisita = !zonasVisitadas.has(clave);
+    zonasVisitadas.add(clave);
+    zonasCompletadasCount = zonasVisitadas.size;
+    console.log(`[Streaming] '${archivo}' listo ✓ (${zonasCompletadasCount}/${totalZonasSecundarias})`);
     broker.emit('zonaCompleta', { zona, progreso: zonasCompletadasCount, total: totalZonasSecundarias });
 
-    // Eliminar de las pendientes para dejar de comprobar
-    delete zonasPendientes[zona];
-
-    if (zonasCompletadasCount === totalZonasSecundarias) {
-        console.log('[Carga Proximidad] ✓ Todas las zonas secundarias cargadas');
+    if (primeraVisita && zonasCompletadasCount === totalZonasSecundarias) {
+        console.log('[Carga Proximidad] ✓ Todas las zonas secundarias visitadas');
         broker.emit('todasZonasCargadas');
-        zonasPendientes = null;
     }
 }
 

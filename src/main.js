@@ -5,7 +5,7 @@ import { inicializarengine } from './core/engine.js';
 import { controlsPrimeraPersona } from './player/controls.js';
 import { inicializarinteractions, actualizarinteractions } from './player/interactions.js';
 import { Skybox } from './world/skybox.js';
-import { cargarEscenario, actualizarCargaPorProximidad, phongUniformsGlobales, aguasInstanciadas } from './world/ModelLoader.js';
+import { cargarEscenario, actualizarCargaPorProximidad, obtenerModelosEnCarga, phongUniformsGlobales, aguasInstanciadas } from './world/ModelLoader.js';
 import { inicializarDebugCollisions, actualizarPlayerBox } from './world/collisions.js';
 import { inicializarLighting, configurarcontrolsLighting, actualizarLucesFarolas, directionalLight } from './world/lighting.js';
 import { actualizaranimations } from './world/animations.js';
@@ -294,9 +294,25 @@ if (fpsCheckbox) {
 // Bucle de renderizado
 let ultimoFrameRenderizado = 0;
 let ultimoLogRendimiento = 0;
+let ultimoAvisoTiron = 0;
+let timestampFrameAnterior = 0;
 
 function animar(timestamp) {
     requestAnimationFrame(animar);
+
+    if (timestampFrameAnterior > 0) {
+        const tiempoFrame = timestamp - timestampFrameAnterior;
+        const umbralTiron = window.esMovil ? 80 : 50;
+        if (tiempoFrame >= umbralTiron && timestamp - ultimoAvisoTiron >= 1000) {
+            ultimoAvisoTiron = timestamp;
+            const cargando = obtenerModelosEnCarga();
+            console.warn(
+                `[FrameSpike] ${Math.round(tiempoFrame)}ms | ` +
+                `modelosCargando=${cargando.length ? cargando.join(', ') : 'ninguno'}`
+            );
+        }
+    }
+    timestampFrameAnterior = timestamp;
 
     if (configuracionRendimiento.fpsMaximos > 0) {
         const intervaloMinimo = 1000 / configuracionRendimiento.fpsMaximos;

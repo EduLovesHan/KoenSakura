@@ -18,6 +18,8 @@ const configuracionRendimientoPredeterminada = {
     concurrenciaSecundaria: 1,
     distanciaCargaZona: 60,
     distanciaDescargaZona: 100,
+    distanciaLODLejano: 45,
+    maxZonasCache: 8,
 };
 const configuracionRendimiento = new Proxy(configuracionRendimientoPredeterminada, {
     get(objetivo, propiedad) {
@@ -414,6 +416,8 @@ const zonasCargando = new Set();
 const zonasCargadas = new Set();
 const zonasVisitadas = new Set();
 const objetosPorZona = new Map();
+const zonasEnCache = new Map();
+const modelosEnCarga = new Set();
 let zonasPendientes = null;
 let totalZonasSecundarias = 0;
 let zonasCompletadasCount = 0;
@@ -422,8 +426,14 @@ let ultimaComprobacionZona = 0;
 const reintentoGrupoDespues = new Map();
 
 async function cargarModeloConRetry(item, loader, esTrackeado, intento = 0) {
+    const archivoMedido = obtenerArchivoModelo(item);
+    const inicioCarga = performance.now();
+    modelosEnCarga.add(archivoMedido);
     try {
         await cargarModelo(item, loader, esTrackeado);
+        console.info(
+            `[ModelTiming] ${archivoMedido} | carga+procesado=${Math.round(performance.now() - inicioCarga)}ms`
+        );
         return true;
     } catch (err) {
         if (intento < MAX_REINTENTOS) {
@@ -443,7 +453,13 @@ async function cargarModeloConRetry(item, loader, esTrackeado, intento = 0) {
             }
             return false;
         }
+    } finally {
+        modelosEnCarga.delete(archivoMedido);
     }
+}
+
+export function obtenerModelosEnCarga() {
+    return [...modelosEnCarga];
 }
 
 function recolectarEstadisticasModelo(modelo) {
@@ -508,7 +524,7 @@ function diagnosticarModelo(item, modeloBase) {
 }
 
 function obtenerArchivoModelo(item) {
-    return configuracionRendimiento.usarModelosReducidos && item.archivoMovil
+    return (configuracionRendimiento.usarModelosReducidos || item._usarLODLejano) && item.archivoMovil
         ? item.archivoMovil
         : item.archivo;
 }
@@ -526,11 +542,62 @@ function agregarTexturasMaterial(material, texturas) {
     }
 }
 
-function descargarZona(zona) {
+function puedeMantenerseEnCache(zona) {
+    const items = zonasPendientes?.[zona]?.items || [];
+    return configuracionRendimiento.maxZonasCache > 0 &&
+        items.length > 0 &&
+        items.every((item) => {
+            const archivo = item.archivo.toLowerCase();
+            return !item.tieneanimations && !item.tieneAnimations && !item.tieneAgua &&
+                !archivo.includes('collisions') && !archivo.includes('colisiones');
+        });
+}
+
+function reactivarZonaDesdeCache(zona) {
+    const objetos = objetosPorZona.get(zona);
+    if (!zonasEnCache.has(zona) || !objetos?.size) return false;
+
+    objetos.forEach((objeto) => {
+        objeto.visible = true;
+        if (objeto.userData.datosJSON) {
+            broker.emit('modeloCargado', {
+                modelo: objeto,
+                datosJSON: objeto.userData.datosJSON,
+                scene: globalScene,
+                objetosColision: globalObjetosColision,
+            });
+        }
+    });
+    zonasEnCache.delete(zona);
+    zonasCargadas.add(zona);
+    console.log(`[Cache] '${zona}' restaurada sin recargar GLB`);
+    return true;
+}
+
+function limitarCacheZonas() {
+    const maximo = configuracionRendimiento.maxZonasCache;
+    while (zonasEnCache.size > maximo) {
+        const zonaMasAntigua = zonasEnCache.keys().next().value;
+        descargarZona(zonaMasAntigua, false);
+    }
+}
+
+function descargarZona(zona, conservarEnCache = true) {
     const objetos = objetosPorZona.get(zona);
     if (!objetos?.size) {
         objetosPorZona.delete(zona);
         zonasCargadas.delete(zona);
+        return;
+    }
+
+    if (conservarEnCache && puedeMantenerseEnCache(zona)) {
+        objetos.forEach((objeto) => { objeto.visible = false; });
+        broker.emit('zonaDescargando', { zona });
+        zonasCargadas.delete(zona);
+        zonasEnCache.delete(zona);
+        zonasEnCache.set(zona, performance.now());
+        console.log(`[Cache] '${zona}' oculta y conservada en memoria`);
+        limitarCacheZonas();
         return;
     }
 
@@ -588,6 +655,7 @@ function descargarZona(zona) {
     });
 
     objetosPorZona.delete(zona);
+    zonasEnCache.delete(zona);
     zonasCargadas.delete(zona);
     globalRenderizador?.renderLists?.dispose();
     console.log(`[Streaming] Zona '${zona}' descargada de memoria`);
@@ -836,6 +904,7 @@ async function cargarModelo(item, loader, esTrackeado) {
 
         const datosJSON = { ...item, ...instancia };
         delete datosJSON.instancias;
+        clon.userData.datosJSON = datosJSON;
         broker.emit('modeloCargado', { modelo: clon, datosJSON, scene: globalScene, objetosColision: globalObjetosColision });
 
         if ((item.tieneanimations || item.tieneAnimations) && gltf.animations?.length > 0) {
@@ -942,6 +1011,7 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
 
     zonasCargando.clear();
     zonasCargadas.clear();
+    zonasEnCache.clear();
     zonasVisitadas.clear();
     objetosPorZona.clear();
     reintentoGrupoDespues.clear();
@@ -972,6 +1042,15 @@ export function actualizarCargaPorProximidad(posicionJugador) {
     // Una descarga/decodificacion a la vez evita picos largos en el hilo principal.
     if (zonasCargando.size > 0) return;
 
+    const cacheCercana = [...zonasEnCache.keys()]
+        .map((clave) => ({
+            clave,
+            distancia: distanciaMinimaZona(posicionJugador, zonasPendientes[clave]?.items),
+        }))
+        .filter(({ distancia }) => distancia <= configuracionRendimiento.distanciaCargaZona)
+        .sort((a, b) => a.distancia - b.distancia)[0];
+    if (cacheCercana && reactivarZonaDesdeCache(cacheCercana.clave)) return;
+
     const siguiente = Object.entries(zonasPendientes)
         .filter(([clave]) => !zonasCargadas.has(clave))
         .filter(([clave]) => (reintentoGrupoDespues.get(clave) || 0) <= ahora)
@@ -991,9 +1070,9 @@ export function actualizarCargaPorProximidad(posicionJugador) {
 
     if (!siguiente) return;
     zonasCargando.add(siguiente.clave);
-    cargarZonaSecundaria(siguiente.clave, siguiente.grupo).catch((error) => {
+    cargarZonaSecundaria(siguiente.clave, siguiente.grupo, siguiente.distancia).catch((error) => {
         zonasCargando.delete(siguiente.clave);
-        descargarZona(siguiente.clave);
+        descargarZona(siguiente.clave, false);
         reintentoGrupoDespues.set(siguiente.clave, performance.now() + 15000);
         console.error(`[Streaming] Error inesperado en '${siguiente.clave}'`, error);
         broker.emit('zonaError', {
@@ -1003,12 +1082,17 @@ export function actualizarCargaPorProximidad(posicionJugador) {
     });
 }
 
-async function cargarZonaSecundaria(clave, grupo) {
+async function cargarZonaSecundaria(clave, grupo, distanciaInicial = 0) {
     if (!loaderBg) {
         loaderBg = crearGLTFLoader(null);
     }
 
     const { zona, items } = grupo;
+    const usarLODLejano = !configuracionRendimiento.esMovil &&
+        distanciaInicial >= configuracionRendimiento.distanciaLODLejano;
+    const itemsCarga = usarLODLejano
+        ? items.map((item) => ({ ...item, _usarLODLejano: Boolean(item.archivoMovil) }))
+        : items;
     const archivo = items[0]?.archivo || clave;
     console.log(`[Streaming] Cargando '${archivo}' (${zona})`);
     broker.emit('zonaCargando', { zona, progreso: zonasCompletadasCount, total: totalZonasSecundarias });
@@ -1016,8 +1100,8 @@ async function cargarZonaSecundaria(clave, grupo) {
     let exito = true;
     try {
         const CONCURRENT_BATCH = configuracionRendimiento.concurrenciaSecundaria;
-        for (let i = 0; i < items.length; i += CONCURRENT_BATCH) {
-            const lote = items.slice(i, i + CONCURRENT_BATCH);
+        for (let i = 0; i < itemsCarga.length; i += CONCURRENT_BATCH) {
+            const lote = itemsCarga.slice(i, i + CONCURRENT_BATCH);
             await esperarSiguienteTick();
             const resultados = await Promise.all(lote.map(item => cargarModeloConRetry(item, loaderBg, false)));
             if (resultados.some(resultado => !resultado)) exito = false;
@@ -1027,7 +1111,7 @@ async function cargarZonaSecundaria(clave, grupo) {
     }
 
     if (!exito) {
-        descargarZona(clave);
+        descargarZona(clave, false);
         reintentoGrupoDespues.set(clave, performance.now() + 15000);
         broker.emit('zonaError', { zona, archivo });
         return;

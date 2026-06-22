@@ -16,6 +16,8 @@ export function inicializarengine() {
         concurrenciaSecundaria: 1,
         distanciaCargaZona: 60,
         distanciaDescargaZona: esMovil ? 100 : 120,
+        distanciaLODLejano: esMovil ? 0 : 45,
+        maxZonasCache: esMovil ? 4 : 10,
         fpsMaximos: esMovil ? 30 : 0,
     };
 

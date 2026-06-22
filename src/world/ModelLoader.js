@@ -9,6 +9,13 @@ import { registraranimations, registrarTexturaAgua } from './animations.js';
 import { mallasSuelo, registrarBoxColision } from './collisions.js';
 
 export const aguasInstanciadas = [];
+const configuracionRendimiento = window.configuracionRendimiento || {
+    esMovil: false,
+    precompilarShaders: true,
+    usarAguaAvanzada: true,
+    concurrenciaPrincipal: 2,
+    concurrenciaSecundaria: 2,
+};
 
 // Cargar la textura de normales del agua
 const textureLoader = new THREE.TextureLoader();
@@ -372,7 +379,7 @@ function crearGLTFLoader(mgr = null) {
     const loader = mgr ? new GLTFLoader(mgr) : new GLTFLoader();
     loader.setMeshoptDecoder(MeshoptDecoder);
     const dracoLoader = new DRACOLoader();
-    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
+    dracoLoader.setDecoderPath('assets/draco/');
     loader.setDRACOLoader(dracoLoader);
     return loader;
 }
@@ -389,6 +396,7 @@ let contadorPrincipal = 0;
 
 const MAX_REINTENTOS = 2;
 const TIMEOUT_MS = window.esMovil ? 30000 : 45000;
+const modelosDiagnosticados = new Set();
 
 // Estados de zonas para carga por proximidad
 const zonasCargando = new Set();
@@ -421,6 +429,67 @@ async function cargarModeloConRetry(item, loader, esTrackeado, intento = 0) {
     }
 }
 
+function recolectarEstadisticasModelo(modelo) {
+    let meshes = 0;
+    let meshesSkinned = 0;
+    let vertices = 0;
+    let triangulos = 0;
+    const materiales = new Set();
+
+    modelo.traverse((child) => {
+        if (!child.isMesh) return;
+
+        meshes++;
+        if (child.isSkinnedMesh) meshesSkinned++;
+
+        const geometry = child.geometry;
+        if (geometry?.attributes?.position) {
+            vertices += geometry.attributes.position.count;
+        }
+        if (geometry?.index) {
+            triangulos += geometry.index.count / 3;
+        } else if (geometry?.attributes?.position) {
+            triangulos += geometry.attributes.position.count / 3;
+        }
+
+        const mats = Array.isArray(child.material) ? child.material : [child.material];
+        mats.filter(Boolean).forEach((mat) => materiales.add(mat.uuid));
+    });
+
+    return {
+        meshes,
+        meshesSkinned,
+        vertices: Math.round(vertices),
+        triangulos: Math.round(triangulos),
+        materiales: materiales.size,
+    };
+}
+
+function diagnosticarModelo(item, modeloBase) {
+    if (modelosDiagnosticados.has(item.archivo)) return;
+    modelosDiagnosticados.add(item.archivo);
+
+    const stats = recolectarEstadisticasModelo(modeloBase);
+    const totalInstancias = item.instancias?.length ?? 0;
+    const pesoAproximado = (
+        (stats.vertices > 120000) ||
+        (stats.triangulos > 80000) ||
+        (stats.meshes > 80)
+    ) ? 'ALTO' : 'OK';
+
+    console.groupCollapsed(
+        `[ModelStats] ${item.archivo} | meshes=${stats.meshes} | vertices=${stats.vertices} | triangulos=${stats.triangulos} | instancias=${totalInstancias} | carga=${pesoAproximado}`
+    );
+    console.log('Zona:', item.zona || 'principal');
+    console.log('Instancias:', totalInstancias);
+    console.log('Meshes:', stats.meshes);
+    console.log('SkinnedMeshes:', stats.meshesSkinned);
+    console.log('Vertices:', stats.vertices);
+    console.log('Triangulos:', stats.triangulos);
+    console.log('Materiales unicos:', stats.materiales);
+    console.groupEnd();
+}
+
 async function cargarModelo(item, loader, esTrackeado) {
     const gltfPromise = loader.loadAsync(item.archivo);
     
@@ -432,6 +501,7 @@ async function cargarModelo(item, loader, esTrackeado) {
     const gltf = await Promise.race([gltfPromise, timeoutPromise]);
     const modeloBase = gltf.scene;
     modeloBase.name = item.archivo;
+    diagnosticarModelo(item, modeloBase);
 
     const usarSkeletonUtils = tieneSkinnedMesh(modeloBase);
     const na = item.archivo.toLowerCase();
@@ -559,7 +629,7 @@ async function cargarModelo(item, loader, esTrackeado) {
             continue;
         }
 
-        if (item.tieneAgua) {
+        if (item.tieneAgua && configuracionRendimiento.usarAguaAvanzada) {
             const aguasMallas = [];
             clon.traverse((hijo) => {
                 if (hijo.isMesh && hijo.name.toLowerCase().includes('agua')) {
@@ -697,7 +767,7 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
     console.log('[Carga] Modelos críticos listos ✓');
 
     // Carga del resto de modelos de la zona principal en lotes secuenciales
-    const CONCURRENT_BATCH = 3;
+    const CONCURRENT_BATCH = configuracionRendimiento.concurrenciaPrincipal;
     console.log(`[Carga] PRINCIPAL: ${itemsPrincipalResto.length} modelos (en lotes de ${CONCURRENT_BATCH})`);
 
     for (let i = 0; i < itemsPrincipalResto.length; i += CONCURRENT_BATCH) {
@@ -738,7 +808,7 @@ async function cargarTodasLasZonasSecundariasDeInmediato(porZona) {
         zonasCargando.add(zona);
         broker.emit('zonaCargando', { zona, progreso: zonasCompletadasCount, total: totalZonasSecundarias });
 
-        const CONCURRENT_BATCH = 3;
+        const CONCURRENT_BATCH = configuracionRendimiento.concurrenciaSecundaria;
         for (let i = 0; i < items.length; i += CONCURRENT_BATCH) {
             const lote = items.slice(i, i + CONCURRENT_BATCH);
             await Promise.all(lote.map(item => cargarModeloConRetry(item, loaderBg, false)));
@@ -749,7 +819,7 @@ async function cargarTodasLasZonasSecundariasDeInmediato(porZona) {
         zonasCompletadasCount++;
 
         // Compilar asíncronamente los shaders de los nuevos modelos agregados a la escena
-        if (globalRenderizador && globalCamara) {
+        if (configuracionRendimiento.precompilarShaders && globalRenderizador && globalCamara) {
             try {
                 await globalRenderizador.compileAsync(globalScene, globalCamara);
                 console.log(`[Carga BG] Shaders de la zona '${zona}' pre-compilados con éxito`);
@@ -806,7 +876,7 @@ async function cargarZonaSecundaria(zona, items) {
     console.log(`[Carga Proximidad] Entrando a zona '${zona}': iniciando carga de ${items.length} modelos`);
     broker.emit('zonaCargando', { zona, progreso: zonasCompletadasCount, total: totalZonasSecundarias });
 
-    const CONCURRENT_BATCH = 3;
+    const CONCURRENT_BATCH = configuracionRendimiento.concurrenciaSecundaria;
     for (let i = 0; i < items.length; i += CONCURRENT_BATCH) {
         const lote = items.slice(i, i + CONCURRENT_BATCH);
         await Promise.all(lote.map(item => cargarModeloConRetry(item, loaderBg, false)));
@@ -817,7 +887,7 @@ async function cargarZonaSecundaria(zona, items) {
     zonasCompletadasCount++;
 
     // Compilar asíncronamente los shaders de los nuevos modelos agregados a la escena
-    if (globalRenderizador && globalCamara) {
+    if (configuracionRendimiento.precompilarShaders && globalRenderizador && globalCamara) {
         try {
             await globalRenderizador.compileAsync(globalScene, globalCamara);
             console.log(`[Carga Proximidad] Shaders de la zona '${zona}' pre-compilados con éxito`);

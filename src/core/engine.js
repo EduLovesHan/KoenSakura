@@ -4,18 +4,26 @@ export function inicializarengine() {
     // Detectar si es móvil
     const esMovil = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || ('ontouchstart' in window);
     window.esMovil = esMovil;
+    window.configuracionRendimiento = {
+        esMovil,
+        precompilarShaders: !esMovil,
+        usarAguaAvanzada: !esMovil,
+        cargarAudioEnArranque: !esMovil,
+        concurrenciaPrincipal: esMovil ? 1 : 2,
+        concurrenciaSecundaria: esMovil ? 1 : 2,
+    };
 
     // Crear Escena
     const scene = new THREE.Scene();
 
     // Crear Cámara
-    const farCamera = esMovil ? 300 : 1000;
+    const farCamera = esMovil ? 180 : 700;
     const camara = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, farCamera);
     camara.position.set(0.8, 3.5, 20);
 
     // Crear Renderizador
     const renderizador = new THREE.WebGLRenderer({
-        antialias: true,
+        antialias: !esMovil,
         powerPreference: "high-performance"
     });
     renderizador.shadowMap.enabled = !esMovil;

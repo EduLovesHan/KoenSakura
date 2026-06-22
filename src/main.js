@@ -23,12 +23,41 @@ const spinnerCarga = document.querySelector('.carga-spinner');
 const btnEntrar = document.getElementById('btn-entrar');
 
 const loadingManager = new THREE.LoadingManager();
+const configuracionRendimiento = window.configuracionRendimiento || {
+    precompilarShaders: true,
+    usarAguaAvanzada: true,
+    cargarAudioEnArranque: true,
+};
+const overlayDiagnostico = document.getElementById('overlay-diagnostico');
+const diagnosticoTexto = document.getElementById('diagnostico-texto');
+const btnCerrarDiagnostico = document.getElementById('btn-cerrar-diagnostico');
+
+if (btnCerrarDiagnostico && overlayDiagnostico) {
+    btnCerrarDiagnostico.addEventListener('click', () => {
+        overlayDiagnostico.classList.add('oculto');
+    });
+}
+
+function registrarDiagnostico(mensaje, error = null, opciones = {}) {
+    const { mostrarOverlay = false } = opciones;
+    const detalle = error instanceof Error
+        ? `${error.name}: ${error.message}`
+        : (typeof error === 'string' ? error : '');
+    const linea = `[${new Date().toLocaleTimeString()}] ${mensaje}${detalle ? ` | ${detalle}` : ''}`;
+    console.log('[DiagnosticoMovil]', linea, error || '');
+    if (!window.esMovil || !overlayDiagnostico || !diagnosticoTexto) return;
+    if (mostrarOverlay) {
+        overlayDiagnostico.classList.remove('oculto');
+    }
+    diagnosticoTexto.textContent = `${linea}\n${diagnosticoTexto.textContent}`.trim();
+}
 
 let porcentajeMaximo = 0;
 let timeoutCierre;
 
 loadingManager.onStart = () => {
     clearTimeout(timeoutCierre);
+    registrarDiagnostico('Inicio de carga principal');
 };
 
 loadingManager.onProgress = (_url, cargados, total) => {
@@ -42,7 +71,9 @@ loadingManager.onProgress = (_url, cargados, total) => {
 loadingManager.onLoad = async () => {
     textoPorcentaje.textContent = 'Compilando gráficos...';
     try {
+    if (configuracionRendimiento.precompilarShaders) {
         await renderizador.compileAsync(scene, camara);
+    }
     } catch (err) {
         console.warn('Error en la pre-compilación', err);
     }
@@ -67,6 +98,7 @@ loadingManager.onLoad = async () => {
 
 loadingManager.onError = (url) => {
     console.error('[LoadingManager] Error cargando:', url);
+    registrarDiagnostico(`Error cargando recurso: ${url}`, null, { mostrarOverlay: true });
 };
 
 // Event listener botón de entrada
@@ -159,6 +191,36 @@ if (indicadorCargaBg) {
 const { scene, camara, renderizador } = inicializarengine();
 const objetosColision = [];
 const timer = new THREE.Timer();
+const canvas = renderizador.domElement;
+
+window.addEventListener('error', (event) => {
+    registrarDiagnostico(
+        `window.onerror en ${event.filename || 'desconocido'}:${event.lineno || 0}`,
+        event.error || event.message,
+        { mostrarOverlay: true }
+    );
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+    registrarDiagnostico('Promesa rechazada sin manejar', event.reason, { mostrarOverlay: true });
+});
+
+window.addEventListener('orientationchange', () => {
+    registrarDiagnostico(`Cambio de orientacion: ${window.orientation ?? 'sin dato'}`);
+});
+
+document.addEventListener('visibilitychange', () => {
+    registrarDiagnostico(`Visibilidad: ${document.visibilityState}`);
+});
+
+canvas.addEventListener('webglcontextlost', (event) => {
+    event.preventDefault();
+    registrarDiagnostico('Se perdiÃ³ el contexto WebGL', null, { mostrarOverlay: true });
+});
+
+canvas.addEventListener('webglcontextrestored', () => {
+    registrarDiagnostico('Se restaurÃ³ el contexto WebGL', null, { mostrarOverlay: true });
+});
 
 // Inicializar el panel de FPS
 const stats = new Stats();
@@ -171,7 +233,7 @@ stats.dom.style.left = 'auto';
 document.body.appendChild(stats.dom);
 
 // Configuración del audio y controles de movimiento
-inicializarAudio(camara);
+inicializarAudio(camara, { cargarMusicaAlInicio: configuracionRendimiento.cargarAudioEnArranque });
 const controls = new controlsPrimeraPersona(camara, document.body, objetosColision);
 configurarcontrolsAudio();
 
@@ -196,6 +258,7 @@ actualizarPlayerBox(camara.position);
 
 // Carga de los models
 cargarEscenario(scene, objetosColision, loadingManager, renderizador, camara);
+registrarDiagnostico(`Inicializacion completa | movil=${window.esMovil ? 'si' : 'no'}`);
 
 // Configuración de la UI y las interacciones
 inicializarinteractions();

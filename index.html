@@ -5,6 +5,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Paseo Virtual KoenSakura</title>
+    <style>
+        html, body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+            color: #fff;
+            font-family: serif;
+        }
+        #juego-contenedor {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            background: #000;
+        }
+        #pantalla-carga {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            background: radial-gradient(ellipse at 60% 40%, #1a0a12 0%, #0d0508 60%, #050205 100%);
+            text-align: center;
+            padding: 16px;
+            box-sizing: border-box;
+        }
+        #cortina-orientacion {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 999999;
+            background: radial-gradient(ellipse at center, #1b0a12 0%, #0d0508 100%);
+            color: white;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #overlay-diagnostico.oculto {
+            display: none;
+        }
+        @media screen and (orientation: portrait) {
+            #cortina-orientacion {
+                display: flex !important;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -13,6 +64,14 @@
             <div class="cortina-icono">🌸</div>
             <p class="cortina-texto">Por favor, gira tu dispositivo a horizontal</p>
         </div>
+    </div>
+
+    <div id="overlay-diagnostico" class="oculto" aria-live="polite">
+        <div class="overlay-diagnostico-header">
+            <strong>Diagnostico movil</strong>
+            <button id="btn-cerrar-diagnostico" type="button" aria-label="Cerrar diagnostico">x</button>
+        </div>
+        <pre id="diagnostico-texto">Esperando eventos...</pre>
     </div>
 
     <div id="juego-contenedor">

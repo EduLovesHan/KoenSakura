@@ -9,7 +9,8 @@ let jugadorEstaCaminando = false;
 let musicaActualRuta = 'assets/audio/MusicaFondo.mp3';
 
 // Carga e inicialización de audios
-export function inicializarAudio(camara) {
+export function inicializarAudio(camara, opciones = {}) {
+    const { cargarMusicaAlInicio = true } = opciones;
     listener = new THREE.AudioListener();
     camara.add(listener);
 
@@ -17,11 +18,13 @@ export function inicializarAudio(camara) {
 
     // Música de fondo
     sonidoFondo = new THREE.Audio(listener);
-    audioLoader.load('assets/audio/MusicaFondo.mp3', (buffer) => {
-        sonidoFondo.setBuffer(buffer);
-        sonidoFondo.setLoop(true); 
-        sonidoFondo.setVolume(0.3);
-    });
+    if (cargarMusicaAlInicio) {
+        audioLoader.load('assets/audio/MusicaFondo.mp3', (buffer) => {
+            sonidoFondo.setBuffer(buffer);
+            sonidoFondo.setLoop(true); 
+            sonidoFondo.setVolume(0.3);
+        });
+    }
 
     // Efecto de clic
     sonidoClick = new THREE.Audio(listener);
@@ -48,7 +51,16 @@ export function inicializarAudio(camara) {
     // Reproducir música y sonidos al hacer clic y ocultar menú
     document.body.addEventListener('click', () => {
         if (listener.context.state === 'suspended') listener.context.resume();
-        if (!sonidoFondo.isPlaying && sonidoFondo.buffer) sonidoFondo.play();
+        if (!sonidoFondo.buffer && !cargarMusicaAlInicio) {
+            audioLoader.load(musicaActualRuta, (buffer) => {
+                sonidoFondo.setBuffer(buffer);
+                sonidoFondo.setLoop(true);
+                sonidoFondo.setVolume(0.3);
+                if (!sonidoFondo.isPlaying) sonidoFondo.play();
+            });
+        } else if (!sonidoFondo.isPlaying && sonidoFondo.buffer) {
+            sonidoFondo.play();
+        }
         if (jugadorEstaCaminando && sonidoPasos && sonidoPasos.buffer && !sonidoPasos.isPlaying) {
             sonidoPasos.play();
         }

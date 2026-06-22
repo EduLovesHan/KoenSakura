@@ -743,6 +743,54 @@ input[type="range"] {
     box-sizing: border-box;
 }
 
+#overlay-diagnostico {
+    position: fixed;
+    left: 12px;
+    right: auto;
+    bottom: 12px;
+    z-index: 1000000;
+    width: min(320px, calc(100vw - 24px));
+    max-height: 26vh;
+    overflow: auto;
+    background: rgba(10, 10, 10, 0.9);
+    color: #d7ffe0;
+    border: 1px solid rgba(140, 255, 180, 0.45);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-family: monospace;
+    font-size: 12px;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    pointer-events: auto;
+}
+
+.overlay-diagnostico-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+#overlay-diagnostico strong {
+    display: block;
+}
+
+#btn-cerrar-diagnostico {
+    border: 1px solid rgba(140, 255, 180, 0.45);
+    background: rgba(255, 255, 255, 0.06);
+    color: #d7ffe0;
+    border-radius: 6px;
+    width: 26px;
+    height: 26px;
+    font: inherit;
+}
+
+#diagnostico-texto {
+    margin: 0;
+    white-space: pre-wrap;
+}
+
 .cortina-icono {
     font-size: 60px;
     animation: rotarDisp 2.5s infinite;
@@ -761,9 +809,6 @@ input[type="range"] {
 @media screen and (orientation: portrait) {
     #cortina-orientacion {
         display: flex !important;
-    }
-    #juego-contenedor {
-        display: none !important;
     }
 }
 

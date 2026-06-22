@@ -56,38 +56,49 @@ function registrarDiagnostico(mensaje, error = null, opciones = {}) {
 
 let porcentajeMaximo = 0;
 let timeoutCierre;
+let timeoutRespaldoCarga;
+let cargaPrincipalFinalizada = false;
+let escenarioPrincipalListo = false;
+
+function finalizarPantallaCarga(origen = 'desconocido') {
+    if (cargaPrincipalFinalizada) return;
+    cargaPrincipalFinalizada = true;
+    clearTimeout(timeoutCierre);
+    clearTimeout(timeoutRespaldoCarga);
+    registrarDiagnostico(`Carga principal lista (${origen})`);
+
+    barraRelleno.style.width = '100%';
+    textoPorcentaje.textContent = '¡Listo! 100%';
+    timeoutCierre = setTimeout(() => {
+        if (spinnerCarga) spinnerCarga.style.display = 'none';
+        const barraContenedor = document.querySelector('.carga-barra-contenedor');
+        if (barraContenedor) barraContenedor.style.display = 'none';
+        if (textoPorcentaje) textoPorcentaje.style.display = 'none';
+        if (btnEntrar) btnEntrar.style.display = 'inline-block';
+    }, 400);
+}
 
 loadingManager.onStart = () => {
-    clearTimeout(timeoutCierre);
+    if (!cargaPrincipalFinalizada) clearTimeout(timeoutCierre);
     registrarDiagnostico('Inicio de carga principal');
 };
 
 loadingManager.onProgress = (_url, cargados, total) => {
+    if (cargaPrincipalFinalizada) return;
     const porcentajeActual = Math.round((cargados / total) * 100);
     porcentajeMaximo = Math.max(porcentajeMaximo, porcentajeActual);
     barraRelleno.style.width = `${porcentajeMaximo}%`;
     const prefijo = diccionario[idiomaActual].carga_progreso;
     textoPorcentaje.textContent = `${prefijo} ${porcentajeMaximo}%`;
+    if (porcentajeMaximo >= 100) {
+        clearTimeout(timeoutRespaldoCarga);
+        timeoutRespaldoCarga = setTimeout(() => finalizarPantallaCarga('respaldo 100%'), 5000);
+    }
 };
 
 loadingManager.onLoad = () => {
     textoPorcentaje.textContent = 'Finalizando carga...';
-    timeoutCierre = setTimeout(() => {
-        barraRelleno.style.width = '100%';
-        textoPorcentaje.textContent = '¡Listo! 100%';
-
-        // Mostrar el botón de entrar al finalizar la carga
-        setTimeout(() => {
-            if (spinnerCarga) spinnerCarga.style.display = 'none';
-            const barraContenedor = document.querySelector('.carga-barra-contenedor');
-            if (barraContenedor) barraContenedor.style.display = 'none';
-            if (textoPorcentaje) textoPorcentaje.style.display = 'none';
-
-            if (btnEntrar) {
-                btnEntrar.style.display = 'inline-block';
-            }
-        }, 800);
-    }, 600);
+    if (escenarioPrincipalListo) finalizarPantallaCarga('LoadingManager');
 };
 
 loadingManager.onError = (url) => {
@@ -257,7 +268,15 @@ inicializarDebugCollisions(scene, camara, controls);
 actualizarPlayerBox(camara.position);
 
 // Carga de los models
-cargarEscenario(scene, objetosColision, loadingManager, renderizador, camara);
+cargarEscenario(scene, objetosColision, loadingManager, renderizador, camara)
+    .then(() => {
+        escenarioPrincipalListo = true;
+        finalizarPantallaCarga('escenario principal');
+    })
+    .catch((error) => {
+        registrarDiagnostico('No se pudo completar la carga principal', error, { mostrarOverlay: true });
+        finalizarPantallaCarga('recuperacion por error');
+    });
 registrarDiagnostico(`Inicializacion completa | movil=${window.esMovil ? 'si' : 'no'}`);
 
 // Configuración de la UI y las interacciones

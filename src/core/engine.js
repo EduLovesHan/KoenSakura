@@ -14,8 +14,8 @@ export function inicializarengine() {
         cargarAudioEnArranque: !esMovil,
         concurrenciaPrincipal: esMovil ? 1 : 2,
         concurrenciaSecundaria: 1,
-        distanciaCargaZona: esMovil ? 45 : 55,
-        distanciaDescargaZona: esMovil ? 75 : 100,
+        distanciaCargaZona: 60,
+        distanciaDescargaZona: esMovil ? 100 : 120,
         fpsMaximos: esMovil ? 30 : 0,
     };
 

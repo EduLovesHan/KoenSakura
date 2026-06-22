@@ -16,8 +16,8 @@ const configuracionRendimientoPredeterminada = {
     usarAguaAvanzada: true,
     concurrenciaPrincipal: 2,
     concurrenciaSecundaria: 1,
-    distanciaCargaZona: 80,
-    distanciaDescargaZona: 115,
+    distanciaCargaZona: 60,
+    distanciaDescargaZona: 100,
 };
 const configuracionRendimiento = new Proxy(configuracionRendimientoPredeterminada, {
     get(objetivo, propiedad) {
@@ -379,7 +379,7 @@ const BATCH_SIZE = 5;
 
 const esperarSiguienteTick = () => {
     if (typeof requestIdleCallback === 'function') {
-        return new Promise((resolve) => requestIdleCallback(() => resolve()));
+        return new Promise((resolve) => requestIdleCallback(() => resolve(), { timeout: 200 }));
     } else {
         return new Promise((resolve) => setTimeout(resolve, 0));
     }
@@ -604,6 +604,20 @@ function distanciaMinimaZona(posicionJugador, items) {
         }
     }
     return Math.sqrt(distanciaSqMinima);
+}
+
+const MODELOS_PRIORITARIOS = [
+    'ichirakuramen.glb',
+    'foocourt.glb',
+    'museo.glb',
+    'plazalago.glb',
+    'hiroshima.glb',
+    'altar.glb',
+];
+
+function esModeloPrioritario(grupo) {
+    const archivo = grupo.items[0]?.archivo?.toLowerCase().split('/').pop() || '';
+    return MODELOS_PRIORITARIOS.includes(archivo);
 }
 
 async function cargarModelo(item, loader, esTrackeado) {
@@ -848,7 +862,7 @@ export async function cargarEscenario(scene, objetosColision, loadingManager = n
         configuracion = await respuesta.json();
     } catch (error) {
         console.error('[ModelLoader] Error al cargar objectMap.json:', error);
-        return;
+        throw error;
     }
 
     //carga de modelos base con mayor prioridad para empezar el recorrido
@@ -930,7 +944,7 @@ export function actualizarCargaPorProximidad(posicionJugador) {
     if (window.juegoIniciado !== true) return;
     if (!zonasPendientes) return;
     const ahora = performance.now();
-    if (ahora - ultimaComprobacionZona < 400) return;
+    if (ahora - ultimaComprobacionZona < 150) return;
     ultimaComprobacionZona = ahora;
 
     // Descargar como maximo un grupo por comprobacion para repartir el trabajo.
@@ -953,9 +967,15 @@ export function actualizarCargaPorProximidad(posicionJugador) {
             clave,
             grupo,
             distancia: distanciaMinimaZona(posicionJugador, grupo.items),
+            prioritario: esModeloPrioritario(grupo),
         }))
-        .filter(({ distancia }) => distancia <= configuracionRendimiento.distanciaCargaZona)
-        .sort((a, b) => a.distancia - b.distancia)[0];
+        .filter(({ distancia, prioritario }) =>
+            distancia <= configuracionRendimiento.distanciaCargaZona + (prioritario ? 15 : 0)
+        )
+        .sort((a, b) =>
+            (a.distancia - (a.prioritario ? 20 : 0)) -
+            (b.distancia - (b.prioritario ? 20 : 0))
+        )[0];
 
     if (!siguiente) return;
     zonasCargando.add(siguiente.clave);
